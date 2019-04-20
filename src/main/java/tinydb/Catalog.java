@@ -80,9 +80,8 @@ public class Catalog {
      */
     public int getTableId(String name) throws NoSuchElementException {
         //If a name conflict exists, use the last table to be added as the table for a given name.
-//        System.out.println("name="+name);
-//        System.out.println("tables="+tableMap.toString());
-        for (TableItem tableItem : tableMap.values()) {
+        for (int i=idList.size()-1; i>=0 ;i--){
+            TableItem tableItem = tableMap.get(idList.get(i));
             if (tableItem.name.equals(name)) {
                 return tableItem.file.getId();
             }

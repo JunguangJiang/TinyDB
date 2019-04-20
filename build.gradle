@@ -13,6 +13,8 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+//    antlr  group: "org.antlr", name: "antlr4", version: "4.6"
+    compile group: "org.antlr", name: "antlr4-runtime", version: "4.6"
     compile fileTree(include: ['*.jar'], dir: 'lib')
 }
 
@@ -28,3 +30,30 @@ jar {
     }
 }
 
+apply plugin: 'java'
+
+test {
+    filter {
+        includeTestsMatching "tinydb.AggregateTest.*"
+        includeTestsMatching "tinydb.BufferPoolWriteTest.*"
+        includeTestsMatching "tinydb.CatalogTest.*"
+        includeTestsMatching "tinydb.FilterTest.*"
+        includeTestsMatching "tinydb.HeapFileReadTest.*"
+        includeTestsMatching "tinydb.HeapFileWriteTest.*"
+        includeTestsMatching "tinydb.HeapPageIdTest.*"
+        includeTestsMatching "tinydb.HeapPageReadTest.*"
+        includeTestsMatching "tinydb.HeapPageWriteTest.*"
+        includeTestsMatching "tinydb.InsertTest.*"
+        includeTestsMatching "tinydb.IntegerAggregatorTest.*"
+        includeTestsMatching "tinydb.JoinPredicateTest.*"
+        includeTestsMatching "tinydb.JoinTest.*"
+        includeTestsMatching "tinydb.PredicateTest.*"
+        includeTestsMatching "tinydb.RecordIdTest.*"
+        includeTestsMatching "tinydb.StringAggregatorTest.*"
+        includeTestsMatching "tinydb.TupleDescTest.*"
+        includeTestsMatching "tinydb.StringAggregatorTest.*"
+        includeTestsMatching "tinydb.TupleTest.*"
+        includeTestsMatching "tinydb.StringAggregatorTest.*"
+
+    }
+}
