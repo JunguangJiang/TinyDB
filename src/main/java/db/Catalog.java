@@ -45,10 +45,17 @@ public class Catalog {
     }
 
     /**
-     *
+     * @return The current database
+     */
+    public Database getCurrentDatabase() {
+        //TODO
+       return new Database();
+    }
+
+    /**
      * @return The names of all the databases
      */
-    public ArrayList<String> getDatabases(){
+    public ArrayList<String> getDatabaseNames(){
         return null;
     }
 

@@ -43,33 +43,42 @@ public class TupleDesc implements Serializable {
      *        that are included in this TupleDesc
      * */
     public Iterator<db.TupleDesc.TDItem> iterator() {
-        return this.tdItems.iterator();
+//        return this.tdItems.iterator();
+        return null;
     }
 
     private static final long serialVersionUID = 1L;
 
-    private ArrayList<TDItem> tdItems;
-    private ArrayList<String> primaryKeys;
+//    private ArrayList<TDItem> tdItems;
+//    private ArrayList<String> primaryKeys;
+//
+//    public TupleDesc() {
+//        this.tdItems = new ArrayList<>();
+//        this.primaryKeys = new ArrayList<>();
+//    }
+//
+    private TDItem[] tdItems;
+    private String[] primaryKeys;
 
-    public TupleDesc() {
-        this.tdItems = new ArrayList<>();
-        this.primaryKeys = new ArrayList<>();
+    public TupleDesc(TDItem[] tdItems, String[] primaryKeys) {
+        this.tdItems = tdItems.clone();
+        this.primaryKeys = primaryKeys.clone();
     }
 
 
-    public void addTDItem(db.Type type, String name, boolean notNull) {
-
-    }
-
-    public void addPrimaryKey(String primaryKey) {
-
-    }
+//    public void addTDItem(db.Type type, String name, boolean notNull) {
+//
+//    }
+//
+//    public void addPrimaryKey(String primaryKey) {
+//
+//    }
 
     /**
      * @return the number of fields in this TupleDesc
      */
     public int numFields() {
-        return tdItems.size();
+        return tdItems.length;
     }
 
     /**

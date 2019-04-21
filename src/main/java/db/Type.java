@@ -2,11 +2,13 @@ package db;
 
 import db.field.IntField;
 import db.field.StringField;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.ParseException;
+import java.util.NoSuchElementException;
 
 /**
  * Class representing a type in SimpleDB.
@@ -64,5 +66,15 @@ public enum Type implements Serializable {
      *   of the appropriate type.
      */
     public abstract Field parse(DataInputStream dis) throws ParseException;
+
+    public static Type getType(String typeString) throws NoSuchElementException {
+        if (typeString.equals("INT")) {
+            return INT_TYPE;
+        } else if (typeString.equals("STRING")) {
+            return STRING_TYPE;
+        } else {
+            throw new NotImplementedException();
+        }
+    }
 
 }

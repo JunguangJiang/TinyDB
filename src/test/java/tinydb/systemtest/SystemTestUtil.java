@@ -147,12 +147,12 @@ public class SystemTestUtil {
     }
 
     /**
-     * Returns number of bytes of RAM used by JVM after calling System.gc many times.
+     * Returns number of bytes of RAM used by JVM after calling GlobalManager.gc many times.
      * @return amount of RAM (in bytes) used by JVM
      */
     public static long getMemoryFootprint() {
-        // Call System.gc in a loop until it stops freeing memory. This is
-        // still no guarantee that all the memory is freed, since System.gc is
+        // Call GlobalManager.gc in a loop until it stops freeing memory. This is
+        // still no guarantee that all the memory is freed, since GlobalManager.gc is
         // just a "hint".
         Runtime runtime = Runtime.getRuntime();
         long memAfter = runtime.totalMemory() - runtime.freeMemory();

@@ -23,7 +23,7 @@ import tinydb.BTreeUtility.*;
 import tinydb.Predicate.Op;
 
 /**
- * System test for the BTree
+ * GlobalManager test for the BTree
  */
 public class BTreeTest extends SimpleDbTestBase {
     private final static Random r = new Random();

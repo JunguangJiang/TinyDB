@@ -175,7 +175,7 @@ public class JoinOptimizer {
         Set<Set<T>> els = new HashSet<Set<T>>();
         els.add(new HashSet<T>());
         // Iterator<Set> it;
-        // long start = System.currentTimeMillis();
+        // long start = GlobalManager.currentTimeMillis();
 
         for (int i = 0; i < size; i++) {
             Set<Set<T>> newels = new HashSet<Set<T>>();

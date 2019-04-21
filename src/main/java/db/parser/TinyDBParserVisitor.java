@@ -75,20 +75,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConstraintDeclaration(TinyDBParser.ConstraintDeclarationContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code nullColumnConstraint}
-	 * labeled alternative in {@link TinyDBParser#colunmConstraint}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNullColumnConstraint(TinyDBParser.NullColumnConstraintContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code primaryKeyColumnConstraint}
-	 * labeled alternative in {@link TinyDBParser#colunmConstraint}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPrimaryKeyColumnConstraint(TinyDBParser.PrimaryKeyColumnConstraintContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#dropDatabase}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
