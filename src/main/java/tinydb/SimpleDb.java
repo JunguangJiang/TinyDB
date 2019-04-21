@@ -67,7 +67,7 @@ public class SimpleDb {
                it.close();
             }
         }
-        else if (args[0].equals("parser")) {
+        else if (args[0].equals("db/parser")) {
             // Strip the first argument and call the parser
             String[] newargs = new String[args.length-1];
             for (int i = 1; i < args.length; ++i) {
@@ -75,14 +75,14 @@ public class SimpleDb {
             }
             
             try {
-                //dynamically load Parser -- if it doesn't exist, print error message
+                //dynamically load Visitor -- if it doesn't exist, print error message
                 Class<?> c = Class.forName("tinydb.Parser");
                 Class<?> s = String[].class;
                 
                 java.lang.reflect.Method m = c.getMethod("main", s);
                 m.invoke(null, (java.lang.Object)newargs);
             } catch (ClassNotFoundException cne) {
-                System.out.println("Class Parser not found -- perhaps you are trying to run the parser as a part of lab1?");
+                System.out.println("Class Visitor not found -- perhaps you are trying to run the parser as a part of lab1?");
             }
             catch (Exception e) {
                 System.out.println("Error in parser.");

@@ -1,4 +1,4 @@
-package file;
+package db.file;
 
 import db.*;
 import db.Tuple;
@@ -24,8 +24,8 @@ public class BufferPool {
     public static final int DEFAULT_PAGES = 50;
 
     private int numPages;
-    private HashMap<file.PageId, file.Page> pageHashMap;
-    private HashMap<file.PageId, Integer> recentlyUsed;
+    private HashMap<PageId, Page> pageHashMap;
+    private HashMap<PageId, Integer> recentlyUsed;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -53,14 +53,14 @@ public class BufferPool {
      *
      * @param pid the ID of the requested page
      */
-    public file.Page getPage(file.PageId pid)
+    public Page getPage(PageId pid)
             throws DbException {
         return null;
-//        file.Page page;
+//        Page page;
 //        if(pageHashMap.containsKey(pid)){
 //            page = pageHashMap.get(pid);
 //        }else{
-//            file.DbFile file = Database.getCatalog().getDatabaseFile(pid.getTableId());
+//            DbFile file = Database.getCatalog().getDatabaseFile(pid.getTableId());
 //            page = file.readPage(pid);
 //            if (pageHashMap.size() >= this.numPages){
 //                evictPage();
@@ -86,9 +86,9 @@ public class BufferPool {
     public void insertTuple(int tableId, Tuple t)
             throws DbException, IOException {
 //        try {
-//            file.DbFile dbFile = Database.getCatalog().getDatabaseFile(tableId);
-//            ArrayList<file.Page> affectedPages = ((HeapFile) dbFile).insertTuple(tid, t);
-//            for (file.Page page : affectedPages) {
+//            DbFile dbFile = Database.getCatalog().getDatabaseFile(tableId);
+//            ArrayList<Page> affectedPages = ((HeapFile) dbFile).insertTuple(tid, t);
+//            for (Page page : affectedPages) {
 //                page.markDirty(true, tid);
 //                pageHashMap.put(page.getId(), page);
 //            }
@@ -113,8 +113,8 @@ public class BufferPool {
             throws DbException {
 //        int tableId = t.getRecordId().getPageId().getTableId();
 //        DbFile dbFile = Database.getCatalog().getDatabaseFile(tableId);
-//        ArrayList<file.Page> pages = ((HeapFile)dbFile).deleteTuple(tid, t);
-//        for (file.Page page : pages) {
+//        ArrayList<Page> pages = ((HeapFile)dbFile).deleteTuple(tid, t);
+//        for (Page page : pages) {
 //            page.markDirty(true, tid);
 //        }
     }
@@ -125,7 +125,7 @@ public class BufferPool {
      *     break file if running in NO STEAL mode.
      */
     public synchronized void flushAllPages() throws IOException {
-//        for (file.PageId pageId : this.pageHashMap.keySet()) {
+//        for (PageId pageId : this.pageHashMap.keySet()) {
 //            this.flushPage(pageId);
 //        }
     }
@@ -138,7 +138,7 @@ public class BufferPool {
      Also used by B+ tree files to ensure that deleted pages
      are removed from the cache so they can be reused safely
      */
-    public synchronized void discardPage(file.PageId pid) {
+    public synchronized void discardPage(PageId pid) {
         // TODO
         // not necessary for lab1
     }
@@ -147,7 +147,7 @@ public class BufferPool {
      * Flushes a certain page to disk
      * @param pid an ID indicating the page to flush
      */
-    private synchronized  void flushPage(file.PageId pid) throws IOException {
+    private synchronized  void flushPage(PageId pid) throws IOException {
 //        Page page = this.pageHashMap.get(pid);
 //        int tableId = ((HeapPageId)pid).getTableId();
 //        HeapFile heapFile = (HeapFile)Database.getCatalog().getDatabaseFile(tableId);
@@ -160,9 +160,9 @@ public class BufferPool {
      * Flushes the page to disk to ensure dirty pages are updated on disk.
      */
     private synchronized  void evictPage() throws DbException {
-//        file.PageId evictedPageId = null;
+//        PageId evictedPageId = null;
 //        int counter = -1;
-//        for (file.PageId pageId : recentlyUsed.keySet()) {
+//        for (PageId pageId : recentlyUsed.keySet()) {
 //            int value = recentlyUsed.get(pageId);
 //            if (value > counter) {
 //                counter = value;

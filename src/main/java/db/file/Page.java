@@ -1,4 +1,4 @@
-package file;
+package db.file;
 
 public interface Page {
 }

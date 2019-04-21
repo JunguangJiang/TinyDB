@@ -1,7 +1,8 @@
-package parser;
+package db.parser;
+
 // Generated from TinyDBParser.g4 by ANTLR 4.7.1
+import db.parser.TinyDBParser;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import parser.TinyDBParser;
 
 /**
  * This interface defines a complete generic visitor for a parse tree produced
@@ -17,6 +18,12 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitRoot(TinyDBParser.RootContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyDBParser#sqlStatements}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSqlStatements(TinyDBParser.SqlStatementsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#sqlStatement}.
 	 * @param ctx the parse tree
@@ -156,13 +163,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTableSourceBase(TinyDBParser.TableSourceBaseContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code tableSourceNested}
-	 * labeled alternative in {@link TinyDBParser#tableSource}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTableSourceNested(TinyDBParser.TableSourceNestedContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code innerJoin}
 	 * labeled alternative in {@link TinyDBParser#joinPart}.
 	 * @param ctx the parse tree
@@ -276,13 +276,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitConstantExpressionAtom(TinyDBParser.ConstantExpressionAtomContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code binaryExpressionAtom}
-	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBinaryExpressionAtom(TinyDBParser.BinaryExpressionAtomContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code fullColumnNameExpressionAtom}
 	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
@@ -401,4 +394,10 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitNullNotnull(TinyDBParser.NullNotnullContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TinyDBParser#decimalLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDecimalLiteral(TinyDBParser.DecimalLiteralContext ctx);
 }

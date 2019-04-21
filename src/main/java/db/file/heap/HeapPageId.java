@@ -1,7 +1,7 @@
-package file.heap;
+package db.file.heap;
 
-import file.BufferPool;
-import file.PageId;
+import db.file.BufferPool;
+import db.file.PageId;
 
 /** Unique identifier for HeapPage objects. */
 public class HeapPageId implements PageId {

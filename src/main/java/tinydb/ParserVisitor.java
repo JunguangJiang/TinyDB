@@ -1,6 +1,6 @@
 package tinydb;
-import parser.TinyDBParser;
-import parser.TinyDBParserBaseVisitor;
+import db.parser.TinyDBParser;
+import db.parser.TinyDBParserBaseVisitor;
 
 public class ParserVisitor extends TinyDBParserBaseVisitor<Void> {
 

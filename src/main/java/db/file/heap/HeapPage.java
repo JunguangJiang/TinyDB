@@ -1,4 +1,4 @@
-package file.heap;
+package db.file.heap;
 
 public class HeapPage {
 }

@@ -1,7 +1,7 @@
 package db;
 
-import file.DbFile;
-import file.DbFileIterator;
+import db.file.DbFile;
+import db.file.DbFileIterator;
 import java.io.File;
 
 /**

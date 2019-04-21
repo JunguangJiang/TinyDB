@@ -3,7 +3,11 @@ parser grammar TinyDBParser;
 options { tokenVocab = TinyDBLexer; }
 
 root
-    : sqlStatement EOF
+    : sqlStatements EOF
+    ;
+
+sqlStatements
+    : (sqlStatement ';')*
     ;
 
 sqlStatement
@@ -92,7 +96,6 @@ tableSources
 
 tableSource
     : tableSourceItem joinPart*                                     #tableSourceBase
-    | '(' tableSourceItem joinPart* ')'                             #tableSourceNested
     ;
 
 joinPart
@@ -149,7 +152,6 @@ expressionAtom
     : constant                                                      #constantExpressionAtom
     | fullColumnName                                                #fullColumnNameExpressionAtom
     | unaryOperator expressionAtom                                  #unaryExpressionAtom
-    | BINARY expressionAtom                                         #binaryExpressionAtom
     | '(' expression (',' expression)* ')'                          #nestedExpressionAtom
     | '(' selectStatement ')'                                       #subqueryExpessionAtom
     | left=expressionAtom bitOperator right=expressionAtom          #bitExpressionAtom
@@ -166,9 +168,9 @@ lengthOneDimension
     ;
 
 constant
-    : STRING_LITERAL | DECIMAL_LITERAL
-    | '-' DECIMAL_LITERAL
-    | REAL_LITERAL | BIT_STRING
+    : STRING_LITERAL | decimalLiteral
+    | '-' decimalLiteral
+    | REAL_LITERAL
     | nullNotnull
     ;
 
@@ -205,7 +207,7 @@ shutdownStatement
     ;
 
 dbName
-    : Id
+    : ID
     ;
 
 tableName
@@ -213,7 +215,7 @@ tableName
     ;
 
 attrName
-    : Id
+    : ID
     ;
 
 attrNames
@@ -222,4 +224,8 @@ attrNames
 
 nullNotnull
     : NOT? NULL_LITERAL
+    ;
+
+decimalLiteral
+    : DECIMAL_LITERAL | ZERO_DECIMAL | ONE_DECIMAL | TWO_DECIMAL
     ;

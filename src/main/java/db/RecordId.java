@@ -1,6 +1,6 @@
 package db;
 
-import file.PageId;
+import db.file.PageId;
 
 import java.io.Serializable;
 
