@@ -75,6 +75,18 @@ public class Catalog {
     }
 
     /**
+     * Create a new table on the disk, if there exists a table which has the same the name
+     * then return false, else return true.
+     * @param tableName the name of the table
+     * @param tupleDesc
+     * @return
+     */
+    public boolean createTable(String tableName, TupleDesc tupleDesc) {
+        // TODO
+        return false;
+    }
+
+    /**
      * Return the id of the table with a specified name,
      * @throws NoSuchElementException if the table doesn't exist
      */
@@ -135,7 +147,6 @@ public class Catalog {
         }
     }
 
-    
     /** Delete all tables from the catalog */
     public void clear() {
         idList.clear();
@@ -187,8 +198,6 @@ public class Catalog {
                 HeapFile tabHf = new HeapFile(new File(baseFolder+"/"+name + ".dat"), t);
                 addTable(tabHf,name,primaryKey);
                 System.out.println("Added table : " + name + " with schema " + t);
-                System.out.println("name="+name);
-                System.out.println("tables="+tableMap.toString());
             }
         } catch (IOException e) {
             e.printStackTrace();

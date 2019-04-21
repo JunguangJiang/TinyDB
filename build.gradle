@@ -13,7 +13,6 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-//    antlr  group: "org.antlr", name: "antlr4", version: "4.6"
     compile group: "org.antlr", name: "antlr4-runtime", version: "4.6"
     compile fileTree(include: ['*.jar'], dir: 'lib')
 }
@@ -22,7 +21,7 @@ jar {
     manifest {
         attributes(
             'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-            'Main-Class': 'tinydb.Main'
+            'Main-Class': 'db.Main'
         )
     }
     from {
