@@ -1,5 +1,6 @@
 package db;
 
+import db.parser.TinyDBOutput;
 import db.parser.TinyDBLexer;
 import db.parser.TinyDBParser;
 import db.parser.Visitor;
@@ -29,12 +30,14 @@ public class Main {
             TinyDBLexer lexer = new TinyDBLexer(CharStreams.fromString(s));
             CommonTokenStream tokenStream = new CommonTokenStream(lexer);
             TinyDBParser parser = new TinyDBParser(tokenStream);
+            parser.removeErrorListeners();
+            TinyDBOutput output = new TinyDBOutput(new BufferedWriter(new FileWriter(outFileName)));
+            parser.addErrorListener(output);
+
             ParseTree tree = parser.root();
 
-            BufferedWriter out = new BufferedWriter(new FileWriter(outFileName));
-            Visitor visitor = new Visitor(out);
+            Visitor visitor = new Visitor(output);
             visitor.visit(tree);
-            out.flush();
         }catch (IOException e){
             e.printStackTrace();
         }

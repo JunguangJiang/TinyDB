@@ -1,44 +1,65 @@
 package db.parser;
 
 import db.GlobalManager;
+import db.Tuple;
 import db.TupleDesc;
 import db.Type;
+import db.query.QueryResult;
+import tinydb.Query;
 
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
-    private BufferedWriter out;
-
+    private TinyDBOutput output;
     /**
      * Visitor parse the sql file and print the result to the out(BufferWriter).
-     * @param out
+     * @param output query result and error information will all go to output
      */
-    public Visitor(BufferedWriter out){
+    public Visitor(TinyDBOutput output){
         super();
-        this.out = out;
+        this.output = output;
     }
 
     /**
-     * print string to the out with a line feed.
-     * @param string
+     * root
+     *     : sqlStatements EOF
+     *     ;
+     * after visiting the root, we will flush the output
+     * @param ctx
+     * @return
      */
-    private void println(String string){
-        print(string+System.getProperty("line.separator"));
+    @Override
+    public Object visitRoot(TinyDBParser.RootContext ctx) {
+        super.visitRoot(ctx);
+        output.flush();
+        return null;
     }
 
     /**
-     * print string to the out without a line feed.
-     * @param string
+     * sqlStatement
+     *     : ddlStatement | dmlStatement | administrationStatement
+     *     ;
+     * For each sqlStatement, we will record the query time.
+     * If the statement was executed correctly, then output the query result with the query time.
+     * Else, output the error message(done by the child visitor).
+     * @param ctx
+     * @return
      */
-    private void print(String string) {
-        try{
-            out.write(string);
-        } catch (IOException e){
-            e.printStackTrace();
+    @Override
+    public Object visitSqlStatement(TinyDBParser.SqlStatementContext ctx) {
+        long startTime = System.currentTimeMillis();
+        QueryResult queryResult = (QueryResult) super.visitSqlStatement(ctx);
+        long endTime = System.currentTimeMillis();
+        double usedTime = (endTime - startTime) / 1000.;
+        if (queryResult != null) {
+            output.print(queryResult.getInfo());
+            if (queryResult.succeeded()) {
+                output.print(usedTime);
+            }
         }
+        return null;
     }
 
     /**
@@ -85,7 +106,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      * @return whether the statement was successfully executed
      */
     @Override
-    public Object visitCreateTable(TinyDBParser.CreateTableContext ctx) {
+    public Object visitCreateTable(TinyDBParser.CreateTableContext ctx){
         String tableName = ctx.tableName().getText();
 
         ArrayList<TupleDesc.TDItem> tdItemArrayList = new ArrayList<>();
@@ -101,11 +122,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         TupleDesc.TDItem[] tdItems = tdItemArrayList.toArray(new TupleDesc.TDItem[0]);
         TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKeys);
 
-        boolean succeed = GlobalManager.getDatabase().createTable(tableName, tupleDesc);
-        if (!succeed) { // table already exists
-            println("Table " + tableName + " already exists!");
-        }
-        return succeed;
+        return GlobalManager.getDatabase().createTable(tableName, tupleDesc);
     }
 
     /**
@@ -190,8 +207,67 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitInsertStatement(TinyDBParser.InsertStatementContext ctx) {
+//        GlobalManager.getDatabase().getTable(ctx.tableName().getText()).insertTuple();
         return super.visitInsertStatement(ctx);
     }
+
+    /**
+     * insertStatementValue
+     *     : selectStatement
+     *     | VALUES '(' expressions ')'
+     *     ;
+     * @param ctx
+     * @return
+     */
+    @Override
+    public Object visitInsertStatementValue(TinyDBParser.InsertStatementValueContext ctx) {
+        return super.visitInsertStatementValue(ctx);
+    }
+
+    /**
+     * expressions
+     *     : expression (',' expression)*
+     *     ;
+     * @param ctx
+     * @return
+     */
+    @Override
+    public Object visitExpressions(TinyDBParser.ExpressionsContext ctx) {
+        return super.visitExpressions(ctx);
+    }
+
+    @Override
+    public Object visitNotExpression(TinyDBParser.NotExpressionContext ctx) {
+        return super.visitNotExpression(ctx);
+    }
+
+    @Override
+    public Object visitLogicalExpression(TinyDBParser.LogicalExpressionContext ctx) {
+        return super.visitLogicalExpression(ctx);
+    }
+
+    @Override
+    public Object visitPredicateExpression(TinyDBParser.PredicateExpressionContext ctx) {
+        return super.visitPredicateExpression(ctx);
+    }
+
+    @Override
+    public Object visitIsNullPredicate(TinyDBParser.IsNullPredicateContext ctx) {
+        return super.visitIsNullPredicate(ctx);
+    }
+
+    @Override
+    public Object visitBinaryComparasionPredicate(TinyDBParser.BinaryComparasionPredicateContext ctx) {
+        return super.visitBinaryComparasionPredicate(ctx);
+    }
+
+    @Override
+    public Object visitExpressionAtomPredicate(TinyDBParser.ExpressionAtomPredicateContext ctx) {
+        return super.visitExpressionAtomPredicate(ctx);
+    }
+
+
+
 
     /**
      * selectStatement

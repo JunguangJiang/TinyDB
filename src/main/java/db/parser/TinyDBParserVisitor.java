@@ -1,7 +1,4 @@
-package db.parser;
-
-// Generated from TinyDBParser.g4 by ANTLR 4.7.1
-import db.parser.TinyDBParser;
+package db.parser;// Generated from TinyDBParser.g4 by ANTLR 4.7.1
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -270,20 +267,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFullColumnNameExpressionAtom(TinyDBParser.FullColumnNameExpressionAtomContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code bitExpressionAtom}
-	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitExpressionAtom(TinyDBParser.BitExpressionAtomContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code nestedExpressionAtom}
-	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNestedExpressionAtom(TinyDBParser.NestedExpressionAtomContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code mathExpressionAtom}
 	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
 	 * @param ctx the parse tree
@@ -326,12 +309,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitLogicalOperator(TinyDBParser.LogicalOperatorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#bitOperator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitOperator(TinyDBParser.BitOperatorContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#mathOperator}.
 	 * @param ctx the parse tree

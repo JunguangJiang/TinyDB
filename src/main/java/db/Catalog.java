@@ -1,5 +1,7 @@
 package db;
 
+import db.query.QueryResult;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,8 +22,8 @@ public class Catalog {
      * @param databaseName the name of the new database
      * @return
      */
-    public boolean createDatabase(String databaseName) {
-        return false;
+    public QueryResult createDatabase(String databaseName) {
+        return new QueryResult(false, "");
     }
 
     /**
@@ -30,8 +32,8 @@ public class Catalog {
      * @param databaseName the name of the old database.
      * @return
      */
-    public boolean dropDatabase(String databaseName) {
-        return false;
+    public QueryResult dropDatabase(String databaseName) {
+        return new QueryResult(false, "");
     }
 
     /**
@@ -40,8 +42,8 @@ public class Catalog {
      * @param databaseName the name of the database.
      * @return
      */
-    public boolean useDatabase(String databaseName) {
-        return false;
+    public QueryResult useDatabase(String databaseName) {
+        return new QueryResult(false, "");
     }
 
     /**

@@ -2,7 +2,11 @@ package db;
 
 import db.file.DbFile;
 import db.file.DbFileIterator;
+import db.query.QueryResult;
+import tinydb.Query;
+
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * Table is an interface provided for Database
@@ -18,12 +22,16 @@ public class Table {
 
     }
 
-    public boolean insertTuple(Tuple tuple) {
-        return false;
+    public QueryResult insertTuple(Tuple tuple) {
+        return new QueryResult(false, "");
     }
 
-    public boolean deleteTuple(Tuple tuple) {
-        return false;
+    public QueryResult insertTuple(HashMap<String, Object> attributes) {
+        return new QueryResult(false, "");
+    }
+
+    public QueryResult deleteTuple(Tuple tuple) {
+        return new QueryResult(false, "");
     }
 
     public DbFileIterator iterator() {

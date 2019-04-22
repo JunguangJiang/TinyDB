@@ -1,5 +1,7 @@
 package db;
 
+import db.query.QueryResult;
+
 import java.util.ArrayList;
 
 /**
@@ -14,8 +16,8 @@ public class Database {
      * @param tupleDesc the descriptor of the tuple
      * @return
      */
-    public boolean createTable(String tableName, TupleDesc tupleDesc) {
-        return false;
+    public QueryResult createTable(String tableName, TupleDesc tupleDesc) {
+        return new QueryResult(false, "");
     }
 
     /**
@@ -24,8 +26,12 @@ public class Database {
      * @param tableName the name of the old table
      * @return
      */
-    public boolean dropTable(String tableName) {
-        return false;
+    public QueryResult dropTable(String tableName) {
+        return new QueryResult(false, "");
+    }
+
+    public Table getTable(String tableName) {
+        return null;
     }
 
     /**

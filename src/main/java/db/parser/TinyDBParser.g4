@@ -147,9 +147,7 @@ expressionAtom
     : constant                                                      #constantExpressionAtom
     | fullColumnName                                                #fullColumnNameExpressionAtom
     | unaryOperator expressionAtom                                  #unaryExpressionAtom
-    | '(' expression (',' expression)* ')'                          #nestedExpressionAtom
     | '(' selectStatement ')'                                       #subqueryExpessionAtom
-    | left=expressionAtom bitOperator right=expressionAtom          #bitExpressionAtom
     | left=expressionAtom mathOperator right=expressionAtom         #mathExpressionAtom
     ;
 
@@ -170,20 +168,16 @@ constant
     ;
 
 unaryOperator
-    : '!' | '~' | '+' | '-' | NOT
+    : '!' | '+' | '-' | NOT
     ;
 
 comparisonOperator
     : '=' | '>' | '<' | '<' '=' | '>' '='
-    | '<' '>' | '!' '=' | '<' '=' '>'
+    | '<' '>' | '!' '='
     ;
 
 logicalOperator
     : AND | '&' '&' | XOR | OR | '|' '|'
-    ;
-
-bitOperator
-    : '<' '<' | '>' '>' | '&' | '^' | '|'
     ;
 
 mathOperator
