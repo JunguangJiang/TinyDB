@@ -3,6 +3,7 @@ package db.field;
 import db.Field;
 import db.Predicate;
 import db.Type;
+import db.query.ComparisonPredicate;
 
 import java.io.*;
 
@@ -78,7 +79,7 @@ public class StringField implements Field {
      *             if val is not a StringField
      * @see Field#compare
      */
-    public boolean compare(Predicate.Op op, Field val) {
+    public boolean compare(ComparisonPredicate.Op op, Field val) {
 
         StringField iVal = (StringField) val;
         int cmpVal = value.compareTo(iVal.value);
@@ -101,9 +102,6 @@ public class StringField implements Field {
 
             case LESS_THAN_OR_EQ:
                 return cmpVal <= 0;
-
-            case LIKE:
-                return value.indexOf(iVal.value) >= 0;
         }
 
         return false;

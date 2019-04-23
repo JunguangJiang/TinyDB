@@ -96,12 +96,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInsertStatement(TinyDBParser.InsertStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#insertStatementValue}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitInsertStatementValue(TinyDBParser.InsertStatementValueContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#selectStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -126,12 +120,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFullColumnName(TinyDBParser.FullColumnNameContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#fromClause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFromClause(TinyDBParser.FromClauseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#tableSources}.
 	 * @param ctx the parse tree
@@ -160,19 +148,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOuterJoin(TinyDBParser.OuterJoinContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code naturalJoin}
-	 * labeled alternative in {@link TinyDBParser#joinPart}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNaturalJoin(TinyDBParser.NaturalJoinContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#tableSourceItem}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTableSourceItem(TinyDBParser.TableSourceItemContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#updateStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -191,67 +166,19 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeleteStatement(TinyDBParser.DeleteStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#expressions}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExpressions(TinyDBParser.ExpressionsContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code notExpression}
-	 * labeled alternative in {@link TinyDBParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNotExpression(TinyDBParser.NotExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code logicalExpression}
-	 * labeled alternative in {@link TinyDBParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLogicalExpression(TinyDBParser.LogicalExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code predicateExpression}
-	 * labeled alternative in {@link TinyDBParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPredicateExpression(TinyDBParser.PredicateExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code expressionAtomPredicate}
+	 * Visit a parse tree produced by the {@code comparisonExpressionPredicate}
 	 * labeled alternative in {@link TinyDBParser#predicate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpressionAtomPredicate(TinyDBParser.ExpressionAtomPredicateContext ctx);
+	T visitComparisonExpressionPredicate(TinyDBParser.ComparisonExpressionPredicateContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code binaryComparasionPredicate}
+	 * Visit a parse tree produced by the {@code logicalExpressionPredicate}
 	 * labeled alternative in {@link TinyDBParser#predicate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBinaryComparasionPredicate(TinyDBParser.BinaryComparasionPredicateContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code isNullPredicate}
-	 * labeled alternative in {@link TinyDBParser#predicate}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIsNullPredicate(TinyDBParser.IsNullPredicateContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code unaryExpressionAtom}
-	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitUnaryExpressionAtom(TinyDBParser.UnaryExpressionAtomContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code subqueryExpessionAtom}
-	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSubqueryExpessionAtom(TinyDBParser.SubqueryExpessionAtomContext ctx);
+	T visitLogicalExpressionPredicate(TinyDBParser.LogicalExpressionPredicateContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code constantExpressionAtom}
 	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
@@ -267,13 +194,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFullColumnNameExpressionAtom(TinyDBParser.FullColumnNameExpressionAtomContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code mathExpressionAtom}
-	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMathExpressionAtom(TinyDBParser.MathExpressionAtomContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#dataType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -286,17 +206,17 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLengthOneDimension(TinyDBParser.LengthOneDimensionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TinyDBParser#constants}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConstants(TinyDBParser.ConstantsContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#constant}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitConstant(TinyDBParser.ConstantContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#unaryOperator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitUnaryOperator(TinyDBParser.UnaryOperatorContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#comparisonOperator}.
 	 * @param ctx the parse tree
@@ -309,12 +229,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitLogicalOperator(TinyDBParser.LogicalOperatorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#mathOperator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMathOperator(TinyDBParser.MathOperatorContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#showStatement}.
 	 * @param ctx the parse tree

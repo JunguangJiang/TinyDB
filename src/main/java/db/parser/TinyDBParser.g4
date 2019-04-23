@@ -52,24 +52,19 @@ useDatabase
     ;
 
 insertStatement
-    : INSERT INTO tableName ( '(' attrNames ')' )? insertStatementValue
-    ;
-
-insertStatementValue
-    : selectStatement
-    | VALUES '(' expressions ')'
+    : INSERT INTO tableName ( '(' attrNames ')' )? VALUES '(' constants ')'
     ;
 
 selectStatement
-    : SELECT selectElements fromClause
+    : SELECT selectElements FROM tableSources (WHERE whereExpr=predicate)?
     ;
 
 selectElements
-    : (star='*' | selectElement ) (',' selectElement)*
+    : selectElement (',' selectElement)*
     ;
 
 selectElement
-    : fullColumnName (AS? alias=attrName)?                                     #selectColumnElement
+    : fullColumnName (AS? alias=attrName)?                          #selectColumnElement
     ;
 
 fullColumnName
@@ -77,78 +72,49 @@ fullColumnName
     | attrName
     ;
 
-fromClause
-    : FROM tableSources
-      (WHERE whereExpr=expression)?
-      (
-        GROUP BY expression
-      )?
-    ;
-
 tableSources
     : tableSource (',' tableSource)*
     ;
 
 tableSource
-    : tableSourceItem joinPart*                                     #tableSourceBase
+    : tableName joinPart*                                     #tableSourceBase
     ;
 
 joinPart
-    : (INNER | CROSS)? JOIN tableSourceItem
+    : JOIN tableName
       (
-        ON expression
+        ON predicate
       )?                                                            #innerJoin
-    | (LEFT | RIGHT) OUTER? JOIN tableSourceItem
+    | (LEFT | RIGHT) OUTER? JOIN tableName
         (
-          ON expression
+          ON predicate
         )                                                           #outerJoin
-    | NATURAL ((LEFT | RIGHT) OUTER?)? JOIN tableSourceItem         #naturalJoin
-    ;
-
-tableSourceItem
-    : tableName
     ;
 
 updateStatement
-    : UPDATE tableName (AS? alias=tableName)?
+    : UPDATE tableName
     SET updatedElement (',' updatedElement)*
-          (WHERE expression)?
+          (WHERE predicate)?
     ;
 
 updatedElement
-    : fullColumnName '=' expression
+    : attrName '=' constant
     ;
 
 deleteStatement
-    : DELETE FROM tableName
-    (WHERE expression)?
+    : DELETE FROM tableName (WHERE predicate)?
     ;
 
-//    Expressions, predicates
-expressions
-    : expression (',' expression)*
-    ;
-
-// Simplified approach for expression
-expression
-    : notOperator=(NOT | '!') expression                            #notExpression
-    | expression logicalOperator expression                         #logicalExpression
-    | predicate                                                     #predicateExpression
-    ;
-
+// Simplified approach for predicate
 predicate
-    : predicate IS nullNotnull                                      #isNullPredicate
-    | left=predicate comparisonOperator right=predicate             #binaryComparasionPredicate
-    | expressionAtom                                                #expressionAtomPredicate
+    : left=predicate logicalOperator right=predicate                #logicalExpressionPredicate
+    | left=expressionAtom comparisonOperator right=expressionAtom   #comparisonExpressionPredicate
     ;
 
 // Add in ASTVisitor nullNotnull in constant
 expressionAtom
     : constant                                                      #constantExpressionAtom
     | fullColumnName                                                #fullColumnNameExpressionAtom
-    | unaryOperator expressionAtom                                  #unaryExpressionAtom
-    | '(' selectStatement ')'                                       #subqueryExpessionAtom
-    | left=expressionAtom mathOperator right=expressionAtom         #mathExpressionAtom
     ;
 
 dataType
@@ -160,15 +126,14 @@ lengthOneDimension
     : '(' DECIMAL_LITERAL ')'
     ;
 
+constants
+    : constant (',' constant)*
+    ;
+
 constant
     : STRING_LITERAL | decimalLiteral
     | '-' decimalLiteral
     | REAL_LITERAL
-    | nullNotnull
-    ;
-
-unaryOperator
-    : '!' | '+' | '-' | NOT
     ;
 
 comparisonOperator
@@ -179,11 +144,6 @@ comparisonOperator
 logicalOperator
     : AND | '&' '&' | XOR | OR | '|' '|'
     ;
-
-mathOperator
-    : '*' | '/' | '%' | DIV | MOD | '+' | '-' | '--'
-    ;
-
 
 showStatement
     : SHOW DATABASES

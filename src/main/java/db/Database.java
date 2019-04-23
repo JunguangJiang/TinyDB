@@ -31,7 +31,7 @@ public class Database {
     }
 
     public Table getTable(String tableName) {
-        return null;
+        return new Table(tableName, null, null);
     }
 
     /**

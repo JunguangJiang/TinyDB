@@ -26,7 +26,9 @@ public class Table {
         return new QueryResult(false, "");
     }
 
-    public QueryResult insertTuple(HashMap<String, Object> attributes) {
+    public QueryResult insertTuple(String[] attrNames, Object[] values) {
+        if (attrNames == null) { // attrNames are all the attribute names of the table
+        }
         return new QueryResult(false, "");
     }
 
