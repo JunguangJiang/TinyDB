@@ -13,6 +13,8 @@ import java.util.NoSuchElementException;
  */
 public abstract class Operator implements OpIterator{
     private static final long serialVersionUID = 1L;
+    private Tuple next = null;
+    private boolean open = false;
 
     public boolean hasNext() throws DbException {
         if (!this.open)
@@ -56,10 +58,10 @@ public abstract class Operator implements OpIterator{
         this.open = false;
     }
 
-    private Tuple next = null;
-    private boolean open = false;
-    private int estimatedCardinality = 0;
-
+    /**
+     * Opens the iterator. This must be called before any of the other methods.
+     * @throws DbException when there are problems opening/accessing the database.
+     */
     public void open() throws DbException {
         this.open = true;
     }
@@ -74,10 +76,7 @@ public abstract class Operator implements OpIterator{
 
     /**
      * Set the children(child) of this operator. If the operator has only one
-     * child, children[0] should be used. If the operator is a join, children[0]
-     * and children[1] should be used.
-     *
-     *
+     * child, children[0] should be used.
      * @param children
      *            the DbIterators which are to be set as the children(child) of
      *            this operator

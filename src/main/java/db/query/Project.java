@@ -1,15 +1,17 @@
 package db.query;
 
+import db.Table;
+
 public class Project {
     public static class ProjectElement {
-        private String tableName = null;
+        private Table table = null;
         private String attrName = null;
-        private String alias = null;
+//        private String alias = null;
 
-        public ProjectElement(String tableName, String attrName, String alias) {
-            this.tableName = tableName;
+        public ProjectElement(Table table, String attrName) {
+            this.table = table;
             this.attrName = attrName;
-            this.alias = alias;
+//            this.alias = alias;
         }
     }
 

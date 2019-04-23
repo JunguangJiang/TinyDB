@@ -56,15 +56,7 @@ insertStatement
     ;
 
 selectStatement
-    : SELECT selectElements FROM tableSources (WHERE whereExpr=predicate)?
-    ;
-
-selectElements
-    : selectElement (',' selectElement)*
-    ;
-
-selectElement
-    : fullColumnName (AS? alias=attrName)?                          #selectColumnElement
+    : SELECT fullColumnName (',' fullColumnName)* FROM tableSources (WHERE whereExpr=predicate)?
     ;
 
 fullColumnName

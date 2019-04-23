@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * OpIterator is the iterator interface that all SimpleDB operators should
+ * OpIterator is the iterator interface that all TinyDB operators should
  * implement. If the iterator is not open, none of the methods should work,
  * and should throw an IllegalStateException.  In addition to any
  * resource allocation/deallocation, an open method should call any
@@ -20,11 +20,10 @@ public interface OpIterator extends Serializable{
      * Opens the iterator. This must be called before any of the other methods.
      * @throws DbException when there are problems opening/accessing the database.
      */
-    public void open()
-            throws DbException;
+    public void open() throws DbException;
 
     /** Returns true if the iterator has more tuples.
-     * @return true f the iterator has more tuples.
+     * @return true if the iterator has more tuples.
      * @throws IllegalStateException If the iterator has not been opened
      */
     public boolean hasNext() throws DbException;

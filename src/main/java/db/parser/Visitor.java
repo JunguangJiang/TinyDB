@@ -1,15 +1,62 @@
 package db.parser;
 
-import db.GlobalManager;
-import db.TupleDesc;
-import db.Type;
+import db.*;
 import db.query.*;
+import db.query.Predicate;
 
 import java.util.ArrayList;
 
 public class Visitor extends TinyDBParserBaseVisitor<Object> {
+    /**
+     * AttributeTable records the table each attribute belonging to in a certain parsing context.
+     *
+     * E.g. If we have Table A (attr1 type1, attr2 type2),
+     * then in the context "from table A",
+     * we have maps :
+     *      attr1 -> A
+     *      attr2 -> A
+     * If two tables has the same attribute, then return null.
+     *
+     * Besides, attribute table records the order in which the tables were added,
+     * s.t. you can get the index of an attribute in a joined table.
+     *
+     */
+    private class AttributeTable {
+        public AttributeTable() {
+
+        }
+
+        public void clear(){
+
+        }
+
+        public void addTable(String tableName){
+
+        }
+
+        public Table getBelongingTable(String attrName) {
+            return null;
+        }
+
+        public int getIndex(String attrName){
+            return 0;
+        }
+
+        public int getIndex(Table table, String attrName) {
+            return 0;
+        }
+
+        public int getIndex(String tableName, String attrName) {
+            return 0;
+        }
+
+        public int getIndex(Project.ProjectElement element) {
+            return 0;
+        }
+    }
 
     private TinyDBOutput output;
+    private AttributeTable attributeTable;
     /**
      * Visitor parse the sql file and print the result to the out(BufferWriter).
      * @param output query result and error information will all go to output
@@ -17,6 +64,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     public Visitor(TinyDBOutput output){
         super();
         this.output = output;
+        this.attributeTable = new AttributeTable();
     }
 
     /**
@@ -46,6 +94,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitSqlStatement(TinyDBParser.SqlStatementContext ctx) {
+        this.attributeTable.clear();
         long startTime = System.currentTimeMillis();
         QueryResult queryResult = (QueryResult) super.visitSqlStatement(ctx);
         long endTime = System.currentTimeMillis();
@@ -273,8 +322,32 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitComparisonExpressionPredicate(TinyDBParser.ComparisonExpressionPredicateContext ctx) {
-        return null;
+        ComparisonPredicate.Op op = (ComparisonPredicate.Op)visit(ctx.comparisonOperator());
+        ComparisonPredicate predicate;
+        Object leftObject = visit(ctx.left);
+        Object rightObject = visit(ctx.right);
+        if (leftObject instanceof Project.ProjectElement) {
+            int lhs = attributeTable.getIndex((Project.ProjectElement)leftObject);
+            if (rightObject instanceof Project.ProjectElement) {
+                int rhs = attributeTable.getIndex((Project.ProjectElement)rightObject);
+                predicate = new ComparisonPredicate(lhs, op, rhs);
+            } else {
+                Field rhs = Util.getField(rightObject);
+                predicate = new ComparisonPredicate(lhs, op, rhs);
+            }
+        } else {
+            Field lhs = Util.getField(leftObject);
+            if (rightObject instanceof Project.ProjectElement) {
+                int rhs = attributeTable.getIndex((Project.ProjectElement)rightObject);
+                predicate = new ComparisonPredicate(lhs, op, rhs);
+            } else {
+                Field rhs = Util.getField(rightObject);
+                predicate = new ComparisonPredicate(lhs, op, rhs);
+            }
+        }
+        return predicate;
     }
+
 
     /**
      * fullColumnName
@@ -286,12 +359,20 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitFullColumnName(TinyDBParser.FullColumnNameContext ctx) {
-        return super.visitFullColumnName(ctx);
+        Table table = null;
+        String attrName = ctx.attrName().getText();
+        if (ctx.tableName() != null) {
+            String tableName = ctx.tableName().getText();
+            table = GlobalManager.getDatabase().getTable(tableName);
+        } else {
+            table = attributeTable.getBelongingTable(attrName);
+        }
+        return new Project.ProjectElement(table, attrName);
     }
 
     /**
      * selectStatement
-     *     : SELECT selectElements FROM tableSources (WHERE whereExpr=predicate)?
+     *     : SELECT fullColumnName (',' fullColumnName)* FROM tableSources (WHERE whereExpr=predicate)?
      *     ;
      * @param ctx
      * @return
@@ -300,39 +381,18 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     public Object visitSelectStatement(TinyDBParser.SelectStatementContext ctx) {
         // A simple query plan without optimization
         OpIterator join = (OpIterator) visit(ctx.tableSources());
+        // After we visit table sources, we have attributeTable ready to look up.
         Predicate predicate = (Predicate) visit(ctx.whereExpr);
         Filter filter = new Filter(predicate, join);
-        Project.ProjectElement[] projectElements = (Project.ProjectElement[]) visit(ctx.selectElements());
-        Project project = new Project(projectElements, (OpIterator) filter);
+
+        ArrayList<Project.ProjectElement> projectElements = new ArrayList<>();
+        for(TinyDBParser.FullColumnNameContext context : ctx.fullColumnName()) {
+            projectElements.add((Project.ProjectElement) visit(context));
+        }
+
+        Project project = new Project(projectElements.toArray(new Project.ProjectElement[0]),
+                (OpIterator) filter);
         return project;
-    }
-
-    @Override
-    public Object visitSelectElements(TinyDBParser.SelectElementsContext ctx) {
-        ArrayList<Project.ProjectElement> arrayList = new ArrayList<>();
-        for (TinyDBParser.SelectElementContext child : ctx.selectElement()) {
-            arrayList.add((Project.ProjectElement) visit(child));
-        }
-        return arrayList.toArray();
-    }
-
-    /**
-     * #selectColumnElement := fullColumnName (AS? alias=attrName)?
-     * @param ctx
-     * @return
-     */
-    @Override
-    public Object visitSelectColumnElement(TinyDBParser.SelectColumnElementContext ctx) {
-        String tableName = null;
-        if (ctx.fullColumnName().tableName() != null) {
-            tableName = ctx.fullColumnName().tableName().getText();
-        }
-        String attrName = ctx.fullColumnName().attrName().getText();
-        String alias = null;
-        if (ctx.alias != null) {
-            alias = ctx.alias.getText();
-        }
-        return new Project.ProjectElement(tableName, attrName, alias);
     }
 
     /**
@@ -357,12 +417,13 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitTableSourceBase(TinyDBParser.TableSourceBaseContext ctx) {
-        SeqScan seqScan = new SeqScan(ctx.tableName().getText());
+        String tableName = ctx.tableName().getText();
+        this.attributeTable.addTable(tableName);
+        SeqScan seqScan = new SeqScan(tableName);
         OpIterator opIterator = (OpIterator) seqScan;
         for (TinyDBParser.JoinPartContext context : ctx.joinPart()) {
             Join.JoinPart joinPart = (Join.JoinPart)visit(context);
-            Join join = new Join(opIterator, joinPart);
-            opIterator = (OpIterator) join;
+            opIterator = new Join(opIterator, joinPart);
         }
         return opIterator;
     }
@@ -374,8 +435,10 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitInnerJoin(TinyDBParser.InnerJoinContext ctx) {
-        SeqScan seqScan = new SeqScan(ctx.tableName().getText());
-        return new Join.JoinPart((LogicalPredicate)visit(ctx.predicate()),(OpIterator)seqScan);
+        String tableName = ctx.tableName().getText();
+        this.attributeTable.addTable(tableName);
+        SeqScan seqScan = new SeqScan(tableName);
+        return new Join.JoinPart((ComparisonPredicate) visit(ctx.predicate()),(OpIterator)seqScan);
     }
 
     /**
@@ -388,7 +451,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitDeleteStatement(TinyDBParser.DeleteStatementContext ctx) {
-        OpIterator opIterator = (OpIterator) (new SeqScan(ctx.tableName().getText()));
+        String tableName = ctx.tableName().getText();
+        this.attributeTable.addTable(tableName);
+        OpIterator opIterator = (OpIterator) (new SeqScan(tableName));
         if (ctx.predicate() != null) {
             LogicalPredicate predicate = (LogicalPredicate) visit(ctx.predicate());
             opIterator = (OpIterator) (new Filter(predicate, opIterator));
@@ -409,7 +474,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitUpdateStatement(TinyDBParser.UpdateStatementContext ctx) {
-        SeqScan seqScan = new SeqScan(ctx.tableName().get(0).getText());
+        String tableName = ctx.tableName().getText();
+        this.attributeTable.addTable(tableName);
+        SeqScan seqScan = new SeqScan(tableName);
         Filter filter = new Filter((LogicalPredicate)visit(ctx.predicate()), (OpIterator)seqScan);
         ArrayList<Update.UpdateElement> updateElements = new ArrayList<>();
         for (TinyDBParser.UpdatedElementContext context : ctx.updatedElement()) {

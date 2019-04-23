@@ -102,19 +102,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelectStatement(TinyDBParser.SelectStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#selectElements}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelectElements(TinyDBParser.SelectElementsContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code selectColumnElement}
-	 * labeled alternative in {@link TinyDBParser#selectElement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelectColumnElement(TinyDBParser.SelectColumnElementContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#fullColumnName}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

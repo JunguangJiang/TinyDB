@@ -92,6 +92,11 @@ public class ComparisonPredicate implements Serializable, Predicate {
         return this.getLeft(tuple).compare(op, this.getRight(tuple));
     }
 
+
+    public boolean filter(Tuple tuple1, Tuple tuple2) {
+        return this.getLeft(tuple1).compare(op, this.getRight(tuple2));
+    }
+
     @Override
     public String toString() {
         return super.toString();
