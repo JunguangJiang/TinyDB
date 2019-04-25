@@ -52,7 +52,7 @@ useDatabase
     ;
 
 insertStatement
-    : INSERT INTO tableName ( '(' attrNames ')' )? VALUES '(' constants ')'
+    : INSERT INTO table ( '(' attrNames ')' )? VALUES '(' constants ')'
     ;
 
 selectStatement
@@ -60,7 +60,7 @@ selectStatement
     ;
 
 fullColumnName
-    : tableName '.' attrName
+    : table '.' attrName
     | attrName
     ;
 
@@ -69,22 +69,22 @@ tableSources
     ;
 
 tableSource
-    : tableName joinPart*                                     #tableSourceBase
+    : table joinPart*                                     #tableSourceBase
     ;
 
 joinPart
-    : JOIN tableName
+    : JOIN table
       (
         ON predicate
       )?                                                            #innerJoin
-    | (LEFT | RIGHT) OUTER? JOIN tableName
+    | (LEFT | RIGHT) OUTER? JOIN table
         (
           ON predicate
         )                                                           #outerJoin
     ;
 
 updateStatement
-    : UPDATE tableName
+    : UPDATE table
     SET updatedElement (',' updatedElement)*
           (WHERE predicate)?
     ;
@@ -94,7 +94,7 @@ updatedElement
     ;
 
 deleteStatement
-    : DELETE FROM tableName (WHERE predicate)?
+    : DELETE FROM table (WHERE predicate)?
     ;
 
 // Simplified approach for predicate
@@ -140,7 +140,7 @@ logicalOperator
 showStatement
     : SHOW DATABASES
     | SHOW DATABASE dbName
-    | SHOW TABLE tableName
+    | SHOW TABLE table
     ;
 
 shutdownStatement
@@ -149,6 +149,10 @@ shutdownStatement
 
 dbName
     : ID
+    ;
+
+table
+    : tableName
     ;
 
 tableName

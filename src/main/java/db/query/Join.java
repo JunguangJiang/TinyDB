@@ -64,8 +64,8 @@ public class Join extends Operator{
             Tuple tuple1 = lhs.next();
             while (rhs.hasNext()) {
                 Tuple tuple2 = rhs.next();
-                if (predicate.filter(tuple1, tuple2)) {
-                    Tuple mergedTuple = Tuple.merge(tuple1, tuple2);
+                Tuple mergedTuple = Tuple.merge(tuple1, tuple2);
+                if (predicate.filter(mergedTuple)) {
                     tuples.add(mergedTuple);
                 }
             }

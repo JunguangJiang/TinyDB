@@ -4,7 +4,11 @@ import db.Tuple;
 
 import java.io.Serializable;
 
-public class LogicalPredicate implements Serializable, Predicate {
+/**
+ * LogicalPredicate is a compound predicate in which
+ * predicates are combined by "AND" and "OR".
+ */
+public class LogicalPredicate extends Predicate implements Serializable {
     private static final long serialVersionUID = 1L;
     private Predicate left, right;
     private Op op;
@@ -32,27 +36,29 @@ public class LogicalPredicate implements Serializable, Predicate {
 
         public String toString() {
             if (this == AND)
-                return "&&";
+                return "AND";
             if (this == OR)
-                return "||";
+                return "OR";
             throw new IllegalStateException("impossible to reach here");
         }
     }
 
-
+    /**
+     * Filter tuple based on compound predicate
+     * @param tuple
+     *            The tuple to compare against
+     * @return true if the compound predicate is true, false otherwise.
+     */
     @Override
     public boolean filter(Tuple tuple) {
         boolean c1 = left.filter(tuple);
         boolean c2 = right.filter(tuple);
         if (op == Op.AND) {
             return c1 && c2;
-        } else {
+        } else if (op == Op.OR){
             return c1 || c2;
+        } else {
+            throw new IllegalStateException("impossible to reach here");
         }
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
     }
 }

@@ -235,6 +235,12 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDbName(TinyDBParser.DbNameContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TinyDBParser#table}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTable(TinyDBParser.TableContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#tableName}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

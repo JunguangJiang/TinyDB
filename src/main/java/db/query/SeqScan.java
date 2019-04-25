@@ -1,9 +1,65 @@
 package db.query;
 
-public class SeqScan {
+import db.DbException;
+import db.Table;
+import db.Tuple;
+import db.TupleDesc;
+import db.file.DbFileIterator;
 
+import java.util.NoSuchElementException;
 
-    public SeqScan(String tableName) {
+/**
+ * SeqScan is an implementation of a sequential scan access method that reads
+ * each tuple of a table in no particular order (e.g., as they are laid out on
+ * disk).
+ */
+public class SeqScan implements OpIterator{
+    private static final long serialVersionUID = 1L;
+    private DbFileIterator iterator;
+    private Table table;
 
+    public SeqScan(Table table) {
+        this.table = table;
+        this.iterator = null;
+    }
+
+    @Override
+    public void open() throws DbException {
+        iterator = table.iterator();
+        iterator.open();
+    }
+
+    /**
+     * @return the TupleDesc with field names from the underlying HeapFile,
+     */
+    public TupleDesc getTupleDesc() {
+        return table.getTupleDesc();
+    }
+
+    @Override
+    public boolean hasNext() throws DbException {
+        if (iterator == null) {
+            return false;
+        }
+        return iterator.hasNext();
+    }
+
+    @Override
+    public Tuple next() throws DbException, NoSuchElementException {
+        if (iterator == null) {
+            throw new NoSuchElementException("tuple is null");
+        }
+        return iterator.next();
+    }
+
+    @Override
+    public void close() {
+        iterator.close();
+    }
+
+    @Override
+    public void rewind() throws DbException {
+        iterator.rewind();
     }
 }
+

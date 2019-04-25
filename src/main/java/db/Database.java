@@ -30,6 +30,11 @@ public class Database {
         return new QueryResult(false, "");
     }
 
+    /**
+     *
+     * @param tableName
+     * @return the table if it exists, otherwise return null
+     */
     public Table getTable(String tableName) {
         return new Table(tableName, null, null);
     }

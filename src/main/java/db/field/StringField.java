@@ -1,7 +1,6 @@
 package db.field;
 
 import db.Field;
-import db.Predicate;
 import db.Type;
 import db.query.ComparisonPredicate;
 
@@ -75,8 +74,6 @@ public class StringField implements Field {
      * Compare the specified field to the value of this Field. Return semantics
      * are as specified by Field.compare
      *
-     * @throws IllegalCastException
-     *             if val is not a StringField
      * @see Field#compare
      */
     public boolean compare(ComparisonPredicate.Op op, Field val) {

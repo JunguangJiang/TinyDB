@@ -2,6 +2,7 @@ package db.query;
 
 import db.Field;
 import db.Tuple;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
 
@@ -9,49 +10,54 @@ import java.io.Serializable;
  * ComparisonPredicate compares two Fields
  * Each Field can be an attribute of a Table or just constant Field value.
  */
-public class ComparisonPredicate implements Serializable, Predicate {
+public class ComparisonPredicate extends Predicate implements Serializable {
     private static final long serialVersionUID = 1L;
-    private int leftId=-1, rightId=-1;
-    private Field left=null, right=null;
     private Op op;
+    private Object lhs, rhs;
 
-    public ComparisonPredicate(int left, Op op, int right) {
-        this.leftId = left;
+    /**
+     * If lhs is an int, it refers to the attribute index in a tuple.
+     * Else lhs is a Field, it refers to a const Field value.
+     *
+     * @param lhs
+     * @param op
+     * @param rhs
+     */
+    public ComparisonPredicate(Object lhs, Op op, Object rhs) {
+        this.lhs = lhs;
         this.op = op;
-        this.rightId = right;
+        this.rhs = rhs;
     }
 
-    public ComparisonPredicate(int left, Op op, Field right) {
-        this.leftId = left;
-        this.op = op;
-        this.right = right;
-    }
-
-    public ComparisonPredicate(Field left, Op op, int right) {
-        this.left = left;
-        this.op = op;
-        this.rightId = right;
-    }
-
-    public ComparisonPredicate(Field left, Op op, Field right) {
-        this.left = left;
-        this.op = op;
-        this.right = right;
-    }
-
+    /**
+     * @param tuple
+     * @return
+     *      If lhs is an index, return the corresponding Field in the tuple,
+     *      otherwise return the const Field value.
+     */
     public Field getLeft(Tuple tuple) {
-        if (this.leftId >= 0) {
-            return tuple.getField(this.leftId);
+        if (this.lhs instanceof Field){
+            return (Field)this.lhs;
+        } else if (this.lhs instanceof Integer){
+            return tuple.getField((int)this.lhs);
         } else {
-            return this.left;
+            throw new NotImplementedException();
         }
     }
 
+    /**
+     * @param tuple
+     * @return
+     *      If rhs is an index, return the corresponding Field in the tuple,
+     *      otherwise return the const Field value.
+     */
     public Field getRight(Tuple tuple) {
-        if (this.rightId >= 0) {
-            return tuple.getField(this.rightId);
+        if (this.rhs instanceof Field){
+            return (Field)this.rhs;
+        } else if (this.rhs instanceof Integer){
+            return tuple.getField((int)this.rhs);
         } else {
-            return this.right;
+            throw new NotImplementedException();
         }
     }
 
@@ -87,18 +93,15 @@ public class ComparisonPredicate implements Serializable, Predicate {
         }
     }
 
+    /**
+     * Filter tuple based on comparison between attributes of the tuple(or const Field values)
+     * @param tuple
+     *            The tuple to compare against
+     * @return true if the comparison is true, false otherwise.
+     */
     @Override
     public boolean filter(Tuple tuple) {
         return this.getLeft(tuple).compare(op, this.getRight(tuple));
     }
 
-
-    public boolean filter(Tuple tuple1, Tuple tuple2) {
-        return this.getLeft(tuple1).compare(op, this.getRight(tuple2));
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
 }
