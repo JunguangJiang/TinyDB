@@ -3,7 +3,6 @@ package db;
 import db.file.DbFile;
 import db.file.DbFileIterator;
 import db.query.QueryResult;
-import tinydb.Query;
 
 import java.io.File;
 import java.util.HashMap;

@@ -33,26 +33,6 @@ apply plugin: 'java'
 
 test {
     filter {
-        includeTestsMatching "tinydb.AggregateTest.*"
-        includeTestsMatching "tinydb.BufferPoolWriteTest.*"
-        includeTestsMatching "tinydb.CatalogTest.*"
-        includeTestsMatching "tinydb.FilterTest.*"
-        includeTestsMatching "tinydb.HeapFileReadTest.*"
-        includeTestsMatching "tinydb.HeapFileWriteTest.*"
-        includeTestsMatching "tinydb.HeapPageIdTest.*"
-        includeTestsMatching "tinydb.HeapPageReadTest.*"
-        includeTestsMatching "tinydb.HeapPageWriteTest.*"
-        includeTestsMatching "tinydb.InsertTest.*"
-        includeTestsMatching "tinydb.IntegerAggregatorTest.*"
-        includeTestsMatching "tinydb.JoinPredicateTest.*"
-        includeTestsMatching "tinydb.JoinTest.*"
-        includeTestsMatching "tinydb.PredicateTest.*"
-        includeTestsMatching "tinydb.RecordIdTest.*"
-        includeTestsMatching "tinydb.StringAggregatorTest.*"
-        includeTestsMatching "tinydb.TupleDescTest.*"
-        includeTestsMatching "tinydb.StringAggregatorTest.*"
-        includeTestsMatching "tinydb.TupleTest.*"
-        includeTestsMatching "tinydb.StringAggregatorTest.*"
-
+        includeTestsMatching "db.TupleDescTest.*"
     }
 }
