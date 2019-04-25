@@ -25,7 +25,7 @@ public class Table {
      * @param file the disk File that the Table is stored in
      */
     public Table(String tableName, TupleDesc tupleDesc, File file) {
-
+        // TODO
     }
 
     /**
@@ -43,6 +43,7 @@ public class Table {
      * @see QueryResult
      */
     public QueryResult insertTuple(Tuple tuple) {
+        // TODO
         return new QueryResult(false, "");
     }
 
@@ -56,6 +57,7 @@ public class Table {
      * @see QueryResult
      */
     public QueryResult insertTuple(String[] attrNames, Object[] values) {
+        // TODO
         if (attrNames == null) { // attrNames are all the attribute names of the table
         }
         return new QueryResult(false, "");
@@ -68,6 +70,7 @@ public class Table {
      * @see QueryResult
      */
     public QueryResult deleteTuple(Tuple tuple) {
+        // TODO
         return new QueryResult(false, "");
     }
 
@@ -75,6 +78,7 @@ public class Table {
      * @return the iterator over the Table
      */
     public DbFileIterator iterator() {
+        // TODO
         return null;
     }
 }

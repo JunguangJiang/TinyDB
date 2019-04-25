@@ -18,12 +18,12 @@ import java.util.NoSuchElementException;
 public enum Type implements Serializable {
     INT_TYPE() {
         @Override
-        public int getLen() {
+        public int getBytes() {
             return 4;
         }
 
         @Override
-        public Field parse(DataInputStream dis) throws ParseException {
+        public Field parse(DataInputStream dis, int maxLen) throws ParseException {
             try {
                 return new IntField(dis.readInt());
             }  catch (IOException e) {
@@ -33,30 +33,29 @@ public enum Type implements Serializable {
 
     }, STRING_TYPE() {
         @Override
-        public int getLen() {
-            return STRING_LEN+4;
+        public int getBytes() {
+            return 4;
         }
 
         @Override
-        public Field parse(DataInputStream dis) throws ParseException {
+        public Field parse(DataInputStream dis, int maxLen) throws ParseException {
             try {
                 int strLen = dis.readInt();
                 byte bs[] = new byte[strLen];
                 dis.read(bs);
-                dis.skipBytes(STRING_LEN-strLen);
-                return new StringField(new String(bs), STRING_LEN);
+                dis.skipBytes(maxLen-strLen);
+                return new StringField(new String(bs), maxLen);
             } catch (IOException e) {
                 throw new ParseException("couldn't parse", 0);
             }
         }
     };
 
-    public static final int STRING_LEN = 128;
-
     /**
      * @return the number of bytes required to store a field of this type.
+     * For StringType, simply return 4.
      */
-    public abstract int getLen();
+    public abstract int getBytes();
 
     /**
      * @return a Field object of the same type as this object that has contents
@@ -65,7 +64,8 @@ public enum Type implements Serializable {
      * @throws ParseException if the data read from the input stream is not
      *   of the appropriate type.
      */
-    public abstract Field parse(DataInputStream dis) throws ParseException;
+    public abstract Field parse(DataInputStream dis, int maxLen) throws ParseException;
+
 
     public static Type getType(String typeString) throws NoSuchElementException {
         if (typeString.equals("INT")) {

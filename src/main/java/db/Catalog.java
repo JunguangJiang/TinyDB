@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * The Catalog keeps track of all available databases
+ * The Catalog keeps track of all available databases.
+ * When Catalog is loaded, there should be a default database.
  */
 public class Catalog {
     private HashMap<String, File> databaseMap;
@@ -23,6 +24,7 @@ public class Catalog {
      * @return
      */
     public QueryResult createDatabase(String databaseName) {
+        // TODO
         return new QueryResult(false, "");
     }
 
@@ -33,6 +35,7 @@ public class Catalog {
      * @return
      */
     public QueryResult dropDatabase(String databaseName) {
+        // TODO
         return new QueryResult(false, "");
     }
 
@@ -43,6 +46,7 @@ public class Catalog {
      * @return
      */
     public QueryResult useDatabase(String databaseName) {
+        // TODO
         return new QueryResult(false, "");
     }
 
@@ -58,6 +62,7 @@ public class Catalog {
      * @return The names of all the databases
      */
     public ArrayList<String> getDatabaseNames(){
+        // TODO
         return null;
     }
 
@@ -66,6 +71,6 @@ public class Catalog {
      * @param catalogFile
      */
     public void load(String catalogFile) {
-
+        // TODO
     }
 }

@@ -17,6 +17,7 @@ public class Database {
      * @return
      */
     public QueryResult createTable(String tableName, TupleDesc tupleDesc) {
+        // TODO
         return new QueryResult(false, "");
     }
 
@@ -27,6 +28,7 @@ public class Database {
      * @return
      */
     public QueryResult dropTable(String tableName) {
+        // TODO
         return new QueryResult(false, "");
     }
 
@@ -36,6 +38,7 @@ public class Database {
      * @return the table if it exists, otherwise return null
      */
     public Table getTable(String tableName) {
+        // TODO
         return new Table(tableName, null, null);
     }
 
@@ -43,7 +46,8 @@ public class Database {
      *
      * @return The names of all the tables in the database
      */
-    public ArrayList<String> getTables(){
+    public ArrayList<String> getTableNames(){
+        // TODO
         return null;
     }
 
@@ -52,6 +56,6 @@ public class Database {
      * @param databaseFile
      */
     public void load(String databaseFile) {
-
+        // TODO
     }
 }

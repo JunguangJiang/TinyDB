@@ -15,29 +15,12 @@ public class Main {
         // An example which reads an sql txt and build a parser tree
         String inFileName = "data/sql.txt";
         String outFileName = "data/out.txt";
+
         try{
             BufferedReader in = new BufferedReader(new FileReader(inFileName));
-            String line;
-            StringBuilder stringBuilder = new StringBuilder();
-            while ((line = in.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append('\n');
-            }
-            in.close();
-            String s = stringBuilder.toString().toUpperCase();//all sql word should be upper case!
-            System.out.println(s);
-
-            TinyDBLexer lexer = new TinyDBLexer(CharStreams.fromString(s));
-            CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-            TinyDBParser parser = new TinyDBParser(tokenStream);
-            parser.removeErrorListeners();
-            TinyDBOutput output = new TinyDBOutput(new BufferedWriter(new FileWriter(outFileName)));
-            parser.addErrorListener(output);
-
-            ParseTree tree = parser.root();
-
-            Visitor visitor = new Visitor(output);
-            visitor.visit(tree);
+            TinyDBOutput out = new TinyDBOutput(new BufferedWriter(new FileWriter(outFileName)));
+            Server server = new Server(".");
+            server.process(in, out);
         }catch (IOException e){
             e.printStackTrace();
         }

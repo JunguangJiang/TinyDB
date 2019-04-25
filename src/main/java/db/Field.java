@@ -5,7 +5,7 @@ import db.query.ComparisonPredicate;
 import java.io.*;
 
 /**
- * Interface for values of fields in tuples in SimpleDB.
+ * Interface for values of fields in tuples in TinyDB.
  */
 public interface Field extends Serializable{
     /**
