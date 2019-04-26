@@ -2,21 +2,15 @@ package db.field;
 
 import db.Field;
 import db.Type;
-import db.query.ComparisonPredicate;
-
 import java.io.*;
 
 /**
- * Instance of Field that stores a single integer.
+ * Instance of Field that stores a single Int.
  */
-public class IntField implements Field {
-
-    private static final long serialVersionUID = 1L;
-
-    private final int value;
+public class IntField extends NumberField {
 
     public int getValue() {
-        return value;
+        return value.intValue();
     }
 
     /**
@@ -25,62 +19,26 @@ public class IntField implements Field {
      * @param i The value of this field.
      */
     public IntField(int i) {
-        value = i;
+        super(i, Type.INT_TYPE);
     }
 
-    public String toString() {
-        return Integer.toString(value);
-    }
-
-    public int hashCode() {
-        return value;
-    }
-
-    public boolean equals(Object field) {
-        return ((IntField) field).value == value;
-    }
 
     public void serialize(DataOutputStream dos) throws IOException {
-        dos.writeInt(value);
+        dos.writeInt(value.intValue());
     }
 
-    /**
-     * Compare the specified field to the value of this Field.
-     * Return semantics are as specified by Field.compare
-     *
-     * @see Field#compare
-     */
-    public boolean compare(ComparisonPredicate.Op op, Field val) {
-
-        IntField iVal = (IntField) val;
-
-        switch (op) {
-            case EQUALS:
-                return value == iVal.value;
-            case NOT_EQUALS:
-                return value != iVal.value;
-
-            case GREATER_THAN:
-                return value > iVal.value;
-
-            case GREATER_THAN_OR_EQ:
-                return value >= iVal.value;
-
-            case LESS_THAN:
-                return value < iVal.value;
-
-            case LESS_THAN_OR_EQ:
-                return value <= iVal.value;
-        }
-
-        return false;
+    @Override
+    public boolean equals(Object obj) {
+        return value.intValue() == ((IntField)obj).value.intValue();
     }
 
-    /**
-     * Return the Type of this field.
-     * @return Type.INT_TYPE
-     */
-    public Type getType() {
-        return Type.INT_TYPE;
+    @Override
+    public boolean greater_than(Field val) {
+        return value.intValue() > ((IntField)val).value.intValue();
+    }
+
+    @Override
+    public boolean less_than(Field val) {
+        return value.intValue() < ((IntField)val).value.intValue();
     }
 }

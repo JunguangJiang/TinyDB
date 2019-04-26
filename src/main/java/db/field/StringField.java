@@ -7,7 +7,7 @@ import db.query.ComparisonPredicate;
 import java.io.*;
 
 /**
- * Instance of Field that stores a single String of a fixed length.
+ * Instance of Field that stores a single String of a certain length.
  */
 public class StringField implements Field {
 

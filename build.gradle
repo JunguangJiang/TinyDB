@@ -31,8 +31,8 @@ jar {
 
 apply plugin: 'java'
 
-test {
-    filter {
-        includeTestsMatching "db.TupleDescTest.*"
-    }
-}
+//test {
+//    filter {
+//        includeTestsMatching "db.TupleDescTest.*"
+//    }
+//}

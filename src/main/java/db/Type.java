@@ -1,7 +1,6 @@
 package db;
 
-import db.field.IntField;
-import db.field.StringField;
+import db.field.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.DataInputStream;
@@ -19,7 +18,7 @@ public enum Type implements Serializable {
     INT_TYPE() {
         @Override
         public int getBytes() {
-            return 4;
+            return Integer.BYTES;
         }
 
         @Override
@@ -31,10 +30,55 @@ public enum Type implements Serializable {
             }
         }
 
-    }, STRING_TYPE() {
+    }, LONG_TYPE() {
         @Override
         public int getBytes() {
-            return 4;
+            return Long.BYTES;
+        }
+
+        @Override
+        public Field parse(DataInputStream dis, int maxLen) throws ParseException {
+            try {
+                return new LongField(dis.readLong());
+            }  catch (IOException e) {
+                throw new ParseException("couldn't parse", 0);
+            }
+        }
+    }, FLOAT_TYPE() {
+        @Override
+        public int getBytes() {
+            return Float.BYTES;
+        }
+
+        @Override
+        public Field parse(DataInputStream dis, int maxLen) throws ParseException {
+            try {
+                return new FloatField(dis.readFloat());
+            }  catch (IOException e) {
+                throw new ParseException("couldn't parse", 0);
+            }
+        }
+    }, DOUBLE_TYPE() {
+        @Override
+        public int getBytes() {
+            return Double.BYTES;
+        }
+
+        @Override
+        public Field parse(DataInputStream dis, int maxLen) throws ParseException {
+            try {
+                return new DoubleField(dis.readDouble());
+            }  catch (IOException e) {
+                throw new ParseException("couldn't parse", 0);
+            }
+        }
+    }, STRING_TYPE() {
+        /**
+         * Ignore the bytes required to store the content
+         */
+        @Override
+        public int getBytes() {
+            return Integer.BYTES;
         }
 
         @Override
@@ -70,6 +114,12 @@ public enum Type implements Serializable {
     public static Type getType(String typeString) throws NoSuchElementException {
         if (typeString.equals("INT")) {
             return INT_TYPE;
+        } else if (typeString.equals("LONG")) {
+            return LONG_TYPE;
+        } else if (typeString.equals("FLOAT")) {
+            return FLOAT_TYPE;
+        } else if (typeString.equals("DOUBLE")) {
+            return DOUBLE_TYPE;
         } else if (typeString.equals("STRING")) {
             return STRING_TYPE;
         } else {
