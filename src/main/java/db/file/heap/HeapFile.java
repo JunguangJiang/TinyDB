@@ -57,7 +57,9 @@ public class HeapFile implements DbFile {
         return this.tupleDesc;
     }
 
-    // see DbFile.java for javadocs
+    /**
+     * @see DbFile#readPage(PageId)
+     */
     public Page readPage(PageId pid) {
         try{
             RandomAccessFile randomAccessFile = new RandomAccessFile(this.file, "r");
@@ -67,14 +69,16 @@ public class HeapFile implements DbFile {
             randomAccessFile.read(bytes, 0, BufferPool.getPageSize());
             HeapPageId heapPageId = (HeapPageId) pid;
             randomAccessFile.close();
-            return new HeapPage(heapPageId, bytes);
+            return new HeapPage(heapPageId, bytes, tupleDesc);
         }catch (IOException exception){
             exception.printStackTrace();
         }
         return null;
     }
 
-    // see DbFile.java for javadocs
+    /**
+     * @see DbFile#writePage(Page)
+     */
     public void writePage(Page page) throws IOException {
         try {
             HeapPageId pageId = (HeapPageId)page.getId();
@@ -96,7 +100,9 @@ public class HeapFile implements DbFile {
         return (int)Math.ceil((float)file.length() / BufferPool.getPageSize());
     }
 
-    // see DbFile.java for javadocs
+    /**
+     * @see DbFile#insertTuple(Tuple)
+     */
     public ArrayList<Page> insertTuple(Tuple t)
             throws DbException, IOException {
         ArrayList<Page> affectedPages = new ArrayList<>();
@@ -104,7 +110,7 @@ public class HeapFile implements DbFile {
             HeapPage heapPage = (HeapPage)this.getEmptyPage();
             if (heapPage == null) {
                 HeapPageId heapPageId = new HeapPageId(this.getId(), this.numPages());
-                heapPage = new HeapPage(heapPageId, HeapPage.createEmptyPageData());
+                heapPage = new HeapPage(heapPageId, HeapPage.createEmptyPageData(), tupleDesc);
                 heapPage.insertTuple(t);
                 this.writePage(heapPage);
             } else {
@@ -128,7 +134,7 @@ public class HeapFile implements DbFile {
             int tableId = this.getId();
             for (int i = 0; i < this.numPages(); i++) {
                 HeapPageId pageId = new HeapPageId(tableId, i);
-                Page page = GlobalManager.getBufferPool().getPage(pageId, Permissions.READ_ONLY);
+                Page page = GlobalManager.getBufferPool().getPage(pageId);
                 if (((HeapPage)page).getNumEmptySlots() != 0){
                     return page;
                 }
@@ -139,17 +145,21 @@ public class HeapFile implements DbFile {
         return null;
     }
 
-    // see DbFile.java for javadocs
+    /**
+     * @see DbFile#deleteTuple(Tuple)
+     */
     public ArrayList<Page> deleteTuple(Tuple t) throws DbException {
         PageId pageId = t.getRecordId().getPageId();
-        HeapPage page = (HeapPage) GlobalManager.getBufferPool().getPage(pageId, Permissions.READ_WRITE);
+        HeapPage page = (HeapPage) GlobalManager.getBufferPool().getPage(pageId);
         page.deleteTuple(t);
         ArrayList<Page> affectedPages = new ArrayList<>();
         affectedPages.add(page);
         return affectedPages;
     }
 
-    // see DbFile.java for javadocs
+    /**
+     * @see DbFile#iterator()
+     */
     public DbFileIterator iterator() {
         return new HeapFileIterator(this);
     }

@@ -1,13 +1,11 @@
 package db.file.heap;
 
-import db.Database;
 import db.DbException;
 import db.GlobalManager;
 import db.Tuple;
 import db.file.DbFileIterator;
 import db.file.Page;
 import db.file.PageId;
-import db.file.Permissions;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -100,7 +98,7 @@ public class HeapFileIterator implements DbFileIterator {
      */
     private Iterator<Tuple> getTupleIteratorFromPage(int pgNum) throws DbException {
         PageId pageId = new HeapPageId(f.getId(), pgNum);
-        Page page = GlobalManager.getBufferPool().getPage(pageId, Permissions.READ_ONLY);
+        Page page = GlobalManager.getBufferPool().getPage(pageId);
         HeapPage heapPage = (HeapPage)page;
         return heapPage.iterator();
     }

@@ -27,8 +27,6 @@ public class HeapPage implements Page {
     final int numSlots;
     boolean dirty;
 
-    byte[] oldData;
-
     /**
      * Create a HeapPage from a set of bytes of data read from disk.
      * The format of a HeapPage is a set of header bytes indicating
@@ -43,9 +41,9 @@ public class HeapPage implements Page {
      * <p>
      * @see BufferPool#getPageSize()
      */
-    public HeapPage(HeapPageId id, byte[] data) throws IOException {
+    public HeapPage(HeapPageId id, byte[] data, TupleDesc tupleDesc) throws IOException {
         this.pid = id;
-        this.td = GlobalManager.getDatabase().getTable(id.getTableId()).getTupleDesc();
+        this.td = tupleDesc;
         this.numSlots = getNumTuples();
         this.dirty = false;
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));

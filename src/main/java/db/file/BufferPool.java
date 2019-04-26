@@ -56,7 +56,7 @@ public class BufferPool {
      *
      * @param pid the ID of the requested page
      */
-    public Page getPage(PageId pid, Permissions permissions)
+    public Page getPage(PageId pid)
             throws DbException {
         Page page;
         if(pageHashMap.containsKey(pid)){

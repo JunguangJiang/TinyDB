@@ -27,7 +27,6 @@ public class Table {
      * @param file the disk File that the Table is stored in
      */
     public Table(Integer id, String name, TupleDesc tupleDesc, File file) {
-        // TODO
         this.dbFile = new HeapFile(id, file, tupleDesc);
         this.name = name;
     }
@@ -35,6 +34,8 @@ public class Table {
     public DbFile getDbFile() {
         return dbFile;
     }
+    public Integer getId() {return id;}
+    public String getName() {return name;}
 
     /**
      *
@@ -44,9 +45,12 @@ public class Table {
         return dbFile.getTupleDesc();
     }
 
+
+
     /**
      * insert a new Tuple into the Table.
      * must use BufferPool to get Page!
+     * must ensure each tuple satisfies the primary key and not null constraint
      * @param tuple
      * @return the QueryResult of the insert
      * @see QueryResult
@@ -58,7 +62,7 @@ public class Table {
         } catch (IOException e){
             e.printStackTrace();
         }
-        return new QueryResult(false, "");
+        return new QueryResult(true, "");
     }
 
     /**
@@ -66,6 +70,7 @@ public class Table {
      * the Tuple has the form
      *      INSERT attrNames VALUES(values);
      * must use BufferPool to get Page!
+     * must ensure each tuple satisfies the primary key and not null constraint
      * @param attrNames attribute names
      * @param values each value might be String, Integer, Float
      * @return the QueryResult of the insert
