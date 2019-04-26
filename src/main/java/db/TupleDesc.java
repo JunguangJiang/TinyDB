@@ -28,7 +28,7 @@ public class TupleDesc implements Serializable {
         public final String fieldName;
 
         /** Can not be Null **/
-        public final boolean notNull;
+        public boolean notNull;
 
         /** When the Type is String, maxLen is the max length of the String **/
         public final int maxLen;
@@ -162,6 +162,14 @@ public class TupleDesc implements Serializable {
         return tdItems[i];
     }
 
+    public String[] getAttrNames() {
+        String[] attrNames = new String[numFields()];
+        for (int i=0; i<numFields(); i++) {
+            attrNames[i] = getField(i).fieldName;
+        }
+        return attrNames;
+    }
+
     /**
      * Find the index of the field with a given name.
      *
@@ -251,6 +259,14 @@ public class TupleDesc implements Serializable {
         return primaryKeysIndex;
     }
 
+    /**
+     * @param i
+     * @return whether the i-th Field is a primary key
+     */
+    public boolean isPrimaryKey(int i) {
+        return Arrays.asList(primaryKeysIndex).contains(i);
+    }
+
     public int hashCode() {
         // If you want to use TupleDesc as keys for HashMap, implement this so
         // that equal objects have equals hashCode() results
@@ -274,5 +290,7 @@ public class TupleDesc implements Serializable {
         }
         return stringBuilder.toString();
     }
+
+
 }
 

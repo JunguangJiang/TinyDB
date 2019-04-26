@@ -1,8 +1,6 @@
 package db;
 
-import db.file.DbFile;
-import db.file.DbFileIterator;
-import db.file.Page;
+import db.file.*;
 import db.file.heap.HeapFile;
 import db.query.QueryResult;
 
@@ -55,31 +53,55 @@ public class Table {
      * @see QueryResult
      */
     public QueryResult insertTuple(Tuple tuple) {
-        // TODO
         try {
             GlobalManager.getBufferPool().insertTuple(this.id, tuple);
         } catch (IOException e){
             e.printStackTrace();
+        } catch (PrimaryKeyViolation e) {
+            return new QueryResult(false, "Violation of PRIMARY KEY constraint."+e.toString());
         }
-        return new QueryResult(true, "");
+        return new QueryResult(true, "Query OK, 1 row affected.");
     }
 
     /**
      * insert a new Tuple into the Table
      * the Tuple has the form
      *      INSERT attrNames VALUES(values);
-     * must use BufferPool to get Page!
      * must ensure each tuple satisfies the primary key and not null constraint
-     * @param attrNames attribute names
+     * @param attrNames attribute names. If attrNames is null, then it refers to all the attributes of the Tuple
      * @param values each value might be String, Integer, Float
      * @return the QueryResult of the insert
      * @see QueryResult
      */
     public QueryResult insertTuple(String[] attrNames, Object[] values) {
-        // TODO
-        if (attrNames == null) { // attrNames are all the attribute names of the table
+        if (attrNames == null) {
+            //attrNames are all the attribute names of the table
+            attrNames = getTupleDesc().getAttrNames();
         }
-        return new QueryResult(false, "");
+        if (attrNames.length != values.length) {
+            return new QueryResult(false,
+                    "The length of attribute must equal to the length of values");
+        } else {
+            HashMap<String, Object> hashMap = new HashMap<>();
+            for (int i=0; i<attrNames.length; i++) {
+                hashMap.put(attrNames[i], values[i]);
+            }
+
+            TupleDesc tupleDesc = getTupleDesc();
+            Tuple tuple = new Tuple(tupleDesc);
+            for (int i=0; i<tupleDesc.numFields(); i++) {
+                TupleDesc.TDItem tdItem = tupleDesc.getField(i);
+                Object value = hashMap.get(tdItem.fieldName);
+                if (value != null) {
+                    tuple.setField(i, Util.getField(value, tdItem.fieldType));
+                } else {
+                    if (tdItem.notNull || tupleDesc.isPrimaryKey(i)) {
+                        return new QueryResult(false, "Attribute " + tdItem.fieldName + " can not be null");
+                    }
+                }
+            }
+            return insertTuple(tuple);
+        }
     }
 
     /**
@@ -93,7 +115,7 @@ public class Table {
         // TODO
         try {
             GlobalManager.getBufferPool().deleteTuple(tuple);
-        } catch (DbException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return new QueryResult(false, "");

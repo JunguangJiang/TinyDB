@@ -9,4 +9,8 @@ public class Util {
     public static Field getField(Object value) {
         return null;
     }
+
+    public static Field getField(Object value, Type type) {
+        return null;
+    }
 }
