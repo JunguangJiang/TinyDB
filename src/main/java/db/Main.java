@@ -13,7 +13,7 @@ import java.io.*;
 public class Main {
     public static void main(String[] args){
         // An example which reads an sql txt and build a parser tree
-        String inFileName = "data/sql.txt";
+        String inFileName = "data/in.sql";
         String outFileName = "data/out.txt";
 
         try{

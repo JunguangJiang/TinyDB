@@ -1,19 +1,24 @@
 package db;
 
 import db.file.DbFile;
+import db.file.Table;
 import db.query.QueryResult;
+import db.tuple.TupleDesc;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.NoSuchElementException;
 
 /**
  * Each database keeps track of multiple tables
  *
  */
 public class Database {
+
     HashMap<String, Integer> nameIdMap;
     HashMap<Integer, Table> idTableMap;
+    private static int id = 0; // Each table has a unique id
+    private String databaseName; // The name of database
 
     Database() {
         nameIdMap = new HashMap<>();
@@ -29,8 +34,15 @@ public class Database {
      * @return
      */
     public QueryResult createTable(String tableName, TupleDesc tupleDesc) {
-        // TODO
-        return new QueryResult(false, "");
+        if (getTable(tableName) != null) {
+            return new QueryResult(false, "Table " + tableName + " already exists.");
+        } else {
+            Table table = new Table(id, tableName, tupleDesc, new File(tableName+".db"));
+            nameIdMap.put(tableName, id);
+            idTableMap.put(id, table);
+            id++;
+            return new QueryResult(true, "Query OK, 0 row affected.");
+        }
     }
 
     /**

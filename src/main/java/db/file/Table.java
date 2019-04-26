@@ -1,6 +1,11 @@
-package db;
+package db.file;
 
-import db.file.*;
+import db.GlobalManager;
+import db.tuple.TDItem;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
+import db.field.TypeMismatch;
+import db.field.Util;
 import db.file.heap.HeapFile;
 import db.query.QueryResult;
 
@@ -89,13 +94,18 @@ public class Table {
 
             TupleDesc tupleDesc = getTupleDesc();
             Tuple tuple = new Tuple(tupleDesc);
+            System.out.println(tupleDesc);
             for (int i=0; i<tupleDesc.numFields(); i++) {
-                TupleDesc.TDItem tdItem = tupleDesc.getField(i);
+                TDItem tdItem = tupleDesc.getField(i);
                 Object value = hashMap.get(tdItem.fieldName);
                 if (value != null) {
-                    tuple.setField(i, Util.getField(value, tdItem.fieldType));
+                    try {
+                        tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen));
+                    } catch (TypeMismatch e) {
+                        return new QueryResult(false, e.toString());
+                    }
                 } else {
-                    if (tdItem.notNull || tupleDesc.isPrimaryKey(i)) {
+                    if (tdItem.notNull || tdItem.isPrimaryKey) {
                         return new QueryResult(false, "Attribute " + tdItem.fieldName + " can not be null");
                     }
                 }
@@ -104,28 +114,27 @@ public class Table {
         }
     }
 
-    /**
-     * delete a Tuple from the Table
-     * must use BufferPool to get Page!
-     * @param tuple
-     * @return the QueryResult of the insert
-     * @see QueryResult
-     */
-    public QueryResult deleteTuple(Tuple tuple) {
-        // TODO
-        try {
-            GlobalManager.getBufferPool().deleteTuple(tuple);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new QueryResult(false, "");
-    }
+//    /**
+//     * delete a Tuple from the Table
+//     * must use BufferPool to get Page!
+//     * @param tuple
+//     * @return the QueryResult of the insert
+//     * @see QueryResult
+//     */
+//    public QueryResult deleteTuple(Tuple tuple) {
+//        // TODO
+//        try {
+//            GlobalManager.getBufferPool().deleteTuple(tuple);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return new QueryResult(false, "");
+//    }
 
     /**
      * @return the iterator over the Table
      */
     public DbFileIterator iterator() {
-        // TODO
-        return null;
+        return dbFile.iterator();
     }
 }

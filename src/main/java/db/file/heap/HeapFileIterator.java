@@ -2,7 +2,7 @@ package db.file.heap;
 
 import db.DbException;
 import db.GlobalManager;
-import db.Tuple;
+import db.tuple.Tuple;
 import db.file.DbFileIterator;
 import db.file.Page;
 import db.file.PageId;

@@ -1,7 +1,5 @@
 package db.field;
 
-import db.Field;
-import db.Type;
 import db.query.ComparisonPredicate;
 
 /**

@@ -1,7 +1,7 @@
 package db.file;
 
 import db.*;
-import db.Tuple;
+import db.tuple.Tuple;
 import db.file.heap.HeapFile;
 
 import java.io.*;

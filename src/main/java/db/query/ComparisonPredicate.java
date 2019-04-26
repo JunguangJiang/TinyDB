@@ -1,7 +1,7 @@
 package db.query;
 
-import db.Field;
-import db.Tuple;
+import db.field.Field;
+import db.tuple.Tuple;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;

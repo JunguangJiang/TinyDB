@@ -1,8 +1,8 @@
 package db.query;
 
 import db.DbException;
-import db.Tuple;
-import db.TupleDesc;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 
 public class Delete extends Operator{
     private static final long serialVersionUID = 1L;

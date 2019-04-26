@@ -1,8 +1,12 @@
 package db.file.heap;
 
 import db.*;
+import db.field.Field;
 import db.file.BufferPool;
 import db.file.Page;
+import db.file.RecordId;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 
 import java.io.*;
 import java.util.ArrayList;

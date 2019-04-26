@@ -1,8 +1,8 @@
 package db.file;
 
 import db.DbException;
-import db.Tuple;
-import db.TupleDesc;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 
 import java.io.IOException;
 import java.util.ArrayList;

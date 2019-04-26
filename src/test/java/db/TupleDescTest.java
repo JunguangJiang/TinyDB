@@ -1,5 +1,8 @@
 package db;
 
+import db.field.Type;
+import db.tuple.TDItem;
+import db.tuple.TupleDesc;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,37 +16,37 @@ public class TupleDescTest {
 
     @Before
     public void setUp() throws Exception {
-        TupleDesc.TDItem[] tdItems1 = new TupleDesc.TDItem[3];
-        tdItems1[0] = new TupleDesc.TDItem(Type.INT_TYPE, "i1", true);
-        tdItems1[1] = new TupleDesc.TDItem(Type.STRING_TYPE, "s1", true, 100);
-        tdItems1[2] = new TupleDesc.TDItem(Type.INT_TYPE, "i2", false);
+        TDItem[] tdItems1 = new TDItem[3];
+        tdItems1[0] = new TDItem(Type.INT_TYPE, "i1", true);
+        tdItems1[1] = new TDItem(Type.STRING_TYPE, "s1", true, 100);
+        tdItems1[2] = new TDItem(Type.INT_TYPE, "i2", false);
         String[] primaryKeys1 = new String []{
                 "i1", "s1"
         };
         tupleDesc1 = new TupleDesc(tdItems1, primaryKeys1);
 
-        TupleDesc.TDItem[] tdItems2 = new TupleDesc.TDItem[3];
-        tdItems2[0] = new TupleDesc.TDItem(Type.INT_TYPE, "i1", true);
-        tdItems2[1] = new TupleDesc.TDItem(Type.STRING_TYPE, "s1", true, 200);
-        tdItems2[2] = new TupleDesc.TDItem(Type.INT_TYPE, "i2", false);
+        TDItem[] tdItems2 = new TDItem[3];
+        tdItems2[0] = new TDItem(Type.INT_TYPE, "i1", true);
+        tdItems2[1] = new TDItem(Type.STRING_TYPE, "s1", true, 200);
+        tdItems2[2] = new TDItem(Type.INT_TYPE, "i2", false);
         String[] primaryKeys2 = new String []{
                 "i1", "i2"
         };
         tupleDesc2 = new TupleDesc(tdItems2, primaryKeys2);
 
-        TupleDesc.TDItem[] tdItems3 = new TupleDesc.TDItem[3];
-        tdItems3[0] = new TupleDesc.TDItem(Type.INT_TYPE, "i1", true);
-        tdItems3[1] = new TupleDesc.TDItem(Type.STRING_TYPE, "s1", true, 200);
-        tdItems3[2] = new TupleDesc.TDItem(Type.INT_TYPE, "i2", false);
+        TDItem[] tdItems3 = new TDItem[3];
+        tdItems3[0] = new TDItem(Type.INT_TYPE, "i1", true);
+        tdItems3[1] = new TDItem(Type.STRING_TYPE, "s1", true, 200);
+        tdItems3[2] = new TDItem(Type.INT_TYPE, "i2", false);
         String[] primaryKeys3 = new String []{
                 "i1", "s1"
         };
         tupleDesc3 = new TupleDesc(tdItems3, primaryKeys3);
 
-        TupleDesc.TDItem[] tdItems4 = new TupleDesc.TDItem[3];
-        tdItems4[0] = new TupleDesc.TDItem(Type.INT_TYPE, "i1", true);
-        tdItems4[1] = new TupleDesc.TDItem(Type.STRING_TYPE, "s1", true, 200);
-        tdItems4[2] = new TupleDesc.TDItem(Type.INT_TYPE, "i2", true);
+        TDItem[] tdItems4 = new TDItem[3];
+        tdItems4[0] = new TDItem(Type.INT_TYPE, "i1", true);
+        tdItems4[1] = new TDItem(Type.STRING_TYPE, "s1", true, 200);
+        tdItems4[2] = new TDItem(Type.INT_TYPE, "i2", true);
         String[] primaryKeys4 = new String []{
                 "i1", "i2"
         };
@@ -96,5 +99,19 @@ public class TupleDescTest {
     public void getPrimaryKeysIndex() {
         assertArrayEquals(tupleDesc1.getPrimaryKeysIndex(), new int[]{0,1});
         assertArrayEquals(tupleDesc2.getPrimaryKeysIndex(), new int[]{0, 2});
+    }
+
+    @Test
+    public void getAttrNames() {
+        String[] attrNames = {
+                "i1", "s1", "i2"
+        };
+        assertArrayEquals(attrNames, tupleDesc1.getAttrNames());
+    }
+
+    @Test
+    public void getPrimaryKeysIndex1() {
+        TupleDesc tupleDesc = new TupleDesc(Utility.getTDItems(3, "wow"), null);
+        assertArrayEquals(tupleDesc.getPrimaryKeysIndex(), new int[0]);
     }
 }

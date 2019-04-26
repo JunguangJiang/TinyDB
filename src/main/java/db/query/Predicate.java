@@ -1,6 +1,6 @@
 package db.query;
 
-import db.Tuple;
+import db.tuple.Tuple;
 
 /**
  * Predicate is used to filter tuples

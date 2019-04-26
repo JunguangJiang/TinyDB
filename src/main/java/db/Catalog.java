@@ -12,9 +12,11 @@ import java.util.HashMap;
  */
 public class Catalog {
     private HashMap<String, File> databaseMap;
+    Database database;// For simplicity, we load a Database in Server rather than a Catalog(should be deprecated later)
 
     public Catalog() {
         databaseMap = new HashMap<>();
+        database = new Database();
     }
 
     /**
@@ -55,7 +57,7 @@ public class Catalog {
      */
     public Database getCurrentDatabase() {
         //TODO
-       return new Database();
+        return database;
     }
 
     /**

@@ -1,9 +1,9 @@
 package db.query;
 
 import db.DbException;
-import db.Table;
-import db.Tuple;
-import db.TupleDesc;
+import db.file.Table;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 
 /**
  * Project is an operator that implements a relational projection.

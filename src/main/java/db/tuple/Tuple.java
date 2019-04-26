@@ -1,6 +1,7 @@
-package db;
+package db.tuple;
 
 import db.field.*;
+import db.file.RecordId;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
@@ -129,14 +130,6 @@ public class Tuple implements Serializable {
     {
         ArrayList<Field> fieldArrayList = new ArrayList<>(Arrays.asList(fields));
         return fieldArrayList.iterator();
-    }
-
-    /**
-     * reset the TupleDesc of this tuple (only affecting the TupleDesc)
-     * */
-    public void resetTupleDesc(TupleDesc td)
-    {
-        tupleDesc = td;
     }
 
     /**

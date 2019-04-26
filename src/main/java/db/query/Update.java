@@ -1,8 +1,8 @@
 package db.query;
 
 import db.DbException;
-import db.Tuple;
-import db.TupleDesc;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 
 /**
  * Project is an operator that implements updating.

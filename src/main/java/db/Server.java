@@ -8,15 +8,21 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import javax.xml.crypto.Data;
 import java.io.*;
 
 public class Server {
+    String sqlPath;
     /**
      *
      * @param sqlPath the sql path where catalog and all the databases are stored in
      */
     public Server(String sqlPath) {
-        load();
+        this.sqlPath = sqlPath;
+        if (!load()) {
+            System.out.println("Can not load " + sqlPath);
+            System.exit(-1);
+        }
     }
 
     /**
@@ -25,7 +31,7 @@ public class Server {
      */
     private boolean load() {
         // TODO
-        return false;
+        return true;
     }
 
     /**

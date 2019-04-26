@@ -1,4 +1,4 @@
-package db;
+package db.field;
 
 import db.query.ComparisonPredicate;
 

@@ -1,103 +1,12 @@
-package db;
+package db.tuple;
 
-import db.Type;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.StringType;
-
-import java.io.DataInputStream;
 import java.io.Serializable;
-import java.sql.Array;
-import java.text.ParseException;
 import java.util.*;
 
 /**
  * TupleDesc describes the schema of a tuple.
  */
 public class TupleDesc implements Serializable {
-
-    /**
-     * A help class to facilitate organizing the information of each field
-     * */
-    public static class TDItem implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        /** The type of the field **/
-        public final db.Type fieldType;
-
-        /** The name of the field **/
-        public final String fieldName;
-
-        /** Can not be Null **/
-        public boolean notNull;
-
-        /** When the Type is String, maxLen is the max length of the String **/
-        public final int maxLen;
-
-        /**
-         * @param type The type of the field
-         * @param name The name of the field
-         * @param notNull Can not be Null
-         * @param maxLen When the Type is String, maxLen is the max length of the String
-         */
-        public TDItem(db.Type type, String name, boolean notNull, int maxLen) {
-            this.fieldName = name;
-            this.fieldType = type;
-            this.notNull = notNull;
-            if (type == Type.STRING_TYPE) {
-                this.maxLen = maxLen;
-            } else {
-                this.maxLen = 0;
-            }
-        }
-
-        public TDItem(db.Type type, String name, boolean notNull) {
-            this(type, name, notNull, 0);
-        }
-
-        /**
-         * @return the number of bytes required to store a field of this type.
-         */
-        public int getBytes() {
-            return fieldType.getBytes() + this.maxLen;
-        }
-
-        public String toString() {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(fieldName + "(" + fieldType);
-            if (fieldType == Type.STRING_TYPE) {
-                stringBuilder.append("(");
-                stringBuilder.append(this.maxLen);
-                stringBuilder.append(")");
-            }
-            if (notNull) {
-                stringBuilder.append(" not null");
-            }
-            stringBuilder.append(")");
-            return stringBuilder.toString();
-        }
-
-        /**
-         * Two TDItems are equal when their
-         *      field type
-         *      notNull
-         *      maxLen (only for StringType)
-         * are same.
-         * @param obj
-         * @return
-         */
-        @Override
-        public boolean equals(Object obj) {
-            TDItem tdItem = (TDItem) obj;
-            boolean equal = (fieldType == tdItem.fieldType)
-                    && (notNull == tdItem.notNull)
-                    && maxLen == tdItem.maxLen;
-            return equal;
-        }
-
-        public Field parse(DataInputStream dis) throws ParseException {
-            return this.fieldType.parse(dis, maxLen);
-        }
-    }
 
     private static final long serialVersionUID = 1L;
     private TDItem[] tdItems;
@@ -120,6 +29,7 @@ public class TupleDesc implements Serializable {
             for(int i=0; i<tdItems.length; i++) {
                 if (primaryKeyList.contains(tdItems[i].fieldName)){
                     primaryKeysIndexList.add(i);
+                    tdItems[i].isPrimaryKey = true;
                 }
             }
             this.primaryKeysIndex = primaryKeysIndexList.stream().mapToInt(i->i).toArray();
@@ -134,7 +44,7 @@ public class TupleDesc implements Serializable {
      *        An iterator which iterates over all the field TDItems
      *        that are included in this TupleDesc
      * */
-    public Iterator<db.TupleDesc.TDItem> iterator() {
+    public Iterator<TDItem> iterator() {
         return Arrays.asList(tdItems).iterator();
     }
 
@@ -195,7 +105,7 @@ public class TupleDesc implements Serializable {
      */
     public int getSize() {
         int size = 0;
-        for (db.TupleDesc.TDItem tdItem : tdItems){
+        for (TDItem tdItem : tdItems){
             size += tdItem.getBytes();
         }
         return size;
@@ -259,14 +169,6 @@ public class TupleDesc implements Serializable {
         return primaryKeysIndex;
     }
 
-    /**
-     * @param i
-     * @return whether the i-th Field is a primary key
-     */
-    public boolean isPrimaryKey(int i) {
-        return Arrays.asList(primaryKeysIndex).contains(i);
-    }
-
     public int hashCode() {
         // If you want to use TupleDesc as keys for HashMap, implement this so
         // that equal objects have equals hashCode() results
@@ -288,6 +190,14 @@ public class TupleDesc implements Serializable {
                 stringBuilder.append(',');
             }
         }
+        stringBuilder.append(" PRIMARY KEY(");
+        for (int i=0; i<primaryKeys.length; i++) {
+            stringBuilder.append(primaryKeys[i]);
+            if (i < primaryKeys.length - 1) {
+                stringBuilder.append(",");
+            }
+        }
+        stringBuilder.append(")");
         return stringBuilder.toString();
     }
 

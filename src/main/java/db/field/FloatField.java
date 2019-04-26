@@ -1,8 +1,5 @@
 package db.field;
 
-import db.Field;
-import db.Type;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 

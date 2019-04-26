@@ -2,6 +2,8 @@ package db.file.heap;
 
 import db.*;
 import db.file.*;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 
 import java.io.File;
 import java.io.IOException;

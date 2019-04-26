@@ -1,6 +1,6 @@
 package db.query;
 
-import db.Tuple;
+import db.tuple.Tuple;
 
 import java.io.Serializable;
 

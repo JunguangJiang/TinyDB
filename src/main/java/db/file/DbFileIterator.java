@@ -1,7 +1,7 @@
 package db.file;
 
 import db.DbException;
-import db.Tuple;
+import db.tuple.Tuple;
 
 import java.util.NoSuchElementException;
 

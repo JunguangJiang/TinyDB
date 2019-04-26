@@ -1,8 +1,8 @@
 package db.query;
 
 import db.DbException;
-import db.Tuple;
-import db.TupleDesc;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,8 +16,8 @@ public class Join extends Operator{
     private OpIterator lhs, rhs;
     private TupleDesc tupleDesc1, tupleDesc2;
     private ComparisonPredicate predicate;
-    private ArrayList<db.Tuple> tuples = new ArrayList<>();
-    private Iterator<db.Tuple> iterator;
+    private ArrayList<Tuple> tuples = new ArrayList<>();
+    private Iterator<Tuple> iterator;
 
     /**
      * A helper class which wraps predicate and rhs in Join.

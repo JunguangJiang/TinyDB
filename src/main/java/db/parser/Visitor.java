@@ -1,10 +1,16 @@
 package db.parser;
 
 import db.*;
+import db.field.Type;
+import db.field.Util;
+import db.file.Table;
 import db.query.*;
 import db.query.Predicate;
+import db.tuple.TDItem;
+import db.tuple.TupleDesc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Visitor extends TinyDBParserBaseVisitor<Object> {
     /**
@@ -129,6 +135,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         long endTime = System.currentTimeMillis();
         double usedTime = (endTime - startTime) / 1000.;
         if (queryResult != null) {
+            if (!queryResult.succeeded()) {
+                output.print(ctx.start.getLine() + ":");
+            }
             output.print(queryResult.getInfo());
             if (queryResult.succeeded()) {
                 output.print(usedTime);
@@ -184,17 +193,17 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     public Object visitCreateTable(TinyDBParser.CreateTableContext ctx){
         String tableName = ctx.tableName().getText();
 
-        ArrayList<TupleDesc.TDItem> tdItemArrayList = new ArrayList<>();
+        ArrayList<TDItem> tdItemArrayList = new ArrayList<>();
         String[] primaryKeys = new String[0];
         for (TinyDBParser.CreateDefinitionContext context : ctx.createDefinition()) {
             Object object = visit(context);
-            if (object instanceof TupleDesc.TDItem) {
-                tdItemArrayList.add((TupleDesc.TDItem)object);
+            if (object instanceof TDItem) {
+                tdItemArrayList.add((TDItem)object);
             } else if (object instanceof String[]){
                 primaryKeys = (String[]) object;
             }
         }
-        TupleDesc.TDItem[] tdItems = tdItemArrayList.toArray(new TupleDesc.TDItem[0]);
+        TDItem[] tdItems = tdItemArrayList.toArray(new TDItem[0]);
         TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKeys);
 
         return GlobalManager.getDatabase().createTable(tableName, tupleDesc);
@@ -207,10 +216,13 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitColumnDeclaration(TinyDBParser.ColumnDeclarationContext ctx) {
-        Type type = (Type) visit(ctx.dataType());
-        String attrName = (String) visit(ctx.attrName());
+        HashMap<String, Object> hashMap = (HashMap<String, Object>) visit(ctx.dataType());
+        Type type = (Type) hashMap.get("type");
+        int maxLen = (int) hashMap.get("maxLen");
+
+        String attrName = ctx.attrName().getText();
         boolean notNull =  (ctx.nullNotnull() != null);
-        return new TupleDesc.TDItem(type, attrName, notNull);
+        return new TDItem(type, attrName, notNull, maxLen);
     }
 
 
@@ -220,19 +232,22 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      *     | (STRING) lengthOneDimension
      *     ;
      * @param ctx
-     * @return Type
+     * @return A HashMap where
+     *          type is the Type of the data
+     *          maxLen is the max length of the data(only for STRING_TYPE)
      */
     @Override
     public Object visitDataType(TinyDBParser.DataTypeContext ctx) {
-        if (ctx.INT() != null) {
-            return Type.INT_TYPE;
-        } else if (ctx.STRING() != null) {
-            return Type.STRING_TYPE;
+        HashMap<String, Object> hashMap = new HashMap<>();
+
+        if (ctx.STRING() != null) {
+            hashMap.put("type", Type.STRING_TYPE);
+            hashMap.put("maxLen", Integer.valueOf(ctx.lengthOneDimension().DECIMAL_LITERAL().getText()));
         } else {
-            // TODO
-            return Type.INT_TYPE;
-//            throw new NotImplementedException();
+            hashMap.put("type", Type.getType(ctx.getText()));
+            hashMap.put("maxLen", 0);
         }
+        return hashMap;
     }
 
     /**
@@ -322,13 +337,13 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             String s = ctx.STRING_LITERAL().getText();
             return s.substring(1, s.length()-1);
         } else if (ctx.decimalLiteral() != null) {
-            Integer integer = Integer.valueOf(ctx.decimalLiteral().getText());
+            Long number = Long.valueOf(ctx.decimalLiteral().getText());
             if (ctx.getChildCount() == 2) {
-                integer = -integer;
+                number = -number;
             }
-            return integer;
+            return number;
         } else {
-            return Float.valueOf(ctx.REAL_LITERAL().getText());
+            return Double.valueOf(ctx.REAL_LITERAL().getText());
         }
     }
 

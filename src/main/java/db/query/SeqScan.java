@@ -1,9 +1,9 @@
 package db.query;
 
 import db.DbException;
-import db.Table;
-import db.Tuple;
-import db.TupleDesc;
+import db.file.Table;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 import db.file.DbFileIterator;
 
 import java.util.NoSuchElementException;

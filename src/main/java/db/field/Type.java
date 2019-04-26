@@ -1,6 +1,5 @@
-package db;
+package db.field;
 
-import db.field.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.DataInputStream;
