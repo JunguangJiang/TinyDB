@@ -46,7 +46,6 @@ public class Table {
     }
 
 
-
     /**
      * insert a new Tuple into the Table.
      * must use BufferPool to get Page!

@@ -39,8 +39,10 @@ public interface DbFile {
      * @return An ArrayList contain the pages that were modified
      * @throws DbException if the tuple cannot be added
      * @throws IOException if the needed file can't be read/written
+     * @throws PKUniqueException if the tuple violates the primary key constraint
+     * @throws NotNullException if the tuple violates the not null constraint
      */
-    public ArrayList<Page> insertTuple(Tuple t) throws DbException, IOException;
+    public ArrayList<Page> insertTuple(Tuple t) throws DbException, IOException, PKUniqueException, NotNullException;
 
     /**
      * Removes the specified tuple from the file
@@ -49,9 +51,11 @@ public interface DbFile {
      *          it is no longer stored on any page.
      * @return An ArrayList contain the pages that were modified
      * @throws DbException if the tuple cannot be deleted or is not a member
+     * @throws PKUniqueException if the tuple violates the primary key constraint
+     * @throws NotNullException if the tuple violates the not null constraint
      *   of the file
      */
-    public ArrayList<Page> deleteTuple(Tuple t) throws DbException, IOException;
+    public ArrayList<Page> deleteTuple(Tuple t) throws DbException, IOException, PKUniqueException, NotNullException;
 
     /**
      * @return an iterator over all the tuples stored in this DbFile.

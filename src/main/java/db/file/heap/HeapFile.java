@@ -104,7 +104,9 @@ public class HeapFile implements DbFile {
      * @see DbFile#insertTuple(Tuple)
      */
     public ArrayList<Page> insertTuple(Tuple t)
-            throws DbException, IOException {
+            throws IOException, PKUniqueException, NotNullException {
+        // TODO Check whether the Tuple satisfies the Primary Key and NotNull constraint
+        //  and throw Exception if necessary
         ArrayList<Page> affectedPages = new ArrayList<>();
         try {
             HeapPage heapPage = (HeapPage)this.getEmptyPage();
@@ -148,12 +150,16 @@ public class HeapFile implements DbFile {
     /**
      * @see DbFile#deleteTuple(Tuple)
      */
-    public ArrayList<Page> deleteTuple(Tuple t) throws DbException {
-        PageId pageId = t.getRecordId().getPageId();
-        HeapPage page = (HeapPage) GlobalManager.getBufferPool().getPage(pageId);
-        page.deleteTuple(t);
+    public ArrayList<Page> deleteTuple(Tuple t) throws IOException, PKUniqueException, NotNullException {
         ArrayList<Page> affectedPages = new ArrayList<>();
-        affectedPages.add(page);
+        try {
+            PageId pageId = t.getRecordId().getPageId();
+            HeapPage page = (HeapPage) GlobalManager.getBufferPool().getPage(pageId);
+            page.deleteTuple(t);
+            affectedPages.add(page);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
         return affectedPages;
     }
 
