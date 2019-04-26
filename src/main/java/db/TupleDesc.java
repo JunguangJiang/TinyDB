@@ -3,8 +3,10 @@ package db;
 import db.Type;
 import jdk.nashorn.internal.runtime.regexp.joni.constants.StringType;
 
+import java.io.DataInputStream;
 import java.io.Serializable;
 import java.sql.Array;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -91,6 +93,10 @@ public class TupleDesc implements Serializable {
                     && maxLen == tdItem.maxLen;
             return equal;
         }
+
+        public Field parse(DataInputStream dis) throws ParseException {
+            return this.fieldType.parse(dis, maxLen);
+        }
     }
 
     private static final long serialVersionUID = 1L;
@@ -141,7 +147,7 @@ public class TupleDesc implements Serializable {
     }
 
     /**
-     * Gets the (possibly null) ith field of this TupleDesc.
+     * Gets the (possibly null) ith TDItem of this TupleDesc.
      *
      * @param i
      *            index of the field to return. It must be a valid index.

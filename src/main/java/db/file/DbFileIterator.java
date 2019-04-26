@@ -6,13 +6,13 @@ import db.Tuple;
 import java.util.NoSuchElementException;
 
 /**
- * DbFileIterator is the iterator interface that all SimpleDB Dbfile should
+ * DbFileIterator is the iterator interface that all TinyDB DbFile should
  * implement.
  */
 public interface DbFileIterator {
     /**
      * Opens the iterator
-     * @throws tinydb.DbException when there are problems opening/accessing the database.
+     * @throws DbException when there are problems opening/accessing the database.
      */
     public void open() throws DbException;
 
@@ -30,7 +30,7 @@ public interface DbFileIterator {
 
     /**
      * Resets the iterator to the start.
-     * @throws tinydb.DbException When rewind is unsupported.
+     * @throws DbException When rewind is unsupported.
      */
     public void rewind() throws DbException;
 
