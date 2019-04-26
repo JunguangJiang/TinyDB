@@ -41,7 +41,11 @@ public class TupleDesc implements Serializable {
             this.fieldName = name;
             this.fieldType = type;
             this.notNull = notNull;
-            this.maxLen = maxLen;
+            if (type == Type.STRING_TYPE) {
+                this.maxLen = maxLen;
+            } else {
+                this.maxLen = 0;
+            }
         }
 
         public TDItem(db.Type type, String name, boolean notNull) {
@@ -52,11 +56,7 @@ public class TupleDesc implements Serializable {
          * @return the number of bytes required to store a field of this type.
          */
         public int getBytes() {
-            if (fieldType == Type.STRING_TYPE) {
-                return this.maxLen + fieldType.getBytes();
-            } else {
-                return fieldType.getBytes();
-            }
+            return fieldType.getBytes() + this.maxLen;
         }
 
         public String toString() {
@@ -86,10 +86,9 @@ public class TupleDesc implements Serializable {
         @Override
         public boolean equals(Object obj) {
             TDItem tdItem = (TDItem) obj;
-            boolean equal = (fieldType == tdItem.fieldType) && (notNull == tdItem.notNull);
-            if (equal && (fieldType == Type.STRING_TYPE)) {
-                equal = (maxLen == tdItem.maxLen);
-            }
+            boolean equal = (fieldType == tdItem.fieldType)
+                    && (notNull == tdItem.notNull)
+                    && maxLen == tdItem.maxLen;
             return equal;
         }
     }

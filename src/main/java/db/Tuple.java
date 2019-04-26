@@ -1,7 +1,6 @@
 package db;
 
-import db.field.IntField;
-import db.field.StringField;
+import db.field.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
@@ -40,10 +39,18 @@ public class Tuple implements Serializable {
                 case INT_TYPE:
                     fields[i] = new IntField(0);
                     break;
+                case LONG_TYPE:
+                    fields[i] = new LongField(0);
+                    break;
+                case FLOAT_TYPE:
+                    fields[i] = new FloatField(0.0f);
+                    break;
+                case DOUBLE_TYPE:
+                    fields[i] = new DoubleField(0.0);
+                    break;
                 case STRING_TYPE:
                     fields[i] = new StringField("", td.getField(i).maxLen);
                     break;
-                // TODO other type
                 default:
                     throw new NotImplementedException();
             }

@@ -10,7 +10,7 @@ import java.text.ParseException;
 import java.util.NoSuchElementException;
 
 /**
- * Class representing a type in SimpleDB.
+ * Class representing a type in TinyDB.
  * Types are static objects defined by this class; hence, the Type
  * constructor is private.
  */
