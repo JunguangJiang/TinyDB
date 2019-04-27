@@ -12,25 +12,26 @@ public class StringField implements Field {
     private static final long serialVersionUID = 1L;
 
     private final String value;
-    private final int maxSize;
+    private final int maxLen;
 
     public String getValue() {
         return value;
     }
+    public int getMaxLen() {return maxLen;}
 
     /**
      * Constructor.
      *
      * @param s
      *            The value of this field.
-     * @param maxSize
+     * @param maxLen
      *            The maximum size of this string
      */
-    public StringField(String s, int maxSize) {
-        this.maxSize = maxSize;
+    public StringField(String s, int maxLen) {
+        this.maxLen = maxLen;
 
-        if (s.length() > maxSize)
-            value = s.substring(0, maxSize);
+        if (s.length() > maxLen)
+            value = s.substring(0, maxLen);
         else
             value = s;
     }
@@ -48,18 +49,18 @@ public class StringField implements Field {
     }
 
     /**
-     * Write this string to dos. Always writes maxSize + 4 bytes to the passed
+     * Write this string to dos. Always writes maxLen + 4 bytes to the passed
      * in dos. First four bytes are string length, next bytes are string, with
-     * remainder padded with 0 to maxSize.
+     * remainder padded with 0 to maxLen.
      *
      * @param dos
      *            Where the string is written
      */
     public void serialize(DataOutputStream dos) throws IOException {
         String s = value;
-        int overflow = maxSize - s.length();
+        int overflow = maxLen - s.length();
         if (overflow < 0) {
-            String news = s.substring(0, maxSize);
+            String news = s.substring(0, maxLen);
             s = news;
         }
         dos.writeInt(s.length());

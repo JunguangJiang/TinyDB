@@ -29,6 +29,12 @@ public class TDItem implements Serializable {
     /** When the Type is String, maxLen is the max length of the String **/
     public final int maxLen;
 
+    /** Used to distinguish same fieldName in the join operation.
+     * Most of the time, tableName is null.
+     * In the join process, the TDItem of different Table will be assigned a different tableName
+     * **/
+    public String tableName;
+
     /**
      * @param type The type of the field
      * @param name The name of the field
@@ -45,6 +51,7 @@ public class TDItem implements Serializable {
             this.maxLen = 0;
         }
         isPrimaryKey = false;
+        tableName = null;
     }
 
     public TDItem(Type type, String name, boolean notNull) {
@@ -89,6 +96,23 @@ public class TDItem implements Serializable {
                 && (notNull == tdItem.notNull)
                 && maxLen == tdItem.maxLen;
         return equal;
+    }
+
+    /**
+     * @param attrName name of attribute
+     * @return whether the TDItem has the given attrName(fieldName)
+     */
+    public boolean hasName(String attrName) {
+        return this.fieldName != null && this.fieldName.equals(attrName);
+    }
+
+    /**
+     * @param tableName name of Table
+     * @param attrName name of attribute
+     * @return whether the TDItem has the given tableName and attrName
+     */
+    public boolean hasName(String tableName, String attrName) {
+        return hasName(attrName) && this.tableName != null && this.tableName.equals(tableName);
     }
 
     public Field parse(DataInputStream dis) throws ParseException {

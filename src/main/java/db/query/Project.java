@@ -1,7 +1,7 @@
 package db.query;
 
 import db.DbException;
-import db.file.Table;
+import db.field.TypeMismatch;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -9,24 +9,15 @@ import db.tuple.TupleDesc;
  * Project is an operator that implements a relational projection.
  */
 public class Project extends Operator{
-    public static class ProjectElement {
-        private Table table = null;
-        private String attrName = null;
-
-        public ProjectElement(Table table, String attrName) {
-            this.table = table;
-            this.attrName = attrName;
-        }
-    }
 
     private static final long serialVersionUID = 1L;
     private OpIterator child;
     private TupleDesc tupleDesc;
-    private ProjectElement[] projectElements;
+    private Attribute[] attributes;
 
-    public Project(ProjectElement[] projectElements, OpIterator child) {
+    public Project(Attribute[] attributes, OpIterator child) {
         this.child = child;
-        this.projectElements = projectElements;
+        this.attributes = attributes;
     }
 
     @Override
@@ -35,7 +26,7 @@ public class Project extends Operator{
     }
 
     @Override
-    public void open() throws DbException {
+    public void open() throws DbException, TypeMismatch {
         super.open();
         child.open();
     }

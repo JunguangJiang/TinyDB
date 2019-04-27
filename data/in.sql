@@ -12,7 +12,7 @@ update myTable set a=0 where b='blob';
 
 create table newTable(a int);
 select myTable.c, newTable.a, d from myTable JOIN newTable ON myTable.a = newTable.a;
-select name from person where ID > 3 and ID < 10;
+select name from person where ID > 3 and ID < 10.1;
 
 drop table myTable;
 drop database dbName;

@@ -28,15 +28,16 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      *
      */
     private class AttributeTable {
+        private HashMap<String, Table> map;
         public AttributeTable() {
-
+            map = new HashMap<>();
         }
 
         /**
          * Clear all the attributes in the AttributeTable.
          */
         public void clear(){
-
+            map.clear();
         }
 
         /**
@@ -44,7 +45,6 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
          * @param tableName
          */
         public void addTable(String tableName){
-
         }
 
         /**
@@ -52,36 +52,24 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
          * @param table
          */
         public void addTable(Table table){
-
+            String[] attrNames = table.getTupleDesc().getAttrNames();
+            for (String attrName : attrNames) {
+                if (map.containsKey(attrName)) { // If two tables has the same attribute,
+                    map.put(attrName, null); // then return null.
+                } else {
+                    map.put(attrName, table);
+                }
+            }
+            table.getTupleDesc().setTableName(table.getName());
         }
 
         /**
          * @param attrName the name of an attribute
-         * @return the Table which an attribute belongs to
+         * @return the Table which an attribute belongs to,
+         *  if the attrName doesn't exist or has more than 1 Table, then return null
          */
         public Table getBelongingTable(String attrName) {
-            return null;
-        }
-
-        public int getIndex(String attrName){
-            return 0;
-        }
-
-        public int getIndex(Table table, String attrName) {
-            return 0;
-        }
-
-        public int getIndex(String tableName, String attrName) {
-            return 0;
-        }
-
-        /**
-         *
-         * @param element (Table, attrName)
-         * @return the position of the element in the joined tuple
-         */
-        public int getIndex(Project.ProjectElement element) {
-            return 0;
+            return map.get(attrName);
         }
     }
 
@@ -368,22 +356,8 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     @Override
     public Object visitComparisonExpressionPredicate(TinyDBParser.ComparisonExpressionPredicateContext ctx) {
         ComparisonPredicate.Op op = (ComparisonPredicate.Op)visit(ctx.comparisonOperator());
-        Object leftObject = visit(ctx.left);
-        Object rightObject = visit(ctx.right);
-        Object lhs, rhs;
-        if (leftObject instanceof Project.ProjectElement) {
-            lhs = attributeTable.getIndex((Project.ProjectElement)leftObject);
-        } else {
-            lhs = Util.getField(leftObject);
-        }
-        if (rightObject instanceof Project.ProjectElement) {
-            rhs = attributeTable.getIndex((Project.ProjectElement)rightObject);
-        } else {
-            rhs = Util.getField(rightObject);
-        }
-        return new ComparisonPredicate(lhs, op, rhs);
+        return new ComparisonPredicate(visit(ctx.left), op, visit(ctx.right));
     }
-
 
     /**
      * fullColumnName
@@ -395,14 +369,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitFullColumnName(TinyDBParser.FullColumnNameContext ctx) {
-        Table table;
+        String tableName = ctx.table().getText();
         String attrName = ctx.attrName().getText();
-        if (ctx.table() != null) {
-            table = (Table) visit(ctx.table());
-        } else {
-            table = attributeTable.getBelongingTable(attrName);
-        }
-        return new Project.ProjectElement(table, attrName);
+        return new Attribute(tableName, attrName);
     }
 
     /**
@@ -420,12 +389,12 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         Predicate predicate = (Predicate) visit(ctx.whereExpr);
         Filter filter = new Filter(predicate, join);
 
-        ArrayList<Project.ProjectElement> projectElements = new ArrayList<>();
+        ArrayList<Attribute> projectElements = new ArrayList<>();
         for(TinyDBParser.FullColumnNameContext context : ctx.fullColumnName()) {
-            projectElements.add((Project.ProjectElement) visit(context));
+            projectElements.add((Attribute) visit(context));
         }
 
-        Project project = new Project(projectElements.toArray(new Project.ProjectElement[0]),
+        Project project = new Project(projectElements.toArray(new Attribute[0]),
                 (OpIterator) filter);
         Query query = new Query(project);
         return query.execute();

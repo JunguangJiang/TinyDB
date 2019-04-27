@@ -112,4 +112,12 @@ public class Database {
     public void load(String databaseScriptFile) {
         // TODO
     }
+
+    /**
+     * write the tables of the database back to the file
+     * @param databaseScriptFile
+     */
+    public void persist(String databaseScriptFile) {
+        // TODO
+    }
 }

@@ -1,6 +1,7 @@
 package db.query;
 
 import db.DbException;
+import db.field.TypeMismatch;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -20,7 +21,7 @@ public interface OpIterator extends Serializable{
      * Opens the iterator. This must be called before any of the other methods.
      * @throws DbException when there are problems opening/accessing the database.
      */
-    public void open() throws DbException;
+    public void open() throws DbException, TypeMismatch;
 
     /** Returns true if the iterator has more tuples.
      * @return true if the iterator has more tuples.

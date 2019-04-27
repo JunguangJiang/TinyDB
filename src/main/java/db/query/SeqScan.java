@@ -1,6 +1,7 @@
 package db.query;
 
 import db.DbException;
+import db.field.TypeMismatch;
 import db.file.Table;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;

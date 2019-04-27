@@ -9,8 +9,19 @@ public class Util {
      * @return
      */
     public static Field getField(Object value) {
-        // TODO
-        return null;
+        if (value instanceof Integer) {
+            return new IntField((int)value);
+        } else if (value instanceof Long) {
+            return new LongField((long)value);
+        } else if (value instanceof Float) {
+            return new FloatField((float)value);
+        } else if (value instanceof Double) {
+            return new DoubleField((double)value);
+        } else if (value instanceof String) {
+            return new StringField((String)value, ((String)value).length());
+        } else {
+            throw new NotImplementedException();
+        }
     }
 
     /**
@@ -29,6 +40,15 @@ public class Util {
                 case LONG_TYPE:
                     return new LongField((long)value);
                 default:
+                    throw new TypeMismatch(Type.LONG_TYPE, type);
+            }
+        } else if (value instanceof Integer) {
+            switch (type) {
+                case INT_TYPE:
+                    return new IntField((int)value);
+                case LONG_TYPE:
+                    return new LongField(((Integer) value).longValue());
+                default:
                     throw new TypeMismatch(Type.INT_TYPE, type);
             }
         } else if (value instanceof Double) {
@@ -37,6 +57,15 @@ public class Util {
                     return new FloatField(((Double) value).floatValue());
                 case DOUBLE_TYPE:
                     return new DoubleField((double)value);
+                default:
+                    throw new TypeMismatch(Type.DOUBLE_TYPE, type);
+            }
+        } else if (value instanceof Float) {
+            switch (type) {
+                case FLOAT_TYPE:
+                    return new FloatField((float)value);
+                case DOUBLE_TYPE:
+                    return new DoubleField(((Float) value).doubleValue());
                 default:
                     throw new TypeMismatch(Type.FLOAT_TYPE, type);
             }

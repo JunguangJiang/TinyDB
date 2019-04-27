@@ -13,6 +13,7 @@ import java.util.HashMap;
 public class Catalog {
     private HashMap<String, File> databaseMap;
     Database database;// For simplicity, we load a Database in Server rather than a Catalog(should be deprecated later)
+    String catalogFileName;
 
     public Catalog() {
         databaseMap = new HashMap<>();
@@ -70,9 +71,18 @@ public class Catalog {
 
     /**
      * load names of all the databases from file
-     * @param catalogFile
+     * @param catalogFileName file name
      */
-    public void load(String catalogFile) {
+    public void load(String catalogFileName) {
+        this.catalogFileName = catalogFileName;
         // TODO
+
+    }
+
+    /**
+     * write names of all the databases back to file
+     */
+    public void persist() {
+       // TODO
     }
 }

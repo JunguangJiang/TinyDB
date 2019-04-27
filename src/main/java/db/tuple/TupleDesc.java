@@ -91,12 +91,38 @@ public class TupleDesc implements Serializable {
      */
     public int fieldNameToIndex(String name) throws NoSuchElementException {
         for(int i=0; i<tdItems.length; i++){
-            String fieldName = tdItems[i].fieldName;
-            if (fieldName != null && fieldName.equals(name)){
+            if (tdItems[i].hasName(name)) {
                 return i;
             }
         }
         throw new NoSuchElementException(String.format("name %s", name));
+    }
+
+    /**
+     *  Find the index of the field with a given tableName and attrName.
+     * @param tableName name of the Table
+     * @param attrName name of the Attribute
+     * @return the index of the field that is first to have the given tableName and attrName.
+     * @throws NoSuchElementException
+     *          if no field with a matching name is found
+     */
+    public int fieldNameToIndex(String tableName, String attrName) throws NoSuchElementException {
+        for (int i=0; i<tdItems.length; i++) {
+            if (tdItems[i].hasName(tableName, attrName)) {
+                return i;
+            }
+        }
+        throw new NoSuchElementException(String.format("table %s attribute %s", tableName, attrName));
+    }
+
+    /**
+     * set the tableName of all the tdItems, which can distinguish TDItem after the join operation.
+     * @param tableName
+     */
+    public void setTableName(String tableName) {
+        for (int i=0; i<tdItems.length; i++) {
+            tdItems[i].tableName = tableName;
+        }
     }
 
     /**

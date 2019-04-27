@@ -1,7 +1,11 @@
 package db.query;
 
 import db.field.Field;
+import db.field.StringField;
+import db.field.TypeMismatch;
+import db.field.Util;
 import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
@@ -14,6 +18,9 @@ public class ComparisonPredicate extends Predicate implements Serializable {
     private static final long serialVersionUID = 1L;
     private Op op;
     private Object lhs, rhs;
+    private boolean preprocessed = false;
+    private int leftIdx=-1, rightIdx=-1;
+    private Field leftVal=null, rightVal=null;
 
     /**
      * If lhs is an int, it refers to the attribute index in a tuple.
@@ -30,18 +37,61 @@ public class ComparisonPredicate extends Predicate implements Serializable {
     }
 
     /**
+     * When the ComparisonPredicate meets a tuple for the first time,
+     * it should decide the leftIdx, rightIdx, leftVal, rightVal based on the tuple.
+     * The preprocess would only happen for one time.
+     *
+     * If lhs is (tableName, attrName), then we can find leftIdx from TupleDesc,
+     * Else we could get the most likely Field leftVal for lhs.
+     * @param tuple
+     * @throws TypeMismatch
+     */
+    private void preprocess(Tuple tuple) throws TypeMismatch {
+        if (preprocessed) {
+            return;
+        }
+        TupleDesc tupleDesc = tuple.getTupleDesc();
+        if (lhs instanceof Attribute) {
+            Attribute attribute = (Attribute)lhs;
+            leftIdx = tupleDesc.fieldNameToIndex(attribute.tableName, attribute.attrName);
+        }
+        if (rhs instanceof Attribute) {
+            Attribute attribute = (Attribute)rhs;
+            rightIdx = tupleDesc.fieldNameToIndex(attribute.tableName, attribute.attrName);
+        }
+        if (!(lhs instanceof Attribute)) {
+            if (rightIdx >= 0) {
+                leftVal = Util.getField(lhs, tupleDesc.getField(rightIdx).fieldType,
+                        tupleDesc.getField(rightIdx).maxLen);
+            } else {
+                leftVal = Util.getField(lhs);
+            }
+        }
+        if (!(rhs instanceof Attribute)) {
+            if (leftIdx >= 0) {
+                rightVal = Util.getField(rhs, tupleDesc.getField(leftIdx).fieldType,
+                        tupleDesc.getField(leftIdx).maxLen);
+            } else {
+                rightVal = Util.getField(rhs);
+                if (leftVal.getType() != rightVal.getType()) {
+                    throw new TypeMismatch(leftVal.getType(), rightVal.getType());
+                }
+            }
+        }
+        preprocessed=true;
+    }
+
+    /**
      * @param tuple
      * @return
      *      If lhs is an index, return the corresponding Field in the tuple,
      *      otherwise return the const Field value.
      */
-    public Field getLeft(Tuple tuple) {
-        if (this.lhs instanceof Field){
-            return (Field)this.lhs;
-        } else if (this.lhs instanceof Integer){
-            return tuple.getField((int)this.lhs);
+    private Field getLeft(Tuple tuple) {
+        if (leftIdx >= 0) {
+            return tuple.getField(leftIdx);
         } else {
-            throw new NotImplementedException();
+            return leftVal;
         }
     }
 
@@ -51,13 +101,11 @@ public class ComparisonPredicate extends Predicate implements Serializable {
      *      If rhs is an index, return the corresponding Field in the tuple,
      *      otherwise return the const Field value.
      */
-    public Field getRight(Tuple tuple) {
-        if (this.rhs instanceof Field){
-            return (Field)this.rhs;
-        } else if (this.rhs instanceof Integer){
-            return tuple.getField((int)this.rhs);
+    private Field getRight(Tuple tuple) {
+        if (rightIdx >= 0) {
+            return tuple.getField(rightIdx);
         } else {
-            throw new NotImplementedException();
+            return rightVal;
         }
     }
 
@@ -100,7 +148,8 @@ public class ComparisonPredicate extends Predicate implements Serializable {
      * @return true if the comparison is true, false otherwise.
      */
     @Override
-    public boolean filter(Tuple tuple) {
+    public boolean filter(Tuple tuple) throws TypeMismatch{
+        preprocess(tuple);
         return this.getLeft(tuple).compare(op, this.getRight(tuple));
     }
 

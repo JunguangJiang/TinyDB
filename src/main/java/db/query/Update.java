@@ -1,6 +1,7 @@
 package db.query;
 
 import db.DbException;
+import db.field.TypeMismatch;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -23,7 +24,7 @@ public class Update extends Operator{
     }
 
     @Override
-    public void open() throws DbException {
+    public void open() throws DbException, TypeMismatch {
         super.open();
     }
 

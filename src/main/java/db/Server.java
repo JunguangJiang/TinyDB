@@ -19,19 +19,31 @@ public class Server {
      */
     public Server(String sqlPath) {
         this.sqlPath = sqlPath;
-        if (!load()) {
+        if (!open()) {
             System.out.println("Can not load " + sqlPath);
             System.exit(-1);
         }
     }
 
     /**
-     * load the catalog into the memory
+     * Open the Server:
+     *      load the Catalog into the memory (call GlobalManager.getCatalog().open(sqlPath))
+     *      load the default Database
      * @return whether the loading is successful
      */
-    private boolean load() {
+    public boolean open() {
         // TODO
         return true;
+    }
+
+    /**
+     * Close the Server:
+     *      write the Catalog back to the disk (call GlobalManager.getCatalog().close())
+     *      write the current Database to the disk
+     *      flush the BufferPool
+     */
+    public void close() {
+        // TODO
     }
 
     /**
