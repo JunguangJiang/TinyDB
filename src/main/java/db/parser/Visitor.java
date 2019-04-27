@@ -369,8 +369,13 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitFullColumnName(TinyDBParser.FullColumnNameContext ctx) {
-        String tableName = ctx.table().getText();
         String attrName = ctx.attrName().getText();
+        String tableName;
+        if (ctx.table() != null) {
+            tableName = ctx.table().getText();
+        } else {
+            tableName = attributeTable.getBelongingTable(attrName).getName();
+        }
         return new Attribute(tableName, attrName);
     }
 

@@ -30,6 +30,7 @@ public class Table {
      * @param file the disk File that the Table is stored in
      */
     public Table(Integer id, String name, TupleDesc tupleDesc, File file) {
+        this.id = id;
         this.dbFile = new HeapFile(id, file, tupleDesc);
         this.name = name;
     }

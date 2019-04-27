@@ -17,7 +17,6 @@ public class StringField implements Field {
     public String getValue() {
         return value;
     }
-    public int getMaxLen() {return maxLen;}
 
     /**
      * Constructor.
@@ -60,8 +59,7 @@ public class StringField implements Field {
         String s = value;
         int overflow = maxLen - s.length();
         if (overflow < 0) {
-            String news = s.substring(0, maxLen);
-            s = news;
+            s = s.substring(0, maxLen);
         }
         dos.writeInt(s.length());
         dos.writeBytes(s);
