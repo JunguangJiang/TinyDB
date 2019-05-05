@@ -1,5 +1,8 @@
 package db.field;
 
+import db.tuple.TDItem;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Util {
@@ -78,5 +81,16 @@ public class Util {
         } else {
             throw new NotImplementedException();
         }
+    }
+
+    public static Tuple getCountTuple(int count, String name) {
+        TDItem[] tdItems = {
+                new TDItem(Type.INT_TYPE, name, false)
+        };
+        TupleDesc tupleDesc = new TupleDesc(tdItems, null);
+        Tuple tuple = new Tuple(tupleDesc);
+        Field field = new IntField(count);
+        tuple.setField(0, field);
+        return tuple;
     }
 }

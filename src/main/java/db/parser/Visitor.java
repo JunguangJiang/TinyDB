@@ -2,11 +2,13 @@ package db.parser;
 
 import db.*;
 import db.field.Type;
+import db.field.TypeMismatch;
 import db.field.Util;
 import db.file.Table;
 import db.query.*;
 import db.query.Predicate;
 import db.tuple.TDItem;
+import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -439,7 +441,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
         Project project = new Project(projectElements.toArray(new Attribute[0]), filter);
         Query query = new Query(project);
-        return query.execute();
+        return query.executeSelect();
     }
 
     /**
@@ -522,12 +524,11 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         OpIterator opIterator = new SeqScan(table);
         if (ctx.predicate() != null) {
             Predicate predicate = (Predicate) visit(ctx.predicate());
-            opIterator = (OpIterator) (new Filter(predicate, opIterator));
+            opIterator = new Filter(predicate, opIterator);
         }
         Delete delete = new Delete(opIterator);
-        return new QueryResult(false, "");
-//        Query query = new Query((OpIterator) delete);
-//        return query.execute();
+        Query query = new Query(delete);
+        return query.executeDeleteOrUpdate();
     }
 
     /**
@@ -549,10 +550,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         for (TinyDBParser.UpdatedElementContext context : ctx.updatedElement()) {
             updateElements.add((Update.UpdateElement)visit(context));
         }
-        Update update = new Update((OpIterator)filter, updateElements.toArray(new Update.UpdateElement[0]));
-        return new QueryResult(false, "");
-//        Query query = new Query((OpIterator)update);
-//        return query.execute();
+        Update update = new Update(filter, updateElements.toArray(new Update.UpdateElement[0]));
+        Query query = new Query(update);
+        return query.executeDeleteOrUpdate();
     }
 
     /**

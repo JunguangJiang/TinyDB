@@ -152,7 +152,7 @@ public class HeapFile implements DbFile {
     /**
      * @see DbFile#deleteTuple(Tuple)
      */
-    public ArrayList<Page> deleteTuple(Tuple t) throws IOException {
+    public ArrayList<Page> deleteTuple(Tuple t) {
         ArrayList<Page> affectedPages = new ArrayList<>();
         try {
             PageId pageId = t.getRecordId().getPageId();

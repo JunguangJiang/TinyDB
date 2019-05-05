@@ -20,7 +20,7 @@ public class Query {
         this.root = root;
     }
 
-    public QueryResult execute() {
+    public QueryResult executeSelect() {
         try {
             this.root.open();
             ArrayList<String> resultList = new ArrayList<>();
@@ -48,6 +48,20 @@ public class Query {
             return new QueryResult(false, e.toString());
         } finally {
             this.root.close();
+        }
+    }
+
+    public QueryResult executeDeleteOrUpdate() {
+        try {
+            root.open();
+            Tuple tuple = root.next();
+            root.close();
+            return new QueryResult(true, "Query OK, " + tuple.getField(0).toString() + " rows affected.");
+        } catch (DbException e){
+            e.printStackTrace();
+            return new QueryResult(false, e.toString());
+        } catch (TypeMismatch e) {
+            return new QueryResult(false, e.toString());
         }
     }
 
