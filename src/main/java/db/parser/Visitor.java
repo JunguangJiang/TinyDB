@@ -3,12 +3,10 @@ package db.parser;
 import db.*;
 import db.field.Type;
 import db.field.TypeMismatch;
-import db.field.Util;
 import db.file.Table;
 import db.query.*;
 import db.query.Predicate;
 import db.tuple.TDItem;
-import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -550,9 +548,13 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         for (TinyDBParser.UpdatedElementContext context : ctx.updatedElement()) {
             updateElements.add((Update.UpdateElement)visit(context));
         }
-        Update update = new Update(filter, updateElements.toArray(new Update.UpdateElement[0]));
-        Query query = new Query(update);
-        return query.executeDeleteOrUpdate();
+        try {
+            Update update = new Update(filter, updateElements.toArray(new Update.UpdateElement[0]));
+            Query query = new Query(update);
+            return query.executeDeleteOrUpdate();
+        } catch (TypeMismatch e) {
+            return new QueryResult(false, e.toString());
+        }
     }
 
     /**

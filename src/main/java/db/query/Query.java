@@ -1,14 +1,12 @@
 package db.query;
 
+import com.github.freva.asciitable.AsciiTable;
 import db.DbException;
-import db.field.Field;
 import db.field.TypeMismatch;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
-
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Only used for select
@@ -20,27 +18,33 @@ public class Query {
         this.root = root;
     }
 
+    /**
+     * execute the select operation
+     * @return the result String of select query
+     */
     public QueryResult executeSelect() {
         try {
             this.root.open();
-            ArrayList<String> resultList = new ArrayList<>();
             // add tuple desc to the result
             TupleDesc tupleDesc = root.getTupleDesc();
-            Iterator<TDItem> iterator = tupleDesc.iterator();
-            while (iterator.hasNext()) {
-                TDItem tdItem = iterator.next();
-                resultList.add(tdItem.tableName + "." +tdItem.fieldName);
+            String[] header = new String[tupleDesc.numFields()];
+            for (int i=0; i<tupleDesc.numFields(); i++) {
+                TDItem tdItem = tupleDesc.getField(i);
+                header[i] = tdItem.tableName + "." +tdItem.fieldName;
             }
+
             // add tuples to the result
+            ArrayList<String[]> data = new ArrayList<>();
             while (root.hasNext()) {
                 Tuple tuple = root.next();
-                System.out.println(tuple.toString());
-                Iterator<Field> fieldIterator = tuple.fields();
-                while (fieldIterator.hasNext()) {
-                    resultList.add(fieldIterator.next().toString());
+                String[] body = new String[tupleDesc.numFields()];
+                for (int i=0; i<tupleDesc.numFields(); i++) {
+                    body[i] = tuple.getField(i).toString();
                 }
+                data.add(body);
             }
-            return new QueryResult(true, format(resultList, tupleDesc.numFields()));
+            String result = AsciiTable.getTable(header, data.toArray(new String[0][]));
+            return new QueryResult(true, result);
         } catch (DbException e){
             e.printStackTrace();
             return new QueryResult(false, e.toString());
@@ -51,6 +55,10 @@ public class Query {
         }
     }
 
+    /**
+     * execute the delete or update operation
+     * @return the result String of the operation
+     */
     public QueryResult executeDeleteOrUpdate() {
         try {
             root.open();
@@ -63,19 +71,5 @@ public class Query {
         } catch (TypeMismatch e) {
             return new QueryResult(false, e.toString());
         }
-    }
-
-    private String format(ArrayList<String> list, int len) {
-        StringBuilder formatedString = new StringBuilder();
-        int i = 0;
-        for (String s : list) {
-            formatedString.append(s);
-            formatedString.append("\t");
-            i += 1;
-            if (i % len == 0) {
-                formatedString.append(System.lineSeparator());
-            }
-        }
-        return formatedString.toString();
     }
 }

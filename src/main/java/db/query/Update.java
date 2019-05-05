@@ -2,6 +2,7 @@ package db.query;
 
 import db.DbException;
 import db.GlobalManager;
+import db.field.Field;
 import db.field.TypeMismatch;
 import db.field.Util;
 import db.tuple.TDItem;
@@ -9,9 +10,14 @@ import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
 /**
- * Project is an operator that implements updating.
+ * Update is an operator that implements updating.
  */
 public class Update extends Operator{
+
+    /**
+     * For sql "set attribute=value",
+     * we have UpdateElement(attribute, value)
+     */
     public static class UpdateElement {
         public String attribute;
         public Object value;
@@ -20,20 +26,21 @@ public class Update extends Operator{
             this.value = value;
         }
     }
+
     private static final long serialVersionUID = 1L;
     private OpIterator child;
-    private UpdateElement[] updateElements;
-    private int indexes[];
-    private Object values[];
+    private int indexes[]; //index of the attributes that needs updating
+    private Field fields[]; //the corresponding updating fields
 
-    public Update(OpIterator child, UpdateElement[] updateElements) {
+    public Update(OpIterator child, UpdateElement[] updateElements) throws TypeMismatch{
         this.child = child;
         this.indexes = new int[updateElements.length];
-        this.values = new Object[updateElements.length];
+        this.fields = new Field[updateElements.length];
         TupleDesc tupleDesc = child.getTupleDesc();
         for (int i=0; i<updateElements.length; i++){
             this.indexes[i] = tupleDesc.fieldNameToIndex(updateElements[i].attribute);
-            this.values[i] = updateElements[i].value;
+            TDItem tdItem = tupleDesc.getField(indexes[i]);
+            this.fields[i] = Util.getField(updateElements[i].value, tdItem.fieldType, tdItem.maxLen);
         }
     }
 
@@ -69,10 +76,8 @@ public class Update extends Operator{
             int tableid = tuple.getRecordId().getPageId().getTableId();
             GlobalManager.getBufferPool().deleteTuple(tuple);
 
-            TupleDesc tupleDesc = tuple.getTupleDesc();
             for (int i=0; i<indexes.length; i++){
-                TDItem tdItem = tupleDesc.getField(i);
-                tuple.setField(indexes[i], Util.getField(values[i], tdItem.fieldType, tdItem.maxLen));
+                tuple.setField(indexes[i], fields[i]);
             }
             try {
                 GlobalManager.getBufferPool().insertTuple(tableid, tuple);

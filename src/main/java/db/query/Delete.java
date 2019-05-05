@@ -2,11 +2,7 @@ package db.query;
 
 import db.DbException;
 import db.GlobalManager;
-import db.field.Field;
-import db.field.IntField;
-import db.field.Type;
-import db.field.TypeMismatch;
-import db.tuple.TDItem;
+import db.field.*;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -27,10 +23,6 @@ public class Delete extends Operator{
     public Delete(OpIterator child) {
         this.fetched = false;
         this.child = child;
-        TDItem[] tdItems = {
-                new TDItem(Type.INT_TYPE, "number of deleted records", false)
-        };
-        tupleDesc = new TupleDesc(tdItems, null);
     }
 
     @Override
@@ -63,7 +55,6 @@ public class Delete extends Operator{
      */
     @Override
     protected Tuple fetchNext() throws DbException, TypeMismatch {
-        Tuple tuple = new Tuple(tupleDesc);
         int count = 0;
         if (fetched) {
            return null;
@@ -74,10 +65,8 @@ public class Delete extends Operator{
                 GlobalManager.getBufferPool().deleteTuple(c);
                 count++;
             }
-            Field field = new IntField(count);
-            tuple.setField(0, field);
+            return Util.getCountTuple(count, "delete count");
         }
-        return tuple;
     }
 
     @Override

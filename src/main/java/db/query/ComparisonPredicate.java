@@ -1,13 +1,10 @@
 package db.query;
 
 import db.field.Field;
-import db.field.StringField;
 import db.field.TypeMismatch;
 import db.field.Util;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.Serializable;
 
 /**

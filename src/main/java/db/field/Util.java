@@ -83,6 +83,12 @@ public class Util {
         }
     }
 
+    /**
+     * Create a new tuple which represents operation affecting the table
+     * @param count the rows affected
+     * @param name the name of the operation
+     * @return
+     */
     public static Tuple getCountTuple(int count, String name) {
         TDItem[] tdItems = {
                 new TDItem(Type.INT_TYPE, name, false)
