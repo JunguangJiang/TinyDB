@@ -6,6 +6,7 @@ import db.query.QueryResult;
 import db.tuple.TupleDesc;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -37,7 +38,16 @@ public class Database {
         if (getTable(tableName) != null) {
             return new QueryResult(false, "Table " + tableName + " already exists.");
         } else {
-            Table table = new Table(id, tableName, tupleDesc, new File(tableName+".db"));
+            // TODO currently we create file in the same directory,
+            //  we need to create file in a tree structure
+            File file = new File(tableName + ".db");
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Table table = new Table(id, tableName, tupleDesc, file);
             nameIdMap.put(tableName, id);
             idTableMap.put(id, table);
             id++;
@@ -53,7 +63,13 @@ public class Database {
      */
     public QueryResult dropTable(String tableName) {
         // TODO
-        return new QueryResult(false, "");
+        Table table = this.getTable(tableName);
+        if (table == null) {
+            return new QueryResult(false, "Table " + tableName + " doesn't exist.");
+        } else {
+            table.file.delete();
+            return new QueryResult(true, "Query OK, 0 row affected.");
+        }
     }
 
     /**

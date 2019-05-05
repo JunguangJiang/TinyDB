@@ -22,6 +22,7 @@ public class Table {
     private DbFile dbFile;
     private Integer id;
     private String name;
+    public File file;
 
     /**
      * @param id
@@ -33,6 +34,7 @@ public class Table {
         this.id = id;
         this.dbFile = new HeapFile(id, file, tupleDesc);
         this.name = name;
+        this.file = file;
     }
 
     public DbFile getDbFile() {

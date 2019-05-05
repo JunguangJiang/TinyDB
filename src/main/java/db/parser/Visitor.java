@@ -8,6 +8,7 @@ import db.query.*;
 import db.query.Predicate;
 import db.tuple.TDItem;
 import db.tuple.TupleDesc;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -348,6 +349,38 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         return new LogicalPredicate(left, op, right);
     }
 
+    @Override
+    public Object visitLogicalOperator(TinyDBParser.LogicalOperatorContext ctx) {
+        String text = ctx.getText();
+        if (text.equals("AND") || text.equals("&&")){
+            return LogicalPredicate.Op.AND;
+        } else if (text.equals("OR") || text.equals("||")) {
+            return LogicalPredicate.Op.OR;
+        } else {
+            throw new NotImplementedException();
+        }
+    }
+
+    @Override
+    public Object visitComparisonOperator(TinyDBParser.ComparisonOperatorContext ctx) {
+        String text = ctx.getText();
+        if (text.equals("=")){
+            return ComparisonPredicate.Op.EQUALS;
+        } else if (text.equals(">")) {
+            return ComparisonPredicate.Op.GREATER_THAN;
+        } else if (text.equals("<")) {
+            return ComparisonPredicate.Op.LESS_THAN;
+        } else if (text.equals("<=")) {
+            return ComparisonPredicate.Op.LESS_THAN_OR_EQ;
+        } else if (text.equals(">=")) {
+            return ComparisonPredicate.Op.GREATER_THAN_OR_EQ;
+        } else if (text.equals("<>") || text.equals("!=")) {
+            return ComparisonPredicate.Op.NOT_EQUALS;
+        } else {
+            throw new NotImplementedException();
+        }
+    }
+
     /**
      * #comparisonExpressionPredicate := left=expressionAtom comparisonOperator right=expressionAtom
      * @param ctx
@@ -391,16 +424,20 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         // A simple query plan without optimization
         OpIterator join = (OpIterator) visit(ctx.tableSources());
         // After we visit table sources, we have attributeTable ready to look up.
-        Predicate predicate = (Predicate) visit(ctx.whereExpr);
-        Filter filter = new Filter(predicate, join);
+        OpIterator filter;
+        if (ctx.whereExpr != null) {
+            Predicate predicate = (Predicate) visit(ctx.whereExpr);
+            filter = new Filter(predicate, join);
+        } else {
+            filter = join;
+        }
 
         ArrayList<Attribute> projectElements = new ArrayList<>();
         for(TinyDBParser.FullColumnNameContext context : ctx.fullColumnName()) {
             projectElements.add((Attribute) visit(context));
         }
 
-        Project project = new Project(projectElements.toArray(new Attribute[0]),
-                (OpIterator) filter);
+        Project project = new Project(projectElements.toArray(new Attribute[0]), filter);
         Query query = new Query(project);
         return query.execute();
     }
@@ -448,8 +485,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     public Object visitTableSourceBase(TinyDBParser.TableSourceBaseContext ctx) {
         Table table = (Table) visit(ctx.table());
         this.attributeTable.addTable(table);
-        SeqScan seqScan = new SeqScan(table);
-        OpIterator opIterator = seqScan;
+        OpIterator opIterator = new SeqScan(table);
         for (TinyDBParser.JoinPartContext context : ctx.joinPart()) {
             Join.JoinPart joinPart = (Join.JoinPart)visit(context);
             opIterator = new Join(opIterator, joinPart);
@@ -489,8 +525,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             opIterator = (OpIterator) (new Filter(predicate, opIterator));
         }
         Delete delete = new Delete(opIterator);
-        Query query = new Query((OpIterator) delete);
-        return query.execute();
+        return new QueryResult(false, "");
+//        Query query = new Query((OpIterator) delete);
+//        return query.execute();
     }
 
     /**
@@ -513,8 +550,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             updateElements.add((Update.UpdateElement)visit(context));
         }
         Update update = new Update((OpIterator)filter, updateElements.toArray(new Update.UpdateElement[0]));
-        Query query = new Query((OpIterator)update);
-        return query.execute();
+        return new QueryResult(false, "");
+//        Query query = new Query((OpIterator)update);
+//        return query.execute();
     }
 
     /**

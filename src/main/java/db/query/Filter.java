@@ -10,6 +10,8 @@ import db.tuple.TupleDesc;
  */
 public class Filter extends Operator{
     private static final long serialVersionUID = 1L;
+    private Predicate predicate;
+    private OpIterator child;
 
     /**
      * Constructor accepts a predicate to apply and a child operator to read
@@ -21,27 +23,30 @@ public class Filter extends Operator{
      *            The child operator
      */
     public Filter(Predicate predicate, OpIterator child) {
-
+        this.predicate = predicate;
+        this.child = child;
     }
 
     @Override
     public TupleDesc getTupleDesc() {
-        return null;
+        return child.getTupleDesc();
     }
 
     @Override
     public void open() throws DbException, TypeMismatch {
+        child.open();
         super.open();
     }
 
     @Override
     public void close() {
         super.close();
+        child.close();
     }
 
     @Override
     public void rewind() throws DbException {
-
+        child.rewind();
     }
 
     /**
@@ -53,17 +58,23 @@ public class Filter extends Operator{
      *         more tuples
      */
     @Override
-    protected Tuple fetchNext() throws DbException {
+    protected Tuple fetchNext() throws DbException, TypeMismatch {
+        while (child.hasNext()) {
+            Tuple tuple = child.next();
+            if (this.predicate.filter(tuple)) {
+                return tuple;
+            }
+        }
         return null;
     }
 
     @Override
     public OpIterator[] getChildren() {
-        return new OpIterator[0];
+        return new OpIterator[]{child};
     }
 
     @Override
     public void setChildren(OpIterator[] children) {
-
+        child = children[0];
     }
 }

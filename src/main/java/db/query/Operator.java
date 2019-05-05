@@ -17,7 +17,7 @@ public abstract class Operator implements OpIterator{
     private Tuple next = null;
     private boolean open = false;
 
-    public boolean hasNext() throws DbException {
+    public boolean hasNext() throws DbException, TypeMismatch {
         if (!this.open)
             throw new IllegalStateException("Operator not yet open");
 
@@ -27,7 +27,7 @@ public abstract class Operator implements OpIterator{
     }
 
     public Tuple next() throws DbException,
-            NoSuchElementException {
+            NoSuchElementException, TypeMismatch {
         if (next == null) {
             next = fetchNext();
             if (next == null)
@@ -47,7 +47,7 @@ public abstract class Operator implements OpIterator{
      * @return the next Tuple in the iterator, or null if the iteration is
      *         finished.
      */
-    protected abstract Tuple fetchNext() throws DbException;
+    protected abstract Tuple fetchNext() throws DbException, TypeMismatch;
 
     /**
      * Closes this iterator. If overridden by a subclass, they should call

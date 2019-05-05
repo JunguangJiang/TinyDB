@@ -27,7 +27,7 @@ public interface OpIterator extends Serializable{
      * @return true if the iterator has more tuples.
      * @throws IllegalStateException If the iterator has not been opened
      */
-    public boolean hasNext() throws DbException;
+    public boolean hasNext() throws DbException, TypeMismatch;
 
     /**
      * Returns the next tuple from the operator (typically implementing by reading
@@ -37,7 +37,7 @@ public interface OpIterator extends Serializable{
      * @throws NoSuchElementException if there are no more tuples.
      * @throws IllegalStateException If the iterator has not been opened
      */
-    public Tuple next() throws DbException, NoSuchElementException;
+    public Tuple next() throws DbException, NoSuchElementException, TypeMismatch;
 
     /**
      * Resets the iterator to the start.

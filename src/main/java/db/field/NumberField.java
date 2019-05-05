@@ -2,6 +2,8 @@ package db.field;
 
 import db.query.ComparisonPredicate;
 
+import java.io.File;
+
 /**
  * Class of Field that stores a single Number.
  * Number might be Int, Long, Float and Double
@@ -46,9 +48,9 @@ public abstract class NumberField implements Field {
     public boolean compare(ComparisonPredicate.Op op, Field val) {
         switch (op) {
             case EQUALS:
-                return equals(val);
+                return value.equals(((NumberField)val).value);
             case NOT_EQUALS:
-                return !equals(val);
+                return !value.equals(((NumberField)val).value);
             case GREATER_THAN:
                 return greater_than(val);
             case GREATER_THAN_OR_EQ:
