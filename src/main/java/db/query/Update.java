@@ -40,7 +40,8 @@ public class Update extends Operator{
         for (int i=0; i<updateElements.length; i++){
             this.indexes[i] = tupleDesc.fieldNameToIndex(updateElements[i].attribute);
             TDItem tdItem = tupleDesc.getField(indexes[i]);
-            this.fields[i] = Util.getField(updateElements[i].value, tdItem.fieldType, tdItem.maxLen);
+            this.fields[i] = Util.getField(updateElements[i].value, tdItem.fieldType,
+                    tdItem.maxLen, tdItem.fieldName);
         }
     }
 

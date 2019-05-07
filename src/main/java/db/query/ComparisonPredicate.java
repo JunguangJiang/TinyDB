@@ -3,6 +3,7 @@ package db.query;
 import db.field.Field;
 import db.field.TypeMismatch;
 import db.field.Util;
+import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 import java.io.Serializable;
@@ -58,20 +59,20 @@ public class ComparisonPredicate extends Predicate implements Serializable {
         }
         if (!(lhs instanceof Attribute)) {
             if (rightIdx >= 0) {
-                leftVal = Util.getField(lhs, tupleDesc.getField(rightIdx).fieldType,
-                        tupleDesc.getField(rightIdx).maxLen);
+                TDItem rightField = tupleDesc.getField(rightIdx);
+                leftVal = Util.getField(lhs, rightField.fieldType, rightField.maxLen, rightField.fieldName);
             } else {
                 leftVal = Util.getField(lhs);
             }
         }
         if (!(rhs instanceof Attribute)) {
             if (leftIdx >= 0) {
-                rightVal = Util.getField(rhs, tupleDesc.getField(leftIdx).fieldType,
-                        tupleDesc.getField(leftIdx).maxLen);
+                TDItem leftItem = tupleDesc.getField(leftIdx);
+                rightVal = Util.getField(rhs, leftItem.fieldType, leftItem.maxLen, leftItem.fieldName);
             } else {
                 rightVal = Util.getField(rhs);
                 if (leftVal.getType() != rightVal.getType()) {
-                    throw new TypeMismatch(leftVal.getType(), rightVal.getType());
+                    throw new TypeMismatch(rhs.toString(), leftVal.getType(), rightVal.getType());
                 }
             }
         }

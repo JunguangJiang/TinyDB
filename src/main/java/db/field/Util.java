@@ -26,7 +26,7 @@ public class Util {
             throw new NotImplementedException();
         }
     }
-
+    
     /**
      *
      * @param value value of the Field, might be Integer, Float or String
@@ -35,7 +35,7 @@ public class Util {
      * @return the Field
      * @throws TypeMismatch when the Type was mismatched
      */
-    public static Field getField(Object value, Type type, int maxLen) throws TypeMismatch{
+    public static Field getField(Object value, Type type, int maxLen, String name) throws TypeMismatch{
         if (value instanceof Long) {
             switch (type) {
                 case INT_TYPE:
@@ -43,7 +43,7 @@ public class Util {
                 case LONG_TYPE:
                     return new LongField((long)value);
                 default:
-                    throw new TypeMismatch(Type.LONG_TYPE, type);
+                    throw new TypeMismatch(name, Type.LONG_TYPE, type);
             }
         } else if (value instanceof Integer) {
             switch (type) {
@@ -52,7 +52,7 @@ public class Util {
                 case LONG_TYPE:
                     return new LongField(((Integer) value).longValue());
                 default:
-                    throw new TypeMismatch(Type.INT_TYPE, type);
+                    throw new TypeMismatch(name, Type.INT_TYPE, type);
             }
         } else if (value instanceof Double) {
             switch (type) {
@@ -61,7 +61,7 @@ public class Util {
                 case DOUBLE_TYPE:
                     return new DoubleField((double)value);
                 default:
-                    throw new TypeMismatch(Type.DOUBLE_TYPE, type);
+                    throw new TypeMismatch(name, Type.DOUBLE_TYPE, type);
             }
         } else if (value instanceof Float) {
             switch (type) {
@@ -70,13 +70,13 @@ public class Util {
                 case DOUBLE_TYPE:
                     return new DoubleField(((Float) value).doubleValue());
                 default:
-                    throw new TypeMismatch(Type.FLOAT_TYPE, type);
+                    throw new TypeMismatch(name, Type.FLOAT_TYPE, type);
             }
         } else if (value instanceof String) {
             if (type == Type.STRING_TYPE) {
                 return new StringField((String)value, maxLen);
             } else {
-                throw new TypeMismatch(Type.STRING_TYPE, type);
+                throw new TypeMismatch(name, Type.STRING_TYPE, type);
             }
         } else {
             throw new NotImplementedException();

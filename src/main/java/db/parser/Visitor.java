@@ -42,13 +42,6 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         }
 
         /**
-         * Add a Table and all its associated attributes into the AttributeTable
-         * @param tableName
-         */
-        public void addTable(String tableName){
-        }
-
-        /**
          * Add a table and all its associated attributes into the AttributeTable
          * @param table
          */
@@ -124,13 +117,13 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         long endTime = System.currentTimeMillis();
         double usedTime = (endTime - startTime) / 1000.;
         if (queryResult != null) {
+            String msg;
             if (!queryResult.succeeded()) {
-                output.print(ctx.start.getLine() + ":");
+                msg = "Line " + ctx.start.getLine() + " : " + queryResult.getInfo();
+            } else {
+                msg = queryResult.getInfo() + " (" + usedTime + " sec)";
             }
-            output.print(queryResult.getInfo());
-            if (queryResult.succeeded()) {
-                output.print(usedTime);
-            }
+            output.print(msg);
         }
         return null;
     }

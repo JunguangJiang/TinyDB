@@ -48,14 +48,6 @@ public class TinyDBOutput extends BaseErrorListener {
     }
 
     /**
-     * Print a execution time to the buffer
-     * @param seconds
-     */
-    public void print(double seconds) {
-        buffer.add(" (" + seconds + " sec)");
-    }
-
-    /**
      * flush the buffer
      */
     public void flush() {

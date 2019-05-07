@@ -102,7 +102,7 @@ public class Table {
                 Object value = hashMap.get(tdItem.fieldName);
                 if (value != null) {
                     try {
-                        tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen));
+                        tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName));
                     } catch (TypeMismatch e) {
                         return new QueryResult(false, e.toString());
                     }
