@@ -97,7 +97,6 @@ public class Table {
 
             TupleDesc tupleDesc = getTupleDesc();
             Tuple tuple = new Tuple(tupleDesc);
-            System.out.println(tupleDesc);
             for (int i=0; i<tupleDesc.numFields(); i++) {
                 TDItem tdItem = tupleDesc.getField(i);
                 Object value = hashMap.get(tdItem.fieldName);
@@ -116,23 +115,6 @@ public class Table {
             return insertTuple(tuple);
         }
     }
-
-//    /**
-//     * delete a Tuple from the Table
-//     * must use BufferPool to get Page!
-//     * @param tuple
-//     * @return the QueryResult of the insert
-//     * @see QueryResult
-//     */
-//    public QueryResult deleteTuple(Tuple tuple) {
-//        // TODO
-//        try {
-//            GlobalManager.getBufferPool().deleteTuple(tuple);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return new QueryResult(false, "");
-//    }
 
     /**
      * @return the iterator over the Table

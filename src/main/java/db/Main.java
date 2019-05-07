@@ -13,8 +13,9 @@ import java.io.*;
 public class Main {
     public static void main(String[] args){
         // An example which reads an sql txt and build a parser tree
-        String inFileName = "data/in.sql";
-        String outFileName = "data/out.txt";
+        String path = "system_test_data/insert/";
+        String inFileName = path+"test.sql";
+        String outFileName = path+"out.txt";
 
         try{
             BufferedReader in = new BufferedReader(new FileReader(inFileName));

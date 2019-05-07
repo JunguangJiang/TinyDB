@@ -406,10 +406,11 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         String tableName;
         if (ctx.table() != null) {
             tableName = ctx.table().getText();
+            return new Attribute(tableName, attrName, tableName+'.'+attrName);
         } else {
             tableName = attributeTable.getBelongingTable(attrName).getName();
+            return new Attribute(tableName, attrName, attrName);
         }
-        return new Attribute(tableName, attrName);
     }
 
     /**
@@ -439,7 +440,12 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
         Project project = new Project(projectElements.toArray(new Attribute[0]), filter);
         Query query = new Query(project);
-        return query.executeSelect();
+
+        String[] header = new String[projectElements.size()];
+        for (int i=0; i<projectElements.size(); i++) {
+            header[i] = projectElements.get(i).alias;
+        }
+        return query.executeSelect(header);
     }
 
     /**

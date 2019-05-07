@@ -22,16 +22,11 @@ public class Query {
      * execute the select operation
      * @return the result String of select query
      */
-    public QueryResult executeSelect() {
+    public QueryResult executeSelect(String[] header) {
         try {
             this.root.open();
             // add tuple desc to the result
             TupleDesc tupleDesc = root.getTupleDesc();
-            String[] header = new String[tupleDesc.numFields()];
-            for (int i=0; i<tupleDesc.numFields(); i++) {
-                TDItem tdItem = tupleDesc.getField(i);
-                header[i] = tdItem.tableName + "." +tdItem.fieldName;
-            }
 
             // add tuples to the result
             ArrayList<String[]> data = new ArrayList<>();
@@ -39,7 +34,7 @@ public class Query {
                 Tuple tuple = root.next();
                 String[] body = new String[tupleDesc.numFields()];
                 for (int i=0; i<tupleDesc.numFields(); i++) {
-                    body[i] = tuple.getField(i).toString();
+                    body[i] = tuple.getFieldString(i);
                 }
                 data.add(body);
             }
