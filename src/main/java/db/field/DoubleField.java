@@ -8,7 +8,8 @@ import java.io.IOException;
  */
 public class DoubleField extends NumberField{
 
-    public Double getValue() {
+    @Override
+    public Object getValue() {
         return value.doubleValue();
     }
 
@@ -29,16 +30,16 @@ public class DoubleField extends NumberField{
 
     @Override
     public boolean equals(Object obj) {
-        return value.doubleValue() == ((DoubleField)obj).value.doubleValue();
+        return (double)getValue() == (double)((Field)obj).getValue();
     }
 
     @Override
     public boolean greater_than(Field val) {
-        return value.doubleValue() > ((DoubleField)val).value.doubleValue();
+        return (double)getValue() > (double)val.getValue();
     }
 
     @Override
     public boolean less_than(Field val) {
-        return value.doubleValue() < ((DoubleField)val).value.doubleValue();
+        return (double)getValue() < (double)val.getValue();
     }
 }

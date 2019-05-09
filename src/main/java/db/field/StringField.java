@@ -15,7 +15,8 @@ public class StringField implements Field {
     private final int maxLen;
     private boolean isNull;
 
-    public String getValue() {
+    @Override
+    public Object getValue() {
         return value;
     }
 

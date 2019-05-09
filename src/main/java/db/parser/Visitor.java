@@ -129,7 +129,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         QueryResult queryResult;
         try {
             queryResult = (QueryResult) super.visitSqlStatement(ctx);
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | ClassCastException e) {
             queryResult = new QueryResult(false, e.getMessage());
         }
         long endTime = System.currentTimeMillis();
