@@ -118,9 +118,9 @@ public class Database {
      *
      * @return The names of all the tables in the database
      */
-    public ArrayList<String> getTableNames(){
+    public String[] getTableNames(){
         // TODO
-        return null;
+        return new String[]{"table"};
     }
 
     /**

@@ -33,9 +33,7 @@ public class Join extends Operator{
     }
 
     /**
-     * lhs : left hand side of "join"
-     * predicate: the predicate after "on"
-     * rhs : right hand side of "join"
+     * `lhs` JOIN `rhs` ON `predicate`
      * @param lhs
      * @param predicate
      * @param rhs

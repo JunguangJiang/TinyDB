@@ -5,6 +5,7 @@ import db.query.QueryResult;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 /**
  * The Catalog keeps track of all available databases.
@@ -37,7 +38,7 @@ public class Catalog {
      * @param databaseName the name of the old database.
      * @return
      */
-    public QueryResult dropDatabase(String databaseName) {
+    public QueryResult  dropDatabase(String databaseName) {
         // TODO
         return new QueryResult(false, "");
     }
@@ -64,9 +65,23 @@ public class Catalog {
     /**
      * @return The names of all the databases
      */
-    public ArrayList<String> getDatabaseNames(){
+    public String[] getDatabaseNames(){
         // TODO
-        return null;
+        return new String[]{
+                "name"
+        };
+    }
+
+    /**
+     * @param databaseName the name of the given Database
+     * @return All the tables' name in a certain Database
+     * @throws java.util.NoSuchElementException if the Database doesn't exist.
+     */
+    public String[] getTableNames(String databaseName) throws NoSuchElementException {
+        // TODO
+        return new String[] {
+                "name"
+        };
     }
 
     /**
