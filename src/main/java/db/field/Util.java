@@ -13,20 +13,20 @@ public class Util {
      */
     public static Field getField(Object value) {
         if (value instanceof Integer) {
-            return new IntField((int)value);
+            return new IntField((int)value, false);
         } else if (value instanceof Long) {
-            return new LongField((long)value);
+            return new LongField((long)value, false);
         } else if (value instanceof Float) {
-            return new FloatField((float)value);
+            return new FloatField((float)value, false);
         } else if (value instanceof Double) {
-            return new DoubleField((double)value);
+            return new DoubleField((double)value, false);
         } else if (value instanceof String) {
-            return new StringField((String)value, ((String)value).length());
+            return new StringField((String)value, ((String)value).length(), false);
         } else {
             throw new NotImplementedException();
         }
     }
-    
+
     /**
      *
      * @param value value of the Field, might be Integer, Float or String
@@ -39,42 +39,42 @@ public class Util {
         if (value instanceof Long) {
             switch (type) {
                 case INT_TYPE:
-                    return new IntField(((Long) value).intValue());
+                    return new IntField(((Long) value).intValue(), false);
                 case LONG_TYPE:
-                    return new LongField((long)value);
+                    return new LongField((long)value, false);
                 default:
                     throw new TypeMismatch(name, Type.LONG_TYPE, type);
             }
         } else if (value instanceof Integer) {
             switch (type) {
                 case INT_TYPE:
-                    return new IntField((int)value);
+                    return new IntField((int)value, false);
                 case LONG_TYPE:
-                    return new LongField(((Integer) value).longValue());
+                    return new LongField(((Integer) value).longValue(), false);
                 default:
                     throw new TypeMismatch(name, Type.INT_TYPE, type);
             }
         } else if (value instanceof Double) {
             switch (type) {
                 case FLOAT_TYPE:
-                    return new FloatField(((Double) value).floatValue());
+                    return new FloatField(((Double) value).floatValue(), false);
                 case DOUBLE_TYPE:
-                    return new DoubleField((double)value);
+                    return new DoubleField((double)value, false);
                 default:
                     throw new TypeMismatch(name, Type.DOUBLE_TYPE, type);
             }
         } else if (value instanceof Float) {
             switch (type) {
                 case FLOAT_TYPE:
-                    return new FloatField((float)value);
+                    return new FloatField((float)value, false);
                 case DOUBLE_TYPE:
-                    return new DoubleField(((Float) value).doubleValue());
+                    return new DoubleField(((Float) value).doubleValue(), false);
                 default:
                     throw new TypeMismatch(name, Type.FLOAT_TYPE, type);
             }
         } else if (value instanceof String) {
             if (type == Type.STRING_TYPE) {
-                return new StringField((String)value, maxLen);
+                return new StringField((String)value, maxLen, false);
             } else {
                 throw new TypeMismatch(name, Type.STRING_TYPE, type);
             }
@@ -95,7 +95,7 @@ public class Util {
         };
         TupleDesc tupleDesc = new TupleDesc(tdItems, null);
         Tuple tuple = new Tuple(tupleDesc);
-        Field field = new IntField(count);
+        Field field = new IntField(count, false);
         tuple.setField(0, field);
         return tuple;
     }

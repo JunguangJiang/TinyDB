@@ -16,13 +16,14 @@ public class IntField extends NumberField {
      *
      * @param i The value of this field.
      */
-    public IntField(int i) {
-        super(i, Type.INT_TYPE);
+    public IntField(int i, boolean isNull) {
+        super(i, Type.INT_TYPE, isNull);
     }
 
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeInt(value.intValue());
+        dos.writeBoolean(isNull);
     }
 
     @Override

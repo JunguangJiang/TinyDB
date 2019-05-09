@@ -17,13 +17,14 @@ public class DoubleField extends NumberField{
      *
      * @param i The value of this field.
      */
-    public DoubleField(Double i) {
-        super(i, Type.DOUBLE_TYPE);
+    public DoubleField(Double i, boolean isNull) {
+        super(i, Type.DOUBLE_TYPE, isNull);
     }
 
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeDouble(value.doubleValue());
+        dos.writeBoolean(isNull);
     }
 
     @Override

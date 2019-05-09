@@ -34,7 +34,7 @@ public class Query {
                 Tuple tuple = root.next();
                 String[] body = new String[tupleDesc.numFields()];
                 for (int i=0; i<tupleDesc.numFields(); i++) {
-                    body[i] = tuple.getFieldString(i);
+                    body[i] = tuple.getField(i).toString();
                 }
                 data.add(body);
             }

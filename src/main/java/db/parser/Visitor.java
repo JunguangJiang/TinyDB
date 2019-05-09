@@ -12,6 +12,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 public class Visitor extends TinyDBParserBaseVisitor<Object> {
     /**
@@ -108,12 +109,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     public Object visitSqlStatement(TinyDBParser.SqlStatementContext ctx) {
         this.attributeTable.clear();
         long startTime = System.currentTimeMillis();
-        QueryResult queryResult=null;
-        try {
-            queryResult = (QueryResult) super.visitSqlStatement(ctx);
-        } catch (NullPointerException exception) {
-//            exception.printStackTrace();
-        }
+        QueryResult queryResult = (QueryResult) super.visitSqlStatement(ctx);
         long endTime = System.currentTimeMillis();
         double usedTime = (endTime - startTime) / 1000.;
         if (queryResult != null) {
@@ -430,15 +426,19 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         for(TinyDBParser.FullColumnNameContext context : ctx.fullColumnName()) {
             projectElements.add((Attribute) visit(context));
         }
+        try {
+            Project project = new Project(projectElements.toArray(new Attribute[0]), filter);
+            Query query = new Query(project);
 
-        Project project = new Project(projectElements.toArray(new Attribute[0]), filter);
-        Query query = new Query(project);
-
-        String[] header = new String[projectElements.size()];
-        for (int i=0; i<projectElements.size(); i++) {
-            header[i] = projectElements.get(i).alias;
+            String[] header = new String[projectElements.size()];
+            for (int i=0; i<projectElements.size(); i++) {
+                header[i] = projectElements.get(i).alias;
+            }
+            return query.executeSelect(header);
+        } catch (NoSuchElementException e) {
+            return new QueryResult(false, e.getMessage());
         }
-        return query.executeSelect(header);
+
     }
 
     /**
@@ -466,8 +466,8 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         String tableName = ctx.getText();
         Table table = GlobalManager.getDatabase().getTable(tableName);
         if (table == null) {
-            output.print(new SemanticError("Table " + tableName + " doesn't exist.", ctx));
-            throw new NullPointerException();
+//            output.print(new SemanticError("Table " + tableName + " doesn't exist.", ctx));
+            throw new NoSuchElementException("Table " + tableName + " doesn't exist.");
         } else {
             return table;
         }
@@ -551,8 +551,8 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             Update update = new Update(filter, updateElements.toArray(new Update.UpdateElement[0]));
             Query query = new Query(update);
             return query.executeDeleteOrUpdate();
-        } catch (TypeMismatch e) {
-            return new QueryResult(false, e.toString());
+        } catch (NoSuchElementException | TypeMismatch e) {
+            return new QueryResult(false, e.getMessage());
         }
     }
 

@@ -95,7 +95,7 @@ public class TupleDesc implements Serializable {
                 return i;
             }
         }
-        throw new NoSuchElementException(String.format("name %s", name));
+        throw new NoSuchElementException(String.format("Attribute %s doesn't exist.", name));
     }
 
     /**
@@ -112,7 +112,7 @@ public class TupleDesc implements Serializable {
                 return i;
             }
         }
-        throw new NoSuchElementException(String.format("table %s attribute %s", tableName, attrName));
+        throw new NoSuchElementException(String.format("Table %s attribute %s doesn't exist.", tableName, attrName));
     }
 
     /**

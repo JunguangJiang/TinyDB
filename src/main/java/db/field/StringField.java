@@ -13,6 +13,7 @@ public class StringField implements Field {
 
     private final String value;
     private final int maxLen;
+    private boolean isNull;
 
     public String getValue() {
         return value;
@@ -26,8 +27,9 @@ public class StringField implements Field {
      * @param maxLen
      *            The maximum size of this string
      */
-    public StringField(String s, int maxLen) {
+    public StringField(String s, int maxLen, boolean isNull) {
         this.maxLen = maxLen;
+        this.isNull = isNull;
 
         if (s.length() > maxLen)
             value = s.substring(0, maxLen);
@@ -36,7 +38,16 @@ public class StringField implements Field {
     }
 
     public String toString() {
-        return value;
+        if (isNull) {
+            return "null";
+        } else {
+            return value;
+        }
+    }
+
+    @Override
+    public boolean isNull() {
+        return isNull;
     }
 
     public int hashCode() {
@@ -65,6 +76,7 @@ public class StringField implements Field {
         dos.writeBytes(s);
         while (overflow-- > 0)
             dos.write((byte) 0);
+        dos.writeBoolean(isNull);
     }
 
     /**
@@ -74,6 +86,9 @@ public class StringField implements Field {
      * @see Field#compare
      */
     public boolean compare(ComparisonPredicate.Op op, Field val) {
+        if (this.isNull || val.isNull()) {
+            return op == ComparisonPredicate.Op.NOT_EQUALS;
+        }
 
         StringField iVal = (StringField) val;
         int cmpVal = value.compareTo(iVal.value);

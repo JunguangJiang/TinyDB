@@ -17,13 +17,13 @@ public enum Type implements Serializable {
     INT_TYPE() {
         @Override
         public int getBytes() {
-            return Integer.BYTES;
+            return Integer.BYTES + 1;
         }
 
         @Override
         public Field parse(DataInputStream dis, int maxLen) throws ParseException {
             try {
-                return new IntField(dis.readInt());
+                return new IntField(dis.readInt(), dis.readBoolean());
             }  catch (IOException e) {
                 throw new ParseException("couldn't parse", 0);
             }
@@ -32,13 +32,13 @@ public enum Type implements Serializable {
     }, LONG_TYPE() {
         @Override
         public int getBytes() {
-            return Long.BYTES;
+            return Long.BYTES + 1;
         }
 
         @Override
         public Field parse(DataInputStream dis, int maxLen) throws ParseException {
             try {
-                return new LongField(dis.readLong());
+                return new LongField(dis.readLong(), dis.readBoolean());
             }  catch (IOException e) {
                 throw new ParseException("couldn't parse", 0);
             }
@@ -46,13 +46,13 @@ public enum Type implements Serializable {
     }, FLOAT_TYPE() {
         @Override
         public int getBytes() {
-            return Float.BYTES;
+            return Float.BYTES + 1;
         }
 
         @Override
         public Field parse(DataInputStream dis, int maxLen) throws ParseException {
             try {
-                return new FloatField(dis.readFloat());
+                return new FloatField(dis.readFloat(), dis.readBoolean());
             }  catch (IOException e) {
                 throw new ParseException("couldn't parse", 0);
             }
@@ -60,13 +60,13 @@ public enum Type implements Serializable {
     }, DOUBLE_TYPE() {
         @Override
         public int getBytes() {
-            return Double.BYTES;
+            return Double.BYTES + 1;
         }
 
         @Override
         public Field parse(DataInputStream dis, int maxLen) throws ParseException {
             try {
-                return new DoubleField(dis.readDouble());
+                return new DoubleField(dis.readDouble(), dis.readBoolean());
             }  catch (IOException e) {
                 throw new ParseException("couldn't parse", 0);
             }
@@ -77,7 +77,7 @@ public enum Type implements Serializable {
          */
         @Override
         public int getBytes() {
-            return Integer.BYTES;
+            return Integer.BYTES + 1;
         }
 
         @Override
@@ -87,7 +87,7 @@ public enum Type implements Serializable {
                 byte bs[] = new byte[strLen];
                 dis.read(bs);
                 dis.skipBytes(maxLen-strLen);
-                return new StringField(new String(bs), maxLen);
+                return new StringField(new String(bs), maxLen, dis.readBoolean());
             } catch (IOException e) {
                 throw new ParseException("couldn't parse", 0);
             }

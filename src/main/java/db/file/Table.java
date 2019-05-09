@@ -100,6 +100,7 @@ public class Table {
             for (int i=0; i<tupleDesc.numFields(); i++) {
                 TDItem tdItem = tupleDesc.getField(i);
                 Object value = hashMap.get(tdItem.fieldName);
+                hashMap.remove(tdItem.fieldName);
                 if (value != null) {
                     try {
                         tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName));
@@ -112,6 +113,12 @@ public class Table {
                     }
                 }
             }
+            // Ensure that all insert attributes exist.
+            if (!hashMap.isEmpty()) {
+                String attribute = hashMap.keySet().toArray(new String[0])[0];
+                return new QueryResult(false, "Attribute " + attribute +" doesn't exist.");
+            }
+
             return insertTuple(tuple);
         }
     }

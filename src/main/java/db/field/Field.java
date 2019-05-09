@@ -39,4 +39,5 @@ public interface Field extends Serializable{
     public boolean equals(Object field);
 
     public String toString();
+    public boolean isNull();
 }

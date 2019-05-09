@@ -5,9 +5,6 @@ import db.file.RecordId;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  * Tuple maintains information about the contents of a tuple. Tuples have a
@@ -34,28 +31,27 @@ public class Tuple implements Serializable {
         tupleDesc = td;
         int length = td.numFields();
         fields = new Field[length];
-
-//        for(int i=0; i<length; i++){
-//            switch (td.getField(i).fieldType){
-//                case INT_TYPE:
-//                    fields[i] = new IntField(0);
-//                    break;
-//                case LONG_TYPE:
-//                    fields[i] = new LongField(0);
-//                    break;
-//                case FLOAT_TYPE:
-//                    fields[i] = new FloatField(0.0f);
-//                    break;
-//                case DOUBLE_TYPE:
-//                    fields[i] = new DoubleField(0.0);
-//                    break;
-//                case STRING_TYPE:
-//                    fields[i] = new StringField("", td.getField(i).maxLen);
-//                    break;
-//                default:
-//                    throw new NotImplementedException();
-//            }
-//        }
+        for(int i=0; i<length; i++){
+            switch (td.getField(i).fieldType){
+                case INT_TYPE:
+                    fields[i] = new IntField(0, true);
+                    break;
+                case LONG_TYPE:
+                    fields[i] = new LongField(0, true);
+                    break;
+                case FLOAT_TYPE:
+                    fields[i] = new FloatField(0.0f, true);
+                    break;
+                case DOUBLE_TYPE:
+                    fields[i] = new DoubleField(0.0, true);
+                    break;
+                case STRING_TYPE:
+                    fields[i] = new StringField("", td.getField(i).maxLen, true);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
     }
 
     /**
@@ -104,45 +100,6 @@ public class Tuple implements Serializable {
     public Field getField(int i) {
         return fields[i];
     }
-
-    /**
-     * @param i field index to return. Must be a valid index.
-     * @return the String format of the ith field, or `null` if it has not been set.
-     */
-    public String getFieldString(int i) {
-        if (fields[i] == null) {
-            return "null";
-        } else {
-            return fields[i].toString();
-        }
-    }
-
-//    /**
-//     * Returns the contents of this Tuple as a string. Note that to pass the
-//     * system tests, the format needs to be as follows:
-//     *
-//     * column1\tcolumn2\tcolumn3\t...\tcolumnN
-//     *
-//     * where \t is any whitespace (except a newline)
-//     */
-//    public String toString() {
-//        StringBuffer stringBuffer = new StringBuffer();
-//        for(Field field : fields){
-//            stringBuffer.append(field.toString());
-//            stringBuffer.append(" ");
-//        }
-//        return stringBuffer.toString().trim();
-//    }
-
-//    /**
-//     * @return
-//     *        An iterator which iterates over all the fields of this tuple
-//     * */
-//    public Iterator<Field> fields()
-//    {
-//        ArrayList<Field> fieldArrayList = new ArrayList<>(Arrays.asList(fields));
-//        return fieldArrayList.iterator();
-//    }
 
     /**
      * merge two tuples into one tuple

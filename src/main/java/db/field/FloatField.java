@@ -17,13 +17,14 @@ public class FloatField extends NumberField{
      *
      * @param i The value of this field.
      */
-    public FloatField(float i) {
-        super(i, Type.FLOAT_TYPE);
+    public FloatField(float i, boolean isNull) {
+        super(i, Type.FLOAT_TYPE, isNull);
     }
 
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeFloat(value.floatValue());
+        dos.writeBoolean(isNull);
     }
 
     @Override

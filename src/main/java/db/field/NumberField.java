@@ -13,6 +13,7 @@ public abstract class NumberField implements Field {
 
     protected final Number value;
     protected final Type type;
+    protected boolean isNull;
 
     /**
      * Constructor.
@@ -20,14 +21,24 @@ public abstract class NumberField implements Field {
      * @param value The value of this field.
      * @param type The type of this field
      */
-    public NumberField(Number value, Type type) {
+    public NumberField(Number value, Type type, boolean isNull) {
         this.value = value;
         this.type = type;
+        this.isNull = isNull;
     }
 
     @Override
     public String toString() {
-        return value.toString();
+        if (isNull) {
+            return "null";
+        } else {
+            return value.toString();
+        }
+    }
+
+    @Override
+    public boolean isNull() {
+        return isNull;
     }
 
     @Override
@@ -46,6 +57,9 @@ public abstract class NumberField implements Field {
      */
     @Override
     public boolean compare(ComparisonPredicate.Op op, Field val) {
+        if (this.isNull || val.isNull()) {
+            return op == ComparisonPredicate.Op.NOT_EQUALS;
+        }
         switch (op) {
             case EQUALS:
                 return value.equals(((NumberField)val).value);

@@ -17,13 +17,14 @@ public class LongField extends NumberField{
      *
      * @param i The value of this field.
      */
-    public LongField(long i) {
-        super(i, Type.LONG_TYPE);
+    public LongField(long i, boolean isNull) {
+        super(i, Type.LONG_TYPE, isNull);
     }
 
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeLong(value.longValue());
+        dos.writeBoolean(isNull);
     }
 
     @Override
