@@ -144,11 +144,14 @@ public class ComparisonPredicate extends Predicate implements Serializable {
      * @param tuple
      *            The tuple to compare against
      * @return true if the comparison is true, false otherwise.
+     *          If any side of the comparison is null, then return false.
      */
     @Override
     public boolean filter(Tuple tuple) throws TypeMismatch{
         preprocess(tuple);
-        return this.getLeft(tuple).compare(op, this.getRight(tuple));
+        Field lhs = getLeft(tuple);
+        Field rhs = getRight(tuple);
+        return lhs != null && rhs != null && lhs.compare(op, rhs);
     }
 
 }

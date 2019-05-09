@@ -7,7 +7,6 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
-import java.util.function.Predicate;
 
 public class SqlTest {
     private String path, name;
@@ -22,10 +21,8 @@ public class SqlTest {
         File outFile = Paths.get(path, name+".out").toFile();
         File ansFile = Paths.get(path, name+".ans").toFile();
         try{
-            BufferedReader in = new BufferedReader(new FileReader(sqlFile));
-            TinyDBOutput out = new TinyDBOutput(new BufferedWriter(new FileWriter(outFile)));
             Server server = new Server(path);
-            server.process(in, out);
+            server.process(sqlFile, outFile);
             return compare(ansFile, outFile);
         } catch (IOException e) {
             e.printStackTrace();
@@ -74,9 +71,19 @@ public class SqlTest {
     }
 
     public static void main(String[] args){
-        SqlTest sqlTest = new SqlTest("data", "in");
-        if(sqlTest.run()) {
-            System.out.println("passed test in");
+        File system_test_dir = new File("system_test_data");
+        try {
+            for(File file : system_test_dir.listFiles()) {
+                String test_name = file.toPath().toString();
+                SqlTest sqlTest = new SqlTest(test_name, "test");
+                if (sqlTest.run()) {
+                    System.out.println("pass " + test_name);
+                } else {
+                    System.out.println("fail " + test_name);
+                }
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
     }
 }

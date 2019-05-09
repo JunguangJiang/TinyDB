@@ -68,6 +68,8 @@ public class Database {
             return new QueryResult(false, "Table " + tableName + " doesn't exist.");
         } else {
             table.file.delete();
+            idTableMap.remove(table.getId());
+            nameIdMap.remove(tableName);
             return new QueryResult(true, "Query OK, 0 row affected.");
         }
     }

@@ -16,7 +16,7 @@ public class Join extends Operator{
 
     private OpIterator lhs, rhs;
     private TupleDesc tupleDesc1, tupleDesc2;
-    private ComparisonPredicate predicate;
+    private Predicate predicate;
     private ArrayList<Tuple> tuples = new ArrayList<>();
     private Iterator<Tuple> iterator;
 
@@ -24,9 +24,9 @@ public class Join extends Operator{
      * A helper class which wraps predicate and rhs in Join.
      */
     public static class JoinPart{
-        public ComparisonPredicate predicate;
+        public Predicate predicate;
         public OpIterator rhs;
-        public JoinPart(ComparisonPredicate predicate, OpIterator rhs) {
+        public JoinPart(Predicate predicate, OpIterator rhs) {
             this.predicate = predicate;
             this.rhs = rhs;
         }
@@ -40,7 +40,7 @@ public class Join extends Operator{
      * @param predicate
      * @param rhs
      */
-    public Join(OpIterator lhs, ComparisonPredicate predicate, OpIterator rhs) {
+    public Join(OpIterator lhs, Predicate predicate, OpIterator rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
         this.predicate = predicate;

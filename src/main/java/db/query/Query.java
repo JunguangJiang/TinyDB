@@ -38,7 +38,8 @@ public class Query {
                 }
                 data.add(body);
             }
-            String result = AsciiTable.getTable(header, data.toArray(new String[0][]));
+            String result = AsciiTable.getTable(header, data.toArray(new String[0][])) +
+                    System.lineSeparator() + String.format("%d rows in set", data.size());
             return new QueryResult(true, result);
         } catch (DbException e){
             e.printStackTrace();

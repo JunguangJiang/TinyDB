@@ -503,7 +503,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         Table table = (Table) visit(ctx.table());
         this.attributeTable.addTable(table);
         SeqScan seqScan = new SeqScan(table);
-        return new Join.JoinPart((ComparisonPredicate) visit(ctx.predicate()),seqScan);
+        return new Join.JoinPart((Predicate) visit(ctx.predicate()),seqScan);
     }
 
     /**
