@@ -106,7 +106,7 @@ public class BufferPool {
      *
      * @param t the tuple to delete
      */
-    public  void deleteTuple(Tuple t) {
+    public void deleteTuple(Tuple t) {
         int tableId = t.getRecordId().getPageId().getTableId();
         DbFile dbFile = GlobalManager.getDatabase().getDbFile(tableId);
         ArrayList<Page> pages = ((HeapFile)dbFile).deleteTuple(t);
