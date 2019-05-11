@@ -52,10 +52,10 @@ public abstract class BTreePage implements Page {
 	 * @param id - the id of this page
 	 * @param key - the field which the index is keyed on
 	 */
-	public BTreePage(BTreePageId id, int key, TupleDesc td) throws IOException {
+	public BTreePage(BTreePageId id, int key) throws IOException {
 		this.pid = id;
 		this.keyField = key;
-		this.td = td;
+		this.td = GlobalManager.getDatabase().getTable(id.getTableId()).getTupleDesc();
 	}
 
 	/**

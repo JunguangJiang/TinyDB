@@ -1,8 +1,10 @@
 package db.file.BTree;
 
+import db.DbException;
 import db.field.*;
 import db.file.BufferPool;
 import db.field.Type;
+import db.file.Debug;
 import db.file.Page;
 
 import java.io.*;
@@ -17,7 +19,6 @@ import java.io.*;
  */
 public class BTreeHeaderPage implements Page {
 	private volatile boolean dirty = false;
-	private volatile TransactionId dirtier = null;
 	
 	final static int INDEX_SIZE = Type.INT_TYPE.getBytes();
 
@@ -254,19 +255,15 @@ public class BTreeHeaderPage implements Page {
 	 * Marks this page as dirty/not dirty and record that transaction
 	 * that did the dirtying
 	 */
-	public void markDirty(boolean dirty, TransactionId tid) {
+	public void markDirty(boolean dirty) {
 		this.dirty = dirty;
-		if (dirty) this.dirtier = tid;
 	}
 
 	/**
 	 * Returns the tid of the transaction that last dirtied this page, or null if the page is not dirty
 	 */
-	public TransactionId isDirty() {
-		if (this.dirty)
-			return this.dirtier;
-		else
-			return null;
+	public boolean isDirty() {
+		return this.dirty;
 	}
 
 	/**

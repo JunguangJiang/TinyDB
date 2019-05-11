@@ -536,7 +536,7 @@ public class BTreeFile implements DbFile {
 	 * @throws TransactionAbortedException
 	 */
 	private void handleMinOccupancyLeafPage(TransactionId tid, HashMap<PageId, Page> dirtypages, BTreeLeafPage page, 
-			BTreeInternalPage parent, BTreeEntry leftEntry, BTreeEntry rightEntry) 
+			BTreeInternalPage parent, BTreeEntry leftEntry, BTreeEntry rightEntry)
 			throws DbException, IOException, TransactionAbortedException {
 		BTreePageId leftSiblingId = null;
 		BTreePageId rightSiblingId = null;

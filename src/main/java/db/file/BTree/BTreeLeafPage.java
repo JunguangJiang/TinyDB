@@ -1,5 +1,15 @@
 package db.file.BTree;
 
+import db.DbException;
+import db.field.Field;
+import db.field.IntField;
+import db.field.Type;
+import db.file.Debug;
+import db.file.RecordId;
+import db.query.ComparisonPredicate;
+import db.tuple.Tuple;
+import db.file.BufferPool;
+
 import java.util.*;
 import java.io.*;
 
@@ -19,6 +29,7 @@ public class BTreeLeafPage extends BTreePage {
 	private int leftSibling; // leaf node or 0
 	private int rightSibling; // leaf node or 0
 
+    /*
 	public void checkRep(int fieldid, Field lowerBound, Field upperBound, boolean checkoccupancy, int depth) {
 		Field prev = lowerBound;
 		assert(this.getId().pgcateg() == BTreePageId.LEAF);
@@ -39,6 +50,7 @@ public class BTreeLeafPage extends BTreePage {
 			assert(getNumTuples() >= getMaxTuples()/2);
 		}
 	}
+	*/
 
 	/**
 	 * Create a BTreeLeafPage from a set of bytes of data read from disk.
@@ -48,13 +60,12 @@ public class BTreeLeafPage extends BTreePage {
 	 *  Specifically, the number of tuples is equal to: <p>
 	 *          floor((BufferPool.getPageSize()*8 - extra bytes*8) / (tuple size * 8 + 1))
 	 * <p> where tuple size is the size of tuples in this
-	 * database table, which can be determined via {@link Catalog#getTupleDesc}.
+	 * database table, which can be determined via {@link db.file.Table#getTupleDesc}.
 	 * The number of 8-bit header words is equal to:
 	 * <p>
 	 *      ceiling(no. tuple slots / 8)
 	 * <p>
-	 * @see Database#getCatalog
-	 * @see Catalog#getTupleDesc
+	 * @see db.Database#getTable(Integer)
 	 * @see BufferPool#getPageSize()
 	 * 
 	 * @param id - the id of this page
@@ -176,7 +187,7 @@ public class BTreeLeafPage extends BTreePage {
 		t.setRecordId(rid);
 		try {
 			for (int j=0; j<td.numFields(); j++) {
-				Field f = td.getFieldType(j).parse(dis);
+				Field f = td.getField(j).fieldType.parse(dis);
 				t.setField(j, f);
 			}
 		} catch (java.text.ParseException e) {
@@ -327,7 +338,7 @@ public class BTreeLeafPage extends BTreePage {
 		Field key = t.getField(keyField);
 		for (int i=0; i<numSlots; i++) {
 			if(isSlotUsed(i)) {
-				if(tuples[i].getField(keyField).compare(Predicate.Op.LESS_THAN_OR_EQ, key))
+				if(tuples[i].getField(keyField).compare(ComparisonPredicate.Op.LESS_THAN_OR_EQ, key))
 					lessOrEqKey = i;
 				else
 					break;	
