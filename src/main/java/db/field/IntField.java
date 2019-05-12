@@ -21,6 +21,10 @@ public class IntField extends NumberField {
         super(i, Type.INT_TYPE, isNull);
     }
 
+    public IntField(int i) {
+        this(i, false);
+    }
+
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeInt(value.intValue());

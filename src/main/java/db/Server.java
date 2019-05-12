@@ -28,7 +28,6 @@ public class Server {
      * @return whether the loading is successful
      */
     public boolean open() {
-        System.out.println("This is open!");
         GlobalManager.getCatalog().load(sqlPath);
         return true;
     }
@@ -40,8 +39,6 @@ public class Server {
      *      flush the BufferPool
      */
     public void close() {
-        // TODO
-        System.out.println("This is close!");
         GlobalManager.getCatalog().persist(sqlPath);
     }
 

@@ -19,9 +19,9 @@ import org.antlr.v4.runtime.tree.ParseTree;
  *
  */
 public class Database {
-    HashMap<String, Integer> nameIdMap;
-    HashMap<Integer, Table> idTableMap;
-    HashMap<Integer, String> idSqlMap; // use to save the sql sentence of certain database
+    private HashMap<String, Integer> nameIdMap;
+    private HashMap<Integer, Table> idTableMap;
+    private HashMap<Integer, String> idSqlMap; // use to save the sql sentence of certain database
     private static int id = 0; // Each table has a unique id
     public String databaseName; // The name of database
 
@@ -29,6 +29,18 @@ public class Database {
         nameIdMap = new HashMap<>();
         idTableMap = new HashMap<>();
         idSqlMap = new HashMap<>();
+    }
+
+    /**
+     * Create a new table and its associated file on the disk.
+     * If the table already exists, then return false.
+     * We have to ensure each Table has different ids and names
+     * @param tableName the name of the new table
+     * @param tupleDesc the descriptor of the tuple
+     * @return the result of the query
+     */
+    public QueryResult createTable(String tableName, TupleDesc tupleDesc) {
+        return createTable(tableName, tupleDesc, "", false);
     }
 
     /**
@@ -167,7 +179,7 @@ public class Database {
         try {
             parseDatabaseScript(utils.readFile(databaseScriptFilename), new File(root + "log.txt"));
         } catch (Exception e) {
-            System.out.println("File" + databaseScriptFilename + " not exist");
+            System.out.println("File " + databaseScriptFilename + " not exist");
             throw new NoSuchElementException();
         }
     }

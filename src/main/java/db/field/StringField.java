@@ -38,6 +38,10 @@ public class StringField implements Field {
             value = s;
     }
 
+    public StringField(String s, int maxLen) {
+        this(s, maxLen, false);
+    }
+
     public String toString() {
         if (isNull) {
             return "null";

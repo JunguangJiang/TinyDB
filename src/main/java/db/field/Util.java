@@ -83,6 +83,10 @@ public class Util {
         }
     }
 
+    public static Field getField(Object value, Type type, int maxLen) throws TypeMismatch{
+        return getField(value, type, maxLen, "");
+    }
+
     /**
      * Create a new tuple which represents operation affecting the table
      * @param count the rows affected

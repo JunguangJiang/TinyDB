@@ -132,12 +132,11 @@ public class Catalog {
     public void load(String sqlPath) {
         this.sqlPath = sqlPath;
         String catalogFileName = sqlPath + "catalog.script";
-        System.out.println("This is load!");
         try {
             parseCatalogFile(utils.readFile(catalogFileName));
         }
         catch (Exception e) {
-            System.out.println("File" + catalogFileName + " not exist");
+            System.out.println("File " + catalogFileName + " not exist");
         }
 
     }
@@ -146,7 +145,6 @@ public class Catalog {
      * write names of all the databases back to file
      */
     public void persist(String sqlPath) {
-        System.out.println("This is persist!");
         String catalogFilename = this.sqlPath + "catalog.script";
         try {
             if (this.database != null)

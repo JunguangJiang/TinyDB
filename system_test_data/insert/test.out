@@ -1,15 +1,15 @@
-Line 1 : 
-Line 2 : 
-Query OK, 0 row affected. (0.049 sec)
-Query OK, 1 row affected. (0.017 sec)
+Query OK, 1 row affected (0.0 sec)
+Database changed (0.0 sec)
+Query OK, 0 row affected. (0.002 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.001 sec)
-Query OK, 1 row affected. (0.0 sec)
+Query OK, 1 row affected. (0.001 sec)
 Line 19 : Type mismatch: <CREDITS> expected DOUBLE_TYPE, yet get INT_TYPE
-Query OK, 1 row affected. (0.0 sec)
+Query OK, 1 row affected. (0.001 sec)
 Line 23 : Attribute ID can not be null
 Line 24 : Attribute NAME can not be null
 +------+----+---------+------+--------+
@@ -31,6 +31,6 @@ Line 24 : Attribute NAME can not be null
 +------+----+---------+------+--------+
 |   S9 |  9 |    null | null |   null |
 +------+----+---------+------+--------+
-8 rows in set (0.02 sec)
+8 rows in set (0.003 sec)
 Query OK, 0 row affected. (0.001 sec)
-Line 31 : 
+Query OK, 0 rows affected (0.0 sec)

@@ -1,5 +1,3 @@
-use database test2;
-show database test2;
-create table C(a int);
-show database test2;
-drop table C;
+create database test1;
+create database test2;
+use database test1;

@@ -1,3 +1,0 @@
-Query OK, 0 row affected. (0.068 sec)
-Query OK, 0 row affected. (0.0 sec)
-Query OK, 0 row affected. (0.0 sec)

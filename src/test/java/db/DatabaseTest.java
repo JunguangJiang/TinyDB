@@ -8,7 +8,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class DatabaseTest {
-
     @Test
     public void createTable() {
         QueryResult queryResult = GlobalManager.getDatabase().createTable("table", Utility.getTupleDesc(3, "tup"));

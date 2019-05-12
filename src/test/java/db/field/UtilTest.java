@@ -31,7 +31,7 @@ public class UtilTest {
         try {
             FloatField field = (FloatField) Util.getField(3.3, Type.FLOAT_TYPE, 0);
             assertEquals(field.getType(), Type.FLOAT_TYPE);
-            assertEquals(field.getValue(), 3.3, 0.00001);
+            assertEquals("", Double.parseDouble(field.getValue().toString()), 3.3, 0.00001);
         } catch (TypeMismatch e) {
             fail();
         }
@@ -39,7 +39,7 @@ public class UtilTest {
         try {
             DoubleField field = (DoubleField) Util.getField(3.3333, Type.DOUBLE_TYPE, 0);
             assertEquals(field.getType(), Type.DOUBLE_TYPE);
-            assertEquals(field.getValue(), 3.3333, 0.00001);
+            assertEquals("", Double.parseDouble(field.getValue().toString()), 3.3333, 0.00001);
         } catch (TypeMismatch e) {
             fail();
         }
