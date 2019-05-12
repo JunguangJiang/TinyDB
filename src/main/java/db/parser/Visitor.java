@@ -15,6 +15,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
+import org.antlr.v4.runtime.misc.Interval;
 
 /**
  * Visitor visits the AST of SQL code, and execute the SQL query in the Database.
@@ -86,15 +87,16 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
     private TinyDBOutput output;
     private AttributeTable attributeTable;
-
+    private Boolean isLog;
     /**
      * Visitor parse the sql file and print the result to the out(BufferWriter).
      * @param output query result and error information will all go to output
      */
-    public Visitor(TinyDBOutput output){
+    public Visitor(TinyDBOutput output, Boolean isLog){
         super();
         this.output = output;
         this.attributeTable = new AttributeTable();
+        this.isLog = isLog;
     }
 
     /**
@@ -205,8 +207,10 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         }
         TDItem[] tdItems = tdItemArrayList.toArray(new TDItem[0]);
         TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKeys);
-
-        return GlobalManager.getDatabase().createTable(tableName, tupleDesc);
+        int a = ctx.start.getStartIndex();
+        int b = ctx.stop.getStopIndex();
+        Interval interval = new Interval(a,b);
+        return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog);
     }
 
     /**

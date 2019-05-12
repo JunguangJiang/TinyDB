@@ -22,10 +22,11 @@ public class Main {
         if (args.length == 0) {
             // An example which reads an sql txt and build a parser tree
             String path = "data/";
-            String inFileName = path+"in.sql";
-            String outFileName = path+"in.out";
+            String inFileName = path+"test.sql";
+            String outFileName = path+"test.out";
             Server server = new Server(path);
             server.process(new File(inFileName), new File(outFileName));
+            server.close();
         } else {
             String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
             switch (args[0]) {
