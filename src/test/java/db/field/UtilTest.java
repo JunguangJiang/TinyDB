@@ -23,7 +23,7 @@ public class UtilTest {
         try {
             LongField field = (LongField) Util.getField(3, Type.LONG_TYPE, 0);
             assertEquals(field.getType(), Type.LONG_TYPE);
-            assertEquals(field.getValue(), 3);
+            assertEquals(field.getValue(), 3l);
         } catch (TypeMismatch e) {
             fail();
         }

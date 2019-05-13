@@ -50,6 +50,9 @@ public class Catalog {
         }
         this.databaseSet.remove(databaseName);
         utils.removeDiretory(new File(String.format("%s/%s", sqlPath, databaseName)));
+        if(this.database != null && this.database.databaseName.equals(databaseName)) {
+            this.database = null;
+        }
         return new QueryResult(true, "Query OK, 0 rows affected");
     }
 
