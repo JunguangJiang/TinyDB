@@ -1,13 +1,11 @@
 package db;
 
-import db.parser.TinyDBLexer;
 import db.parser.TinyDBOutput;
 import db.parser.TinyDBParser;
 import db.parser.Visitor;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.*;
+import db.utils.utils;
 
 public class Server {
     String sqlPath;
@@ -30,7 +28,7 @@ public class Server {
      * @return whether the loading is successful
      */
     public boolean open() {
-        // TODO
+        GlobalManager.getCatalog().load(sqlPath);
         return true;
     }
 
@@ -41,7 +39,7 @@ public class Server {
      *      flush the BufferPool
      */
     public void close() {
-        // TODO
+        GlobalManager.getCatalog().persist();
     }
 
     /**
@@ -50,7 +48,7 @@ public class Server {
      * @param out
      */
     private void process(BufferedReader in, TinyDBOutput out) {
-        try{
+        try {
             String line;
             StringBuilder stringBuilder = new StringBuilder();
             while ((line = in.readLine()) != null) {
@@ -60,17 +58,11 @@ public class Server {
             in.close();
 
             String s = stringBuilder.toString().toUpperCase();//all sql word should be upper case!
-            TinyDBLexer lexer = new TinyDBLexer(CharStreams.fromString(s));
-            CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-            TinyDBParser parser = new TinyDBParser(tokenStream);
-            parser.removeErrorListeners();
-            parser.addErrorListener(out);
-
+            TinyDBParser parser = utils.createParser(s, out);
             ParseTree tree = parser.root();
-
-            Visitor visitor = new Visitor(out);
+            Visitor visitor = new Visitor(out, false);
             visitor.visit(tree);
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

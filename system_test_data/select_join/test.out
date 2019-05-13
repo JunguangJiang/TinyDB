@@ -1,21 +1,21 @@
-Line 1 : 
-Line 2 : 
-Query OK, 0 row affected. (0.0 sec)
-Query OK, 0 row affected. (0.0 sec)
-Query OK, 0 row affected. (0.0 sec)
+Query OK, 1 row affected (0.003 sec)
+Database changed (0.0 sec)
+Query OK, 0 row affected. (0.001 sec)
+Query OK, 0 row affected. (0.001 sec)
+Query OK, 0 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.003 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.001 sec)
-Query OK, 1 row affected. (0.001 sec)
-Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.001 sec)
-Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.001 sec)
-Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.002 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.0 sec)
+Query OK, 1 row affected. (0.002 sec)
 Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.0 sec)
@@ -84,7 +84,7 @@ Query OK, 1 row affected. (0.0 sec)
 +--------------+---------+------+-------------+
 |           S8 |     150 |  4.0 |         PKU |
 +--------------+---------+------+-------------+
-14 rows in set (0.005 sec)
+14 rows in set (0.007 sec)
 +--------------+--------------+-------------+
 | TEACHER.NAME | STUDENT.NAME | SCHOOL.NAME |
 +--------------+--------------+-------------+
@@ -95,7 +95,7 @@ Query OK, 1 row affected. (0.0 sec)
 |           T3 |           S5 |         PKU |
 +--------------+--------------+-------------+
 3 rows in set (0.007 sec)
+Query OK, 0 row affected. (0.001 sec)
 Query OK, 0 row affected. (0.0 sec)
-Query OK, 0 row affected. (0.0 sec)
-Query OK, 0 row affected. (0.0 sec)
-Line 61 : 
+Query OK, 0 row affected. (0.001 sec)
+Query OK, 0 rows affected (0.0 sec)

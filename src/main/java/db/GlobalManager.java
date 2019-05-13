@@ -35,5 +35,7 @@ public class GlobalManager {
     }
 
     /** Return the current database */
-    public static Database getDatabase() {return getCatalog().getCurrentDatabase();}
+    public static Database getDatabase() {
+        return getCatalog().getCurrentDatabase();
+    }
 }

@@ -1,16 +1,16 @@
-Line 1 : 
-Line 2 : 
-Query OK, 0 row affected. (0.0 sec)
+Query OK, 1 row affected (0.02 sec)
+Database changed (0.002 sec)
+Query OK, 0 row affected. (0.064 sec)
+Query OK, 1 row affected. (0.008 sec)
+Query OK, 1 row affected. (0.0 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.001 sec)
-Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.001 sec)
-Query OK, 1 rows affected. (0.0 sec)
+Query OK, 1 rows affected. (0.005 sec)
 +------+----+---------+------+--------+
 | NAME | ID | CREDITS | GPA  | SCORES |
 +------+----+---------+------+--------+
@@ -30,7 +30,7 @@ Query OK, 1 rows affected. (0.0 sec)
 +------+----+---------+------+--------+
 |   S9 |  9 |    null | null |   null |
 +------+----+---------+------+--------+
-8 rows in set (0.002 sec)
+8 rows in set (0.059 sec)
 Query OK, 1 rows affected. (0.0 sec)
 +------+----+---------+------+--------+
 | NAME | ID | CREDITS | GPA  | SCORES |
@@ -49,8 +49,8 @@ Query OK, 1 rows affected. (0.0 sec)
 +------+----+---------+------+--------+
 |   S9 |  9 |    null | null |   null |
 +------+----+---------+------+--------+
-7 rows in set (0.002 sec)
-Query OK, 0 rows affected. (0.0 sec)
+7 rows in set (0.003 sec)
+Query OK, 0 rows affected. (0.001 sec)
 +------+----+---------+------+--------+
 | NAME | ID | CREDITS | GPA  | SCORES |
 +------+----+---------+------+--------+
@@ -68,7 +68,7 @@ Query OK, 0 rows affected. (0.0 sec)
 +------+----+---------+------+--------+
 |   S9 |  9 |    null | null |   null |
 +------+----+---------+------+--------+
-7 rows in set (0.001 sec)
+7 rows in set (0.003 sec)
 Query OK, 4 rows affected. (0.001 sec)
 +------+----+---------+------+--------+
 | NAME | ID | CREDITS | GPA  | SCORES |
@@ -79,6 +79,6 @@ Query OK, 4 rows affected. (0.001 sec)
 +------+----+---------+------+--------+
 |   S9 |  9 |    null | null |   null |
 +------+----+---------+------+--------+
-3 rows in set (0.001 sec)
-Query OK, 0 row affected. (0.0 sec)
-Line 38 : 
+3 rows in set (0.002 sec)
+Query OK, 0 row affected. (0.001 sec)
+Query OK, 0 rows affected (0.0 sec)

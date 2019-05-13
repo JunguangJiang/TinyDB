@@ -11,6 +11,10 @@ public class Attribute {
         this.alias = alias;
     }
 
+    public Attribute(String tableName, String attrName) {
+        this(tableName, attrName, "");
+    }
+
     @Override
     public String toString() {
         return this.tableName + '.' + this.attrName;

@@ -22,6 +22,10 @@ public class LongField extends NumberField{
         super(i, Type.LONG_TYPE, isNull);
     }
 
+    public LongField(long i) {
+        this(i, false);
+    }
+
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeLong(value.longValue());

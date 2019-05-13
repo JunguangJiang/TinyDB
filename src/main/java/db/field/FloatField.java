@@ -22,6 +22,10 @@ public class FloatField extends NumberField{
         super(i, Type.FLOAT_TYPE, isNull);
     }
 
+    public FloatField(float i) {
+        this(i, false);
+    }
+
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeFloat(value.floatValue());
