@@ -39,7 +39,7 @@ public class Server {
      *      flush the BufferPool
      */
     public void close() {
-        GlobalManager.getCatalog().persist(sqlPath);
+        GlobalManager.getCatalog().persist();
     }
 
     /**

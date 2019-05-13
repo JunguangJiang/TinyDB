@@ -17,6 +17,9 @@ public class Catalog {
     String sqlPath;
 
     public Catalog() {
+        this.sqlPath = "test_data/";
+        // TODO temp
+        utils.removeDiretory(new File(this.sqlPath));
         this.databaseSet = new HashSet<>();
         this.database = null;
     }
@@ -31,6 +34,7 @@ public class Catalog {
         if (this.databaseSet.contains(databaseName))
             return new QueryResult(false, "ERROR 1007 (HY000): Can't create database '" + databaseName + "'; database exists");
         this.databaseSet.add(databaseName);
+        (new Database(sqlPath, databaseName)).persist();
         return new QueryResult(true, "Query OK, 1 row affected");
     }
 
@@ -45,6 +49,7 @@ public class Catalog {
             return new QueryResult(false, "ERROR 1008 (HY000): Can't drop database '" + databaseName + "'; database doesn't exist");
         }
         this.databaseSet.remove(databaseName);
+        utils.removeDiretory(new File(String.format("%s/%s", sqlPath, databaseName)));
         return new QueryResult(true, "Query OK, 0 rows affected");
     }
 
@@ -60,7 +65,7 @@ public class Catalog {
         if (this.database != null && databaseName.equals(this.database.databaseName))
             return new QueryResult(true, "Database changed");
         if (this.database != null)
-            this.database.persist(this.sqlPath);
+            this.database.persist();
         else
             this.database = new Database();
         try {
@@ -136,7 +141,7 @@ public class Catalog {
             parseCatalogFile(utils.readFile(catalogFileName));
         }
         catch (Exception e) {
-            System.out.println("File " + catalogFileName + " not exist");
+            System.out.println("File " + catalogFileName + " not exist. New database create!");
         }
 
     }
@@ -144,11 +149,11 @@ public class Catalog {
     /**
      * write names of all the databases back to file
      */
-    public void persist(String sqlPath) {
+    public void persist() {
         String catalogFilename = this.sqlPath + "catalog.script";
         try {
             if (this.database != null)
-                this.database.persist(sqlPath);
+                this.database.persist();
 
             File f = new File(catalogFilename);
             OutputStream fop = new FileOutputStream(f);

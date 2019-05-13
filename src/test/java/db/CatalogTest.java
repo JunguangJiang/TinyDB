@@ -1,8 +1,11 @@
 package db;
 
-import db.file.Table;
 import db.query.QueryResult;
+import db.tuple.TupleDesc;
 import org.junit.Test;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
+
 import static org.junit.Assert.*;
 
 public class CatalogTest {
@@ -51,7 +54,10 @@ public class CatalogTest {
         GlobalManager.getCatalog().createDatabase("database2");
 
         databaseNames = GlobalManager.getCatalog().getDatabaseNames();
-        assertArrayEquals(databaseNames, new String[]{"database2, database1, database"});
+        String[] expected = new String[]{"database2", "database1", "database"};
+        Arrays.sort(databaseNames);
+        Arrays.sort(expected);
+        assertArrayEquals(expected, databaseNames);
 
         GlobalManager.getCatalog().dropDatabase("database");
         GlobalManager.getCatalog().dropDatabase("database1");
@@ -68,7 +74,7 @@ public class CatalogTest {
         GlobalManager.getCatalog().createDatabase("database2");
         GlobalManager.getCatalog().createDatabase("database3");
 
-        GlobalManager.getCatalog().useDatabase("database2");
+        queryResult = GlobalManager.getCatalog().useDatabase("database2");
         assertTrue(queryResult.succeeded());
         Database database = GlobalManager.getCatalog().getCurrentDatabase();
         assertEquals(database.databaseName, "database2");
@@ -82,4 +88,37 @@ public class CatalogTest {
         GlobalManager.getCatalog().dropDatabase("database1");
         GlobalManager.getCatalog().dropDatabase("database2");
     }
+
+    @Test
+    public void getCurrentDatabase() {
+        // use database, set current database
+        GlobalManager.getCatalog().createDatabase("database");
+        GlobalManager.getCatalog().useDatabase("database");
+
+        Database database = GlobalManager.getCatalog().getCurrentDatabase();
+        assertEquals(database.databaseName, "database");
+
+        GlobalManager.getCatalog().dropDatabase("database");
+    }
+
+    @Test
+    public void getTableNames() {
+        // create two databases
+        GlobalManager.getCatalog().createDatabase("database1");
+        GlobalManager.getCatalog().createDatabase("database2");
+        GlobalManager.getCatalog().useDatabase("database1");
+        GlobalManager.getDatabase().createTable("table1", Utility.getTupleDesc(3, "tup"));
+        GlobalManager.getDatabase().createTable("table2", Utility.getTupleDesc(3, "tup"));
+        GlobalManager.getDatabase().createTable("table3", Utility.getTupleDesc(3, "tup"));
+
+        String[] names = GlobalManager.getCatalog().getTableNames("database1");
+        Arrays.sort(names);
+        String[] expected = new String[]{"table1", "table2", "table3"};
+        Arrays.sort(expected);
+        assertArrayEquals(expected, names);
+
+        GlobalManager.getCatalog().dropDatabase("database1");
+        GlobalManager.getCatalog().dropDatabase("database2");
+    }
+
 }

@@ -1,24 +1,24 @@
-Query OK, 1 row affected (0.0 sec)
+Query OK, 1 row affected (0.003 sec)
 Database changed (0.0 sec)
 Query OK, 0 row affected. (0.001 sec)
-Query OK, 0 row affected. (0.0 sec)
+Query OK, 0 row affected. (0.001 sec)
 Query OK, 0 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.003 sec)
-Query OK, 1 row affected. (0.002 sec)
-Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.001 sec)
-Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.0 sec)
-Query OK, 1 row affected. (0.002 sec)
+Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.0 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.002 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.0 sec)
+Query OK, 1 row affected. (0.002 sec)
+Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.0 sec)
 +--------------+---------+------+-------------+
 | STUDENT.NAME | CREDITS | GPA  | SCHOOL.NAME |
 +--------------+---------+------+-------------+
@@ -38,7 +38,7 @@ Query OK, 1 row affected. (0.001 sec)
 +--------------+---------+------+-------------+
 |           S8 |     150 |  4.0 |         ZJU |
 +--------------+---------+------+-------------+
-8 rows in set (0.008 sec)
+8 rows in set (0.009 sec)
 +--------------+---------+------+-------------+
 | STUDENT.NAME | CREDITS | GPA  | SCHOOL.NAME |
 +--------------+---------+------+-------------+
@@ -52,7 +52,7 @@ Query OK, 1 row affected. (0.001 sec)
 +--------------+---------+------+-------------+
 |           S8 |     150 |  4.0 |         ZJU |
 +--------------+---------+------+-------------+
-5 rows in set (0.007 sec)
+5 rows in set (0.006 sec)
 +--------------+---------+------+-------------+
 | STUDENT.NAME | CREDITS | GPA  | SCHOOL.NAME |
 +--------------+---------+------+-------------+
@@ -96,6 +96,6 @@ Query OK, 1 row affected. (0.001 sec)
 +--------------+--------------+-------------+
 3 rows in set (0.007 sec)
 Query OK, 0 row affected. (0.001 sec)
-Query OK, 0 row affected. (0.001 sec)
+Query OK, 0 row affected. (0.0 sec)
 Query OK, 0 row affected. (0.001 sec)
 Query OK, 0 rows affected (0.0 sec)

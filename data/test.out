@@ -1,3 +1,5 @@
-Query OK, 1 row affected (0.001 sec)
-Query OK, 1 row affected (0.0 sec)
-Line 3 : System collapse. Something error, todo.
+Line 1 : ERROR 1007 (HY000): Can't create database 'TEST1'; database exists
+Line 2 : ERROR 1007 (HY000): Can't create database 'TEST2'; database exists
+Line 3 : ERROR 1007 (HY000): Can't create database 'TEST3'; database exists
+Database changed (0.081 sec)
+Line 5 : Table A already exists.

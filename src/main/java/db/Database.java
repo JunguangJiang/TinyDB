@@ -24,11 +24,18 @@ public class Database {
     private HashMap<Integer, String> idSqlMap; // use to save the sql sentence of certain database
     private static int id = 0; // Each table has a unique id
     public String databaseName; // The name of database
+    public String sqlPath; // The path to store sql data
 
     Database() {
         nameIdMap = new HashMap<>();
         idTableMap = new HashMap<>();
         idSqlMap = new HashMap<>();
+    }
+
+    Database(String sqlPath, String databaseName) {
+        this();
+        this.databaseName = databaseName;
+        this.sqlPath = sqlPath;
     }
 
     /**
@@ -55,12 +62,11 @@ public class Database {
         if (getTable(tableName) != null) {
             return new QueryResult(false, "Table " + tableName + " already exists.");
         } else {
-            // TODO currently we create file in the same directory,
-            //  we need to create file in a tree structure
-            File file = new File(tableName + ".db");
+            File file = new File(String.format("%s%s/%s.db", sqlPath, databaseName, tableName));
             if (!isLog) {
                 try {
-                    file.createNewFile();
+                    if (!file.createNewFile())
+                        System.out.println(String.format("Create %s.db failed", tableName));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -156,11 +162,13 @@ public class Database {
     private void parseDatabaseScript(String content, File outFile) {
         try {
             content = content.split("\n", 2)[1];
-            TinyDBOutput out = new TinyDBOutput(new BufferedWriter(new FileWriter(outFile)));
+            BufferedWriter log = new BufferedWriter(new FileWriter(outFile));
+            TinyDBOutput out = new TinyDBOutput(log);
             TinyDBParser parser = utils.createParser(content, out);
             ParseTree tree = parser.root();
             Visitor visitor = new Visitor(out, true);
             visitor.visit(tree);
+            log.close();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -174,13 +182,18 @@ public class Database {
      */
     public void load(String sqlPath, String databaseName) throws NoSuchElementException{
         this.databaseName = databaseName;
+        this.sqlPath = sqlPath;
         String root = sqlPath + this.databaseName + "/";
         String databaseScriptFilename = root + String.format("%s.script", databaseName);
+        File log = new File(root + "log.txt");
         try {
-            parseDatabaseScript(utils.readFile(databaseScriptFilename), new File(root + "log.txt"));
+            parseDatabaseScript(utils.readFile(databaseScriptFilename), log);
         } catch (Exception e) {
             System.out.println("File " + databaseScriptFilename + " not exist");
             throw new NoSuchElementException();
+        } finally {
+            if (!log.delete())
+                System.out.println("Log file delete failed! Please remove it by hand.");
         }
     }
 
@@ -222,10 +235,9 @@ public class Database {
 
     /**
      * persist: write the tables of the database back to the file
-     * @param sqlPath: the directory where you save the metadata
      */
-    public void persist(String sqlPath) {
-        String root = sqlPath + this.databaseName + "/";
+    public void persist() {
+        String root = this.sqlPath + this.databaseName + "/";
         if (!newDatabaseDirectory(root)) {
             return;
         }

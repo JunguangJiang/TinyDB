@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
+
 public class utils {
     /**
      * readFile:
@@ -45,5 +46,21 @@ public class utils {
         parser.removeErrorListeners();
         parser.addErrorListener(out);
         return parser;
+    }
+
+    public static boolean removeDiretory(File dir) {
+        File[] files = dir.listFiles();
+        if (files == null)
+            return true;
+        for (File file: files) {
+            if(file.isDirectory()) {
+                if (!removeDiretory(file))
+                    return false;
+            }else {
+                if (!file.delete())
+                    return false;
+            }
+        }
+        return dir.delete();
     }
 }
