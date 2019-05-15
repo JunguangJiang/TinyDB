@@ -133,7 +133,7 @@ public class BTreeInternalPage extends BTreePage {
 	 * Computes the number of bytes in the header of a B+ internal page with each entry occupying entrySize bytes
 	 * @return the number of bytes in the header
 	 */
-	private int getHeaderSize() {        
+	private int getHeaderSize() {
 		int slotsPerPage = getMaxEntries() + 1;
 		int hb = (slotsPerPage / 8);
 		if (hb * 8 < slotsPerPage) hb++;

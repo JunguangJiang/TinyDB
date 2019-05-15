@@ -6,7 +6,7 @@ import java.util.*;
 /**
  * TupleDesc describes the schema of a tuple.
  */
-public class TupleDesc implements Serializable {
+public class TupleDesc implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     private TDItem[] tdItems;
@@ -48,7 +48,6 @@ public class TupleDesc implements Serializable {
         return Arrays.asList(tdItems).iterator();
     }
 
-
     /**
      * @return the number of fields in this TupleDesc
      */
@@ -78,6 +77,13 @@ public class TupleDesc implements Serializable {
             attrNames[i] = getField(i).fieldName;
         }
         return attrNames;
+    }
+
+    /**
+     * @return primaryKeys
+     */
+    public String[] getPrimaryKeys(){
+        return this.primaryKeys;
     }
 
     /**

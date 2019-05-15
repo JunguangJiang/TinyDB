@@ -1,9 +1,6 @@
 package db.file.BTree;
 
-import db.*;
 import db.file.*;
-import db.tuple.Tuple;
-import db.tuple.TupleDesc;
 import db.field.Field;
 import java.io.Serializable;
 

@@ -1,7 +1,12 @@
 package db.file.BTree;
 
+import db.DbException;
+import db.GlobalManager;
 import db.file.DbFileIterator;
+import db.file.Table;
 import db.query.OpIterator;
+import db.tuple.TDItem;
+import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
 import java.util.*;
@@ -15,7 +20,6 @@ public class BTreeScan implements OpIterator {
 	private static final long serialVersionUID = 1L;
 
 	private boolean isOpen = false;
-	private TransactionId tid;
 	private TupleDesc myTd;
 	private IndexPredicate ipred = null;
 	private transient DbFileIterator it;
@@ -23,28 +27,21 @@ public class BTreeScan implements OpIterator {
 	private String alias;
 
 	/**
-	 * Creates a B+ tree scan over the specified table as a part of the
-	 * specified transaction.
-	 * 
-	 * @param tid
-	 *            The transaction this scan is running as a part of.
+	 * Creates a B+ tree scan over the specified table
+	 *
 	 * @param tableid
 	 *            the table to scan.
 	 * @param tableAlias
 	 *            the alias of this table (needed by the parser); the returned
 	 *            tupleDesc should have fields with name tableAlias.fieldName
-	 *            (note: this class is not responsible for handling a case where
-	 *            tableAlias or fieldName are null. It shouldn't crash if they
-	 *            are, but the resulting name can be null.fieldName,
-	 *            tableAlias.null, or null.null).
+     *            this parameter should not be null
 	 * @param ipred
 	 * 			  The index predicate to match. If null, the scan will return all tuples
 	 *            in sorted order
 	 */
-	public BTreeScan(TransactionId tid, int tableid, String tableAlias, IndexPredicate ipred) {
-		this.tid = tid;
+	public BTreeScan(int tableid, String tableAlias, IndexPredicate ipred) {
 		this.ipred = ipred;
-		reset(tableid,tableAlias);
+		reset(tableid, tableAlias);
 	}
 
 	/**
@@ -71,39 +68,34 @@ public class BTreeScan implements OpIterator {
 	 * @param tableAlias
 	 *            the alias of this table (needed by the parser); the returned
 	 *            tupleDesc should have fields with name tableAlias.fieldName
-	 *            (note: this class is not responsible for handling a case where
-	 *            tableAlias or fieldName are null. It shouldn't crash if they
-	 *            are, but the resulting name can be null.fieldName,
-	 *            tableAlias.null, or null.null).
+	 *            this parameter should not be null
 	 */
 	public void reset(int tableid, String tableAlias) {
-		this.isOpen=false;
+		this.isOpen = false;
 		this.alias = tableAlias;
-		this.tablename = Database.getCatalog().getTableName(tableid);
+        Table targetTable = GlobalManager.getDatabase().getTable(tableid);
+		this.tablename = targetTable.getName();
 		if(ipred == null) {
-			this.it = Database.getCatalog().getDatabaseFile(tableid).iterator(tid);
+			this.it = GlobalManager.getDatabase().getDbFile(tableid).iterator();
 		}
 		else {
-			this.it = ((BTreeFile) Database.getCatalog().getDatabaseFile(tableid)).indexIterator(tid, ipred);
+			this.it = ((BTreeFile) GlobalManager.getDatabase().getDbFile(tableid)).indexIterator(ipred);
 		}
-		myTd = Database.getCatalog().getTupleDesc(tableid);
-		String[] newNames = new String[myTd.numFields()];
-		Type[] newTypes = new Type[myTd.numFields()];
+		myTd = targetTable.getTupleDesc();
+		LinkedList<TDItem> newItems = new LinkedList<>();
 		for (int i = 0; i < myTd.numFields(); i++) {
-			String name = myTd.getFieldName(i);
-			Type t = myTd.getFieldType(i);
+            TDItem tmp = myTd.getField(i);
+            newItems.add(new TDItem(tmp.fieldType, tableAlias + "." + tmp.fieldName, tmp.notNull, tmp.maxLen));
+        }
 
-			newNames[i] = tableAlias + "." + name;
-			newTypes[i] = t;
-		}
-		myTd = new TupleDesc(newTypes, newNames);
+		myTd = new TupleDesc(newItems.toArray(new TDItem[0]), myTd.getPrimaryKeys());
 	}
 
-	public BTreeScan(TransactionId tid, int tableid, IndexPredicate ipred) {
-		this(tid, tableid, Database.getCatalog().getTableName(tableid), ipred);
+	public BTreeScan(int tableid, IndexPredicate ipred) {
+		this(tableid, GlobalManager.getDatabase().getTable(tableid).getName(), ipred);
 	}
 
-	public void open() throws DbException, TransactionAbortedException {
+	public void open() throws DbException {
 		if (isOpen)
 			throw new DbException("double open on one OpIterator.");
 
@@ -124,14 +116,13 @@ public class BTreeScan implements OpIterator {
 		return myTd;
 	}
 
-	public boolean hasNext() throws TransactionAbortedException, DbException {
+	public boolean hasNext() throws DbException {
 		if (!isOpen)
 			throw new IllegalStateException("iterator is closed");
 		return it.hasNext();
 	}
 
-	public Tuple next() throws NoSuchElementException,
-	TransactionAbortedException, DbException {
+	public Tuple next() throws NoSuchElementException, DbException {
 		if (!isOpen)
 			throw new IllegalStateException("iterator is closed");
 
@@ -143,8 +134,7 @@ public class BTreeScan implements OpIterator {
 		isOpen = false;
 	}
 
-	public void rewind() throws DbException, NoSuchElementException,
-	TransactionAbortedException {
+	public void rewind() throws DbException, NoSuchElementException {
 		close();
 		open();
 	}
