@@ -5,7 +5,9 @@ import db.tuple.Tuple;
 
 import java.util.NoSuchElementException;
 
-/** Helper for implementing DbFileIterators. Handles hasNext()/next() logic. */
+/**
+ * Helper for implementing DbFileIterators.
+ */
 public abstract class AbstractDbFileIterator implements DbFileIterator {
 
     public boolean hasNext() throws DbException {

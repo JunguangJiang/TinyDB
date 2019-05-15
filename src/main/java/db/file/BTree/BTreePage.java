@@ -33,22 +33,6 @@ public abstract class BTreePage implements Page {
 	protected final Byte oldDataLock=new Byte((byte)0);
 
 	/**
-	 * Create a BTreeInternalPage from a set of bytes of data read from disk.
-	 * The format of a BTreeInternalPage is a set of header bytes indicating
-	 * the slots of the page that are in use, some number of entry slots, and extra
-	 * bytes for the parent pointer, one extra child pointer (a node with m entries 
-	 * has m+1 pointers to children), and the category of all child pages (either 
-	 * leaf or internal).
-	 *  Specifically, the number of entries is equal to: <p>
-	 *          floor((BufferPool.getPageSize()*8 - extra bytes*8) / (entry size * 8 + 1))
-	 * <p> where entry size is the size of entries in this index node
-	 * (key + child pointer), which can be determined via the key field and
-	 * The number of 8-bit header words is equal to:
-	 * <p>
-	 *      ceiling((no. entry slots + 1) / 8)
-	 * <p>
-	 * @see BufferPool#getPageSize()
-	 * 
 	 * @param id - the id of this page
 	 * @param key - the field which the index is keyed on
 	 */
@@ -68,15 +52,13 @@ public abstract class BTreePage implements Page {
 	/**
 	 * Static method to generate a byte array corresponding to an empty
 	 * BTreePage.
-	 * Used to add new, empty pages to the file. Passing the results of
-	 * this method to the BTreeInternalPage or BTreeLeafPage constructor will create a BTreePage with
-	 * no valid entries in it.
+	 * Used to add new, empty pages to the file.
 	 *
 	 * @return The returned ByteArray.
 	 */
 	public static byte[] createEmptyPageData() {
 		int len = BufferPool.getPageSize();
-		return new byte[len]; //all 0
+		return new byte[len]; // all 0
 	}
 
 	/**
@@ -114,15 +96,14 @@ public abstract class BTreePage implements Page {
 	}
 
 	/**
-	 * Marks this page as dirty/not dirty and record that transaction
-	 * that did the dirtying
+	 * Marks this page as dirty/not dirty
 	 */
 	public void markDirty(boolean dirty) {
 		this.dirty = dirty;
 	}
 
 	/**
-	 * Returns the tid of the transaction that last dirtied this page, or null if the page is not dirty
+	 * Returns whether the page is dirty or not
 	 */
 	public boolean isDirty() {
 		return this.dirty;

@@ -37,10 +37,11 @@ public class IndexPredicate implements Serializable {
         return op;
     }
 
-    /** Return true if the fieldvalue in the supplied predicate
-     is satisfied by this predicate's fieldvalue and
-     operator.
-     @param ipd The field to compare against.
+    /**
+     * Return true if the fieldvalue in the supplied predicate
+     * is satisfied by this predicate's fieldvalue and
+     * operator.
+     * @param ipd The field to compare against.
      */
     public boolean equals(IndexPredicate ipd) {
         if (ipd == null)

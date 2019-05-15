@@ -35,15 +35,24 @@ public class BTreeFile implements DbFile {
 	 * 
 	 * @param f - the file that stores the on-disk backing store for this B+ tree
 	 *            file.
-	 * @param key - the field which index is keyed on
 	 * @param td - the tuple descriptor of tuples in the file
+     *
+     * (already dropped) param key - the field which index is keyed on, now we just use the first column
+     *            of PrimaryKey rather than read from this parameter
 	 */
-	public BTreeFile(File f, int key, TupleDesc td) {
+	/* public BTreeFile(File f, int key, TupleDesc td) {
 		this.f = f;
 		this.tableid = f.getAbsoluteFile().hashCode();
 		this.keyField = key;
 		this.td = td;
-	}
+	}*/
+
+	public BTreeFile(int id, File f, TupleDesc td){
+        this.f = f;
+        this.tableid = id;
+        this.keyField = td.getPrimaryKeysIndex()[0];
+        this.td = td;
+    }
 
 	/**
 	 * Returns the File backing this BTreeFile on disk.
@@ -53,12 +62,6 @@ public class BTreeFile implements DbFile {
 	}
 
 	/**
-	 * Returns an ID uniquely identifying this BTreeFile. Implementation note:
-	 * you will need to generate this tableid somewhere and ensure that each
-	 * BTreeFile has a "unique id," and that you always return the same value for
-	 * a particular BTreeFile. We suggest hashing the absolute file name of the
-	 * file underlying the BTreeFile, i.e. f.getAbsoluteFile().hashCode().
-	 * 
 	 * @return an ID uniquely identifying this BTreeFile.
 	 */
 	public int getId() {
@@ -1194,24 +1197,6 @@ public class BTreeFile implements DbFile {
 
 		// if this is the last page in the file (and not the only page), just 
 		// truncate the file
-		// @TODO: Commented out because we should probably do this somewhere else in case the transaction aborts....
-//		synchronized(this) {
-//			if(emptyPageNo == numPages()) {
-//				if(emptyPageNo <= 1) {
-//					// if this is the only page in the file, just return.
-//					// It just means we have an empty root page
-//					return;
-//				}
-//				long newSize = f.length() - BufferPool.getPageSize();
-//				FileOutputStream fos = new FileOutputStream(f, true);
-//				FileChannel fc = fos.getChannel();
-//				fc.truncate(newSize);
-//				fc.close();
-//				fos.close();
-//				return;
-//			}
-//		}
-
 		// otherwise, get a read lock on the root pointer page and use it to locate 
 		// the first header page
 		BTreeRootPtrPage rootPtr = getRootPtrPage(dirtypages);
@@ -1276,9 +1261,7 @@ public class BTreeFile implements DbFile {
 	}
 
 	/**
-	 * Get an iterator for all tuples in this B+ tree file in sorted order. This method 
-	 * will acquire a read lock on the affected pages of the file, and may block until 
-	 * the lock can be acquired.
+	 * Get an iterator for all tuples in this B+ tree file in sorted order.
 	 *
 	 * @return an iterator for all the tuples in this file
 	 */

@@ -2,7 +2,8 @@ package db.file.BTree;
 
 import db.file.PageId;
 
-/** Unique identifier for BTreeInternalPage, BTreeLeafPage, BTreeHeaderPage
+/**
+ * Unique identifier for BTreeInternalPage, BTreeLeafPage, BTreeHeaderPage
  *  and BTreeRootPtrPage objects. 
  */
 public class BTreePageId implements PageId {

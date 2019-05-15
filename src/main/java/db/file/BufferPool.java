@@ -3,6 +3,7 @@ package db.file;
 import db.*;
 import db.tuple.Tuple;
 import db.file.heap.HeapFile;
+import db.file.BTree.BTreeFile;
 
 import java.io.*;
 import java.util.*;
@@ -85,7 +86,7 @@ public class BufferPool {
      * @param t the tuple to add
      */
     public void insertTuple(int tableId, Tuple t)
-            throws IOException, PrimaryKeyViolation {
+            throws IOException, PrimaryKeyViolation, DbException {
         DbFile dbFile = GlobalManager.getDatabase().getDbFile(tableId);
         ArrayList<Page> affectedPages = dbFile.insertTuple(t);
         for (Page page : affectedPages) {
@@ -109,7 +110,16 @@ public class BufferPool {
     public void deleteTuple(Tuple t) {
         int tableId = t.getRecordId().getPageId().getTableId();
         DbFile dbFile = GlobalManager.getDatabase().getDbFile(tableId);
-        ArrayList<Page> pages = ((HeapFile)dbFile).deleteTuple(t);
+        // ArrayList<Page> pages = ((HeapFile)dbFile).deleteTuple(t);
+        ArrayList<Page> pages = null;
+        try {
+            pages = ((BTreeFile)dbFile).deleteTuple(t);
+        }
+        catch (DbException e){
+            e.printStackTrace();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
         for (Page page : pages) {
             page.markDirty(true);
         }
