@@ -1,7 +1,5 @@
 package db.file.BTree;
 
-import db.Database;
-import db.Catalog;
 import db.DbException;
 import db.GlobalManager;
 import db.field.Type;

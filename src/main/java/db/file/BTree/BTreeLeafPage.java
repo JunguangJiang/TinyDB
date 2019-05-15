@@ -19,7 +19,6 @@ import java.io.*;
  *
  * @see BTreeFile
  * @see BufferPool
- *
  */
 public class BTreeLeafPage extends BTreePage {
 	private final byte header[];

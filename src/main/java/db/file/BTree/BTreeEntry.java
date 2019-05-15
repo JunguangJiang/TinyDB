@@ -11,8 +11,8 @@ import java.io.Serializable;
  * the key, and all of the entries or tuples in the right child page should be greater 
  * than or equal to the key.
  * 
- * Note that updating a BTreeEntry does not actually change the data stored on the page 
- * identified by its recordId. After updating a BTreeEntry object, you must call 
+ * Update a BTreeEntry does not actually change the data stored on the page
+ * identified by its recordId. After updating a BTreeEntry object, call
  * BTreeInternalPage.updateEntry() in order for the changes to take effect.
  *
  * @see BTreeInternalPage
@@ -85,10 +85,7 @@ public class BTreeEntry implements Serializable {
 	}
 	
 	/**
-	 * Set the key for this entry. Note that updating a BTreeEntry does not 
-	 * actually change the data stored on the page identified by its recordId.  After
-	 * calling this method, you must call BTreeInternalPage.updateEntry() in order for
-	 * it to take effect.
+	 * Set the key for this entry.
 	 * @param key - the new key
 	 * @see BTreeInternalPage#updateEntry(BTreeEntry)
 	 */
@@ -97,10 +94,7 @@ public class BTreeEntry implements Serializable {
 	}
 	
 	/**
-	 * Set the left child id for this entry.  Note that updating a BTreeEntry does not 
-	 * actually change the data stored on the page identified by its recordId.  After
-	 * calling this method, you must call BTreeInternalPage.updateEntry() in order for
-	 * it to take effect.
+	 * Set the left child id for this entry.
 	 * @param leftChild - the new left child
 	 * @see BTreeInternalPage#updateEntry(BTreeEntry)
 	 */
@@ -109,10 +103,7 @@ public class BTreeEntry implements Serializable {
 	}
 	
 	/**
-	 * Set the right child id for this entry.  Note that updating a BTreeEntry does not 
-	 * actually change the data stored on the page identified by its recordId.  After
-	 * calling this method, you must call BTreeInternalPage.updateEntry() in order for
-	 * it to take effect.
+	 * Set the right child id for this entry.
 	 * @param rightChild - the new right child
 	 * @see BTreeInternalPage#updateEntry(BTreeEntry)
 	 */
