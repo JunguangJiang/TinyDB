@@ -1,18 +1,40 @@
 CREATE DATABASE dbName;
-show databases;
 use database dbName;
+create table person(name string(256) not null, ID int, weight long, height float, ratio double, primary key(ID));
+insert into person(name, ID) values ("hie", 4);
+insert into person(name, ID, weight, height) values ("woo", 5, 100, 165.0);
+insert into person(name, ID, ratio) values ("jiang", 6, 5.4);
+insert into person(name, ID) values ("jun", 7);
+insert into person VALUES ("mk", 8, 199, 29.9, 2.4);
+insert into person VALUES ("sm", 9, 299, 29.9, 33.4);
 
-CREATE TABLE myTable(a int, b STRING(39), c float not null, d double, e long, primary key(a,b));
-create table person(name string(256), ID int not null, primary key(ID));
+select person.name, ID, weight, height, ratio from person where id > 4 and ratio = 0.0;
+
+create table man(name string(256) not null, ID int, wife string(100));
+insert into man(name, ID, wife) values ("hie", 4, "woo");
+insert into man values ("jiang", 6, "jun");
+select man.name, man.ID, wife, weight, height from man join person on man.name = person.name where man.id = person.id and man.id=4;
+
+
+delete from person where name = "jun";
+update person set names = "hi" where name = "hie";
+update person set ratio = 1.0 where ratio = 0.0;
+select name, ID, weight, height, ratio from persons;
+select names, ID, weight, height, ratio from person;
+select name, ID, weight, height, ratio from person where ids=4;
+select name, man.ID, wife, weight, height from man join person on man.name = person.name where man.id = person.id and man.id=4;
+
+select man.name, man.ID, wife, weight, height from man, person where man.id = person.id and man.id=4;
+
+select name, height, ratio from person where height > ratio;
+
+insert into person(name, ID, weight) values ("hi", 4);
+insert into person(name, ID, weights) values ("hi", 4, 5);
+
+show databases;
 show database dbName;
-show table myTable;
-insert into myTable(a,b,c,d,e) values(12,'blob',2.2,4.4,3000);
-delete from myTable where d=4.4;
-update myTable set a=0 where b='blob';
+show table man;
+show table woman;
 
-create table newTable(a int);
-select myTable.c, newTable.a, d from myTable JOIN newTable ON myTable.a = newTable.a;
-select name from person where ID > 3 and ID < 10.1;
-
-drop table myTable;
-drop database dbName;
+drop table person;
+drop table man;

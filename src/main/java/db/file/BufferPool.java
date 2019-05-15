@@ -151,13 +151,19 @@ public class BufferPool {
 
     /**
      * Flushes a certain page to disk
+     * If the Table of the page was deleted, then do nothing.
      * @param pid an ID indicating the page to flush
      */
     private synchronized  void flushPage(PageId pid) throws IOException {
         Page page = this.pageHashMap.get(pid);
         int tableId = pid.getTableId();
-        DbFile file = GlobalManager.getDatabase().getDbFile(tableId);
-        file.writePage(page);
+        DbFile file;
+        try {
+            file = GlobalManager.getDatabase().getDbFile(tableId);
+            file.writePage(page);
+        } catch (NullPointerException e){
+            System.out.println("Table "+tableId + " has already been deleted.");
+        }
         page.markDirty(false);
     }
 

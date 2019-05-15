@@ -11,9 +11,9 @@ public class TDItemTest {
     @Test
     public void getBytes() {
         TDItem tdItem = new TDItem(Type.STRING_TYPE, "S", false, 30);
-        assertEquals(tdItem.getBytes(), 34);
+        assertEquals(tdItem.getBytes(), 35);
         TDItem tdItem1 = new TDItem(Type.FLOAT_TYPE, "F", false, 30);
-        assertEquals(tdItem1.getBytes(), Float.BYTES);
+        assertEquals(tdItem1.getBytes(), Float.BYTES+1);
     }
 
     @Test

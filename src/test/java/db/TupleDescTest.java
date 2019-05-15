@@ -73,8 +73,8 @@ public class TupleDescTest {
 
     @Test
     public void getSize() {
-        assertEquals(tupleDesc1.getSize(), 112);
-        assertEquals(tupleDesc2.getSize(), 212);
+        assertEquals(tupleDesc1.getSize(), 115);
+        assertEquals(tupleDesc2.getSize(), 215);
     }
 
     @Test

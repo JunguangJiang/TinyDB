@@ -6,8 +6,10 @@
 ```bash
 gradle assemble #编译并生成主程序，Main函数的设置在build.gradle中
 java -jar build/libs/TinyDB-1.0.jar #运行主程序Main
+java -jar build/libs/TinyDB-1.0.jar Help #查看程序支持的参数
 ```
 其他的gradle命令可以通过gradle tasks查看。
+
 
 
 ### 开发说明
@@ -17,4 +19,3 @@ java -jar build/libs/TinyDB-1.0.jar #运行主程序Main
 ```bash
 'Main-Class': 'db.SqlTest'
 ```
-可以改变程序的入口，SqlTest入口是用来进行系统测试的；此后需要实现Server和Client的入口，从而生成服务器和客户端的程序。

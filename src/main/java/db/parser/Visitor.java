@@ -1,5 +1,6 @@
 package db.parser;
 
+import com.github.freva.asciitable.AsciiTable;
 import db.*;
 import db.field.Type;
 import db.field.TypeMismatch;
@@ -7,38 +8,45 @@ import db.file.Table;
 import db.query.*;
 import db.query.Predicate;
 import db.tuple.TDItem;
+import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
+import org.antlr.v4.runtime.misc.Interval;
+
+/**
+ * Visitor visits the AST of SQL code, and execute the SQL query in the Database.
+ @author jiangjunguang
+ */
 
 public class Visitor extends TinyDBParserBaseVisitor<Object> {
     /**
-     * AttributeTable records the table each attribute belonging to in a certain parsing context.
+     * AttributeTable records the table each attribute belonging to
+     * in a certain parsing context.
      *
      * E.g. If we have Table A (attr1 type1, attr2 type2),
      * then in the context "from table A",
      * we have maps :
      *      attr1 -> A
      *      attr2 -> A
-     * If two tables has the same attribute, then return null.
      *
-     * Besides, attribute table records the order in which the tables were added,
-     * s.t. you can get the index of an attribute in a joined table.
+     * If two tables has the same attribute, then throw NoSuchElementException
+     * to indicate ambiguity.
      *
      */
     private class AttributeTable {
         private HashMap<String, Table> map;
-        public AttributeTable() {
+        private AttributeTable() {
             map = new HashMap<>();
         }
 
         /**
          * Clear all the attributes in the AttributeTable.
          */
-        public void clear(){
+        private void clear(){
             map.clear();
         }
 
@@ -46,7 +54,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
          * Add a table and all its associated attributes into the AttributeTable
          * @param table
          */
-        public void addTable(Table table){
+        private void addTable(Table table){
             String[] attrNames = table.getTupleDesc().getAttrNames();
             for (String attrName : attrNames) {
                 if (map.containsKey(attrName)) { // If two tables has the same attribute,
@@ -61,9 +69,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         /**
          * @param attrName the name of an attribute
          * @return the Table which an attribute belongs to,
-         * @throws NoSuchElementException if the attrName doesn't exist or has more than 1 Table
+         * @throws NoSuchElementException if the attrName doesn't exist or is ambiguous
          */
-        public Table getBelongingTable(String attrName) {
+        private Table getBelongingTable(String attrName) {
             if (map.containsKey(attrName)) {
                 Table table = map.get(attrName);
                 if (table == null) {
@@ -79,14 +87,16 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
     private TinyDBOutput output;
     private AttributeTable attributeTable;
+    private Boolean isLog;
     /**
      * Visitor parse the sql file and print the result to the out(BufferWriter).
      * @param output query result and error information will all go to output
      */
-    public Visitor(TinyDBOutput output){
+    public Visitor(TinyDBOutput output, Boolean isLog){
         super();
         this.output = output;
         this.attributeTable = new AttributeTable();
+        this.isLog = isLog;
     }
 
     /**
@@ -110,7 +120,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      *     ;
      * For each sqlStatement, we will record the query time.
      * If the statement was executed correctly, then output the query result with the query time.
-     * Else, output the error message(done by the child visitor).
+     * Else, output the error message.
      * @param ctx
      * @return
      */
@@ -118,10 +128,10 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     public Object visitSqlStatement(TinyDBParser.SqlStatementContext ctx) {
         this.attributeTable.clear();
         long startTime = System.currentTimeMillis();
-        QueryResult queryResult = null;
+        QueryResult queryResult;
         try {
             queryResult = (QueryResult) super.visitSqlStatement(ctx);
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | ClassCastException e) {
             queryResult = new QueryResult(false, e.getMessage());
         }
         long endTime = System.currentTimeMillis();
@@ -197,8 +207,14 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         }
         TDItem[] tdItems = tdItemArrayList.toArray(new TDItem[0]);
         TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKeys);
-
-        return GlobalManager.getDatabase().createTable(tableName, tupleDesc);
+        int a = ctx.start.getStartIndex();
+        int b = ctx.stop.getStopIndex();
+        Interval interval = new Interval(a,b);
+        if (GlobalManager.getDatabase() == null) {
+            return new QueryResult(false, "Database not set. Please input the sql 'USE DATABASE $NAME' first");
+        } else{
+            return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog);
+        }
     }
 
     /**
@@ -293,6 +309,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         if (ctx.attrNames() != null) {
             attrNames = (String[])visit(ctx.attrNames());
         }
+        if (ctx.constants() == null) {
+            return new QueryResult(false, "values can not be empty");
+        }
         Object[] values = (Object[]) visit(ctx.constants());
         Table table = (Table)visit(ctx.table());
         return table.insertTuple(attrNames, values);
@@ -346,12 +365,17 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitLogicalExpressionPredicate(TinyDBParser.LogicalExpressionPredicateContext ctx) {
-        Predicate left = (Predicate)visit(ctx.left);
         LogicalPredicate.Op op = (LogicalPredicate.Op)visit(ctx.logicalOperator());
-        Predicate right = (Predicate)visit(ctx.right);
-        return new LogicalPredicate(left, op, right);
+        return new LogicalPredicate((Predicate)visit(ctx.left), op, (Predicate)visit(ctx.right));
     }
 
+    /**
+     *logicalOperator
+     *     : AND | '&' '&' | OR | '|' '|'
+     *     ;
+     * @param ctx
+     * @return
+     */
     @Override
     public Object visitLogicalOperator(TinyDBParser.LogicalOperatorContext ctx) {
         String text = ctx.getText();
@@ -364,23 +388,33 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         }
     }
 
+    /**
+     * comparisonOperator
+     *     : '=' | '>' | '<' | '<' '=' | '>' '='
+     *     | '<' '>' | '!' '='
+     *     ;
+     * @param ctx
+     * @return
+     */
     @Override
     public Object visitComparisonOperator(TinyDBParser.ComparisonOperatorContext ctx) {
         String text = ctx.getText();
-        if (text.equals("=")){
-            return ComparisonPredicate.Op.EQUALS;
-        } else if (text.equals(">")) {
-            return ComparisonPredicate.Op.GREATER_THAN;
-        } else if (text.equals("<")) {
-            return ComparisonPredicate.Op.LESS_THAN;
-        } else if (text.equals("<=")) {
-            return ComparisonPredicate.Op.LESS_THAN_OR_EQ;
-        } else if (text.equals(">=")) {
-            return ComparisonPredicate.Op.GREATER_THAN_OR_EQ;
-        } else if (text.equals("<>") || text.equals("!=")) {
-            return ComparisonPredicate.Op.NOT_EQUALS;
-        } else {
-            throw new NotImplementedException();
+        switch (text) {
+            case "=":
+                return ComparisonPredicate.Op.EQUALS;
+            case ">":
+                return ComparisonPredicate.Op.GREATER_THAN;
+            case "<":
+                return ComparisonPredicate.Op.LESS_THAN;
+            case "<=":
+                return ComparisonPredicate.Op.LESS_THAN_OR_EQ;
+            case ">=":
+                return ComparisonPredicate.Op.GREATER_THAN_OR_EQ;
+            case "<>":
+            case "!=":
+                return ComparisonPredicate.Op.NOT_EQUALS;
+            default:
+                throw new IllegalStateException();
         }
     }
 
@@ -428,6 +462,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         // A simple query plan without optimization
         OpIterator join = (OpIterator) visit(ctx.tableSources());
         // After we visit table sources, we have attributeTable ready to look up.
+
         OpIterator filter;
         if (ctx.whereExpr != null) {
             Predicate predicate = (Predicate) visit(ctx.whereExpr);
@@ -440,7 +475,6 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         for(TinyDBParser.FullColumnNameContext context : ctx.fullColumnName()) {
             projectElements.add((Attribute) visit(context));
         }
-
         Project project = new Project(projectElements.toArray(new Attribute[0]), filter);
         Query query = new Query(project);
 
@@ -460,8 +494,20 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitTableSources(TinyDBParser.TableSourcesContext ctx) {
-        // TODO Currently, we simply return the first table source!
-        return visit(ctx.tableSource(0));
+        OpIterator opIterator = null;
+        for (TinyDBParser.TableSourceContext context : ctx.tableSource()) {
+            if (opIterator == null) {
+                opIterator = (OpIterator)visit(context);
+            } else {
+                opIterator = new Join(opIterator, new Predicate() {
+                    @Override
+                    public boolean filter(Tuple tuple) {
+                        return true;
+                    }
+                }, (OpIterator)visit(context));
+            }
+        }
+        return opIterator;
     }
 
     /**
@@ -527,11 +573,13 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     public Object visitDeleteStatement(TinyDBParser.DeleteStatementContext ctx) {
         Table table = (Table) visit(ctx.table());
         this.attributeTable.addTable(table);
+
         OpIterator opIterator = new SeqScan(table);
         if (ctx.predicate() != null) {
             Predicate predicate = (Predicate) visit(ctx.predicate());
             opIterator = new Filter(predicate, opIterator);
         }
+
         Delete delete = new Delete(opIterator);
         Query query = new Query(delete);
         return query.executeDeleteOrUpdate();
@@ -550,14 +598,19 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     public Object visitUpdateStatement(TinyDBParser.UpdateStatementContext ctx) {
         Table table = (Table) visit(ctx.table());
         this.attributeTable.addTable(table);
-        SeqScan seqScan = new SeqScan(table);
-        Filter filter = new Filter((Predicate) visit(ctx.predicate()), seqScan);
+
+        OpIterator opIterator = new SeqScan(table);
+        if (ctx.predicate() != null) {
+            opIterator = new Filter((Predicate) visit(ctx.predicate()), opIterator);
+        }
+
         ArrayList<Update.UpdateElement> updateElements = new ArrayList<>();
         for (TinyDBParser.UpdatedElementContext context : ctx.updatedElement()) {
             updateElements.add((Update.UpdateElement)visit(context));
         }
+
         try {
-            Update update = new Update(filter, updateElements.toArray(new Update.UpdateElement[0]));
+            Update update = new Update(opIterator, updateElements.toArray(new Update.UpdateElement[0]));
             Query query = new Query(update);
             return query.executeDeleteOrUpdate();
         } catch (NoSuchElementException | TypeMismatch e) {
@@ -588,6 +641,36 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitShowStatement(TinyDBParser.ShowStatementContext ctx) {
-        return new QueryResult(false, "");
+        if (ctx.TABLE() != null) {
+            // SHOW TABLE table
+            Table table = (Table)visit(ctx.table());
+            String tableName = ctx.table().getText();
+            if (table == null) {
+                throw new NoSuchElementException("Table " + tableName + " doesn't exist.");
+            } else {
+                return new QueryResult(true, tableName + " : " + table.getTupleDesc().toString());
+            }
+        } else {
+            String[] header;
+            String[] originData;
+
+            if (ctx.DATABASES() != null) {
+                // SHOW DATABASES
+                header = new String[]{"Database"};
+                originData = GlobalManager.getCatalog().getDatabaseNames();
+            } else {
+                // SHOW DATABASE dbName
+                header = new String[] {"Table"};
+                originData = GlobalManager.getCatalog().getTableNames(ctx.dbName().getText());
+            }
+            String[][] data = new String[originData.length][1];
+            for (int i=0; i<originData.length; i++) {
+                data[i][0] = originData[i];
+            }
+            String asciiTable = AsciiTable.getTable(header, data);
+            return new QueryResult(true, asciiTable +
+                    System.lineSeparator() + String.format("%d rows in set", data.length));
+        }
+
     }
 }

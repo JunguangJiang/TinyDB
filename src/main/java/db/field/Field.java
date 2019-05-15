@@ -40,4 +40,5 @@ public interface Field extends Serializable{
 
     public String toString();
     public boolean isNull();
+    public Object getValue();
 }

@@ -33,9 +33,7 @@ public class Join extends Operator{
     }
 
     /**
-     * lhs : left hand side of "join"
-     * predicate: the predicate after "on"
-     * rhs : right hand side of "join"
+     * `lhs` JOIN `rhs` ON `predicate`
      * @param lhs
      * @param predicate
      * @param rhs
@@ -61,6 +59,7 @@ public class Join extends Operator{
     public void open() throws DbException, TypeMismatch {
         this.lhs.open();
         this.rhs.open();
+        // TODO decrease the loop times
         while (lhs.hasNext()) {
             Tuple tuple1 = lhs.next();
             while (rhs.hasNext()) {

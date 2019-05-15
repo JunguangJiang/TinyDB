@@ -82,7 +82,7 @@ public class Table {
      *      INSERT attrNames VALUES(values);
      * must ensure each tuple satisfies the primary key and not null constraint
      * @param attrNames attribute names. If attrNames is null, then it refers to all the attributes of the Tuple
-     * @param values each value might be String, Integer, Float
+     * @param values each value might be String, Integer, Long, Float or Double
      * @return the QueryResult of the insert
      * @see QueryResult
      */
@@ -102,10 +102,10 @@ public class Table {
 
             TupleDesc tupleDesc = getTupleDesc();
             Tuple tuple = new Tuple(tupleDesc);
+            // Set each attribute to the corresponding value
             for (int i=0; i<tupleDesc.numFields(); i++) {
                 TDItem tdItem = tupleDesc.getField(i);
-                Object value = hashMap.get(tdItem.fieldName);
-                hashMap.remove(tdItem.fieldName);
+                Object value = hashMap.remove(tdItem.fieldName);
                 if (value != null) {
                     try {
                         tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName));

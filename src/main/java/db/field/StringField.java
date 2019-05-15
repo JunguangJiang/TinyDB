@@ -15,7 +15,8 @@ public class StringField implements Field {
     private final int maxLen;
     private boolean isNull;
 
-    public String getValue() {
+    @Override
+    public Object getValue() {
         return value;
     }
 
@@ -35,6 +36,10 @@ public class StringField implements Field {
             value = s.substring(0, maxLen);
         else
             value = s;
+    }
+
+    public StringField(String s, int maxLen) {
+        this(s, maxLen, false);
     }
 
     public String toString() {

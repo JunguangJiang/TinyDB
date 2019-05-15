@@ -1,23 +1,28 @@
 package db.file;
 
 import db.GlobalManager;
-import db.Utility;
 import db.field.FloatField;
 import db.field.IntField;
 import db.field.StringField;
 import db.field.Type;
-import db.query.Query;
 import db.query.QueryResult;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-
 import static org.junit.Assert.*;
 
 public class TableTest {
+    @Before public void setUp(){
+        GlobalManager.getCatalog().createDatabase("database");
+        GlobalManager.getCatalog().useDatabase("database");
+    }
+
+    @After public void tearDown() {
+        GlobalManager.getCatalog().dropDatabase("database");
+    }
 
     // Test primary key constraint
     @Test
@@ -41,6 +46,7 @@ public class TableTest {
         // TODO satisfy the primary key constraint
 //        queryResult = table.insertTuple(tuple);
 //        assertFalse(queryResult.succeeded());
+        GlobalManager.getDatabase().dropTable("table");
     }
 
     // Test the compatibility of attrNames and values
@@ -73,6 +79,7 @@ public class TableTest {
 
         queryResult = table.insertTuple(attrNames, full_values);
         assertFalse(queryResult.succeeded());
+        GlobalManager.getDatabase().dropTable("table");
     }
 
     // Test the not null constraint
@@ -96,6 +103,7 @@ public class TableTest {
         Table table = GlobalManager.getDatabase().getTable("table");
         queryResult = table.insertTuple(attrNames, values);
         assertFalse(queryResult.succeeded());
+        GlobalManager.getDatabase().dropTable("table");
     }
 
     // Test not find attrName
@@ -119,6 +127,7 @@ public class TableTest {
         Table table = GlobalManager.getDatabase().getTable("table");
         queryResult = table.insertTuple(attrNames, values);
         assertFalse(queryResult.succeeded());
+        GlobalManager.getDatabase().dropTable("table");
     }
 
 }

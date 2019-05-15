@@ -8,7 +8,8 @@ import java.io.IOException;
  */
 public class LongField extends NumberField{
 
-    public long getValue() {
+    @Override
+    public Object getValue() {
         return value.longValue();
     }
 
@@ -21,6 +22,10 @@ public class LongField extends NumberField{
         super(i, Type.LONG_TYPE, isNull);
     }
 
+    public LongField(long i) {
+        this(i, false);
+    }
+
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeLong(value.longValue());
@@ -29,16 +34,16 @@ public class LongField extends NumberField{
 
     @Override
     public boolean equals(Object obj) {
-        return value.longValue() == ((LongField)obj).value.longValue();
+        return (long)getValue() == (long)((Field)obj).getValue();
     }
 
     @Override
     public boolean greater_than(Field val) {
-        return value.longValue() > ((LongField)val).value.longValue();
+        return (long)getValue() > (long)val.getValue();
     }
 
     @Override
     public boolean less_than(Field val) {
-        return value.longValue() < ((LongField)val).value.longValue();
+        return (long)getValue() < (long)val.getValue();
     }
 }

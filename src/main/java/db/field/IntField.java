@@ -7,7 +7,8 @@ import java.io.*;
  */
 public class IntField extends NumberField {
 
-    public int getValue() {
+    @Override
+    public Object getValue() {
         return value.intValue();
     }
 
@@ -20,6 +21,10 @@ public class IntField extends NumberField {
         super(i, Type.INT_TYPE, isNull);
     }
 
+    public IntField(int i) {
+        this(i, false);
+    }
+
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeInt(value.intValue());
@@ -28,16 +33,16 @@ public class IntField extends NumberField {
 
     @Override
     public boolean equals(Object obj) {
-        return value.intValue() == ((IntField)obj).value.intValue();
+        return (int)getValue() == (int)((Field)obj).getValue();
     }
 
     @Override
     public boolean greater_than(Field val) {
-        return value.intValue() > ((IntField)val).value.intValue();
+        return (int)getValue() > (int)val.getValue();
     }
 
     @Override
     public boolean less_than(Field val) {
-        return value.intValue() < ((IntField)val).value.intValue();
+        return (int) getValue() < (int) val.getValue();
     }
 }

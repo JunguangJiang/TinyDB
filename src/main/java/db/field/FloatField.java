@@ -8,7 +8,8 @@ import java.io.IOException;
  */
 public class FloatField extends NumberField{
 
-    public float getValue() {
+    @Override
+    public Object getValue() {
         return value.floatValue();
     }
 
@@ -21,6 +22,10 @@ public class FloatField extends NumberField{
         super(i, Type.FLOAT_TYPE, isNull);
     }
 
+    public FloatField(float i) {
+        this(i, false);
+    }
+
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeFloat(value.floatValue());
@@ -29,16 +34,16 @@ public class FloatField extends NumberField{
 
     @Override
     public boolean equals(Object obj) {
-        return value.floatValue() == ((FloatField)obj).value.floatValue();
+        return (float)getValue() == (float)((Field)obj).getValue();
     }
 
     @Override
     public boolean greater_than(Field val) {
-        return value.floatValue() > ((FloatField)val).value.floatValue();
+        return (float)getValue() > (float)val.getValue();
     }
 
     @Override
     public boolean less_than(Field val) {
-        return value.floatValue() < ((FloatField)val).value.floatValue();
+        return (float) getValue() < (float) val.getValue();
     }
 }

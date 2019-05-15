@@ -134,7 +134,7 @@ comparisonOperator
     ;
 
 logicalOperator
-    : AND | '&' '&' | XOR | OR | '|' '|'
+    : AND | '&' '&' | OR | '|' '|'
     ;
 
 showStatement
@@ -168,7 +168,7 @@ attrNames
     ;
 
 nullNotnull
-    : NOT? NULL_LITERAL
+    : NOT NULL_LITERAL
     ;
 
 decimalLiteral
