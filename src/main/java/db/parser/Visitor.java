@@ -305,6 +305,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         if (ctx.attrNames() != null) {
             attrNames = (String[])visit(ctx.attrNames());
         }
+        if (ctx.constants() == null) {
+            return new QueryResult(false, "values can not be empty");
+        }
         Object[] values = (Object[]) visit(ctx.constants());
         Table table = (Table)visit(ctx.table());
         return table.insertTuple(attrNames, values);

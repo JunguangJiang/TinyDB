@@ -105,7 +105,7 @@ public class Database {
      * @param tableName name of the Table
      * @return the DbFile associated with the Table if it exists, otherwise null
      */
-    public DbFile getDbFile(String tableName) {
+    public DbFile getDbFile(String tableName) throws NullPointerException{
         return getDbFile(getTableId(tableName));
     }
 
@@ -113,7 +113,7 @@ public class Database {
      * @param tableId id of the Table
      * @return the DbFile associated with the Table if it exists, otherwise null
      */
-    public DbFile getDbFile(Integer tableId) {
+    public DbFile getDbFile(Integer tableId) throws NullPointerException{
         return getTable(tableId).getDbFile();
     }
 
@@ -121,7 +121,7 @@ public class Database {
      * @param tableName name of the Table
      * @return the id of the Table if it exists, otherwise null
      */
-    public Integer getTableId(String tableName) {
+    public Integer getTableId(String tableName){
         return nameIdMap.get(tableName);
     }
 
@@ -129,7 +129,7 @@ public class Database {
      * @param tableName name of the table
      * @return the Table if it exists, otherwise null
      */
-    public Table getTable(String tableName) {
+    public Table getTable(String tableName) throws NullPointerException{
         return getTable(getTableId(tableName));
     }
 

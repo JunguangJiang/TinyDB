@@ -59,6 +59,7 @@ public class Join extends Operator{
     public void open() throws DbException, TypeMismatch {
         this.lhs.open();
         this.rhs.open();
+        // TODO decrease the loop times
         while (lhs.hasNext()) {
             Tuple tuple1 = lhs.next();
             while (rhs.hasNext()) {
