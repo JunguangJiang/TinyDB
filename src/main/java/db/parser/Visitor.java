@@ -210,7 +210,11 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         int a = ctx.start.getStartIndex();
         int b = ctx.stop.getStopIndex();
         Interval interval = new Interval(a,b);
-        return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog);
+        if (GlobalManager.getDatabase() == null) {
+            return new QueryResult(false, "Database not set. Please input the sql 'USE DATABASE $NAME' first");
+        } else{
+            return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog);
+        }
     }
 
     /**

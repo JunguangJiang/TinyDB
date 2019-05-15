@@ -83,10 +83,7 @@ public class Catalog {
     /**
      * @return The current database
      */
-    public Database getCurrentDatabase() throws NoSuchElementException{
-        if (this.database == null) {
-            throw new NoSuchElementException("Database not set. Please input the sql 'USE DATABASE $NAME' first");
-        }
+    public Database getCurrentDatabase(){
         return this.database;
     }
 
