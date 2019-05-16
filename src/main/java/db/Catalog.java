@@ -48,8 +48,10 @@ public class Catalog {
         if (!this.databaseSet.contains(databaseName)) {
             return new QueryResult(false, "ERROR 1008 (HY000): Can't drop database '" + databaseName + "'; database doesn't exist");
         }
-        if (this.database.databaseName.equals(databaseName)) {
-            this.database = null;
+        if (this.database != null) {
+            if (this.database.databaseName.equals(databaseName)) {
+                this.database = null;
+            }
         }
         this.databaseSet.remove(databaseName);
         utils.removeDiretory(new File(String.format("%s/%s", sqlPath, databaseName)));
