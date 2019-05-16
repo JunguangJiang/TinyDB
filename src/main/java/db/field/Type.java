@@ -109,6 +109,10 @@ public enum Type implements Serializable {
      */
     public abstract Field parse(DataInputStream dis, int maxLen) throws ParseException;
 
+    public Field parse(DataInputStream dis) throws ParseException{
+        return parse(dis, 0);
+    }
+
 
     public static Type getType(String typeString) throws NoSuchElementException {
         if (typeString.equals("INT")) {

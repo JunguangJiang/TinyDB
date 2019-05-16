@@ -1,6 +1,8 @@
 package db.file;
 
+import db.DbException;
 import db.GlobalManager;
+import db.file.BTree.BTreeFile;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -32,7 +34,8 @@ public class Table {
      */
     public Table(Integer id, String name, TupleDesc tupleDesc, File file) {
         this.id = id;
-        this.dbFile = new HeapFile(id, file, tupleDesc);
+        // this.dbFile = new HeapFile(id, file, tupleDesc);
+        this.dbFile = new BTreeFile(id, file, tupleDesc);
         this.name = name;
         this.file = file;
     }
@@ -67,6 +70,8 @@ public class Table {
             e.printStackTrace();
         } catch (PrimaryKeyViolation e) {
             return new QueryResult(false, "Violation of PRIMARY KEY constraint."+e.toString());
+        } catch (DbException e){
+            e.printStackTrace();
         }
         return new QueryResult(true, "Query OK, 1 row affected.");
     }
