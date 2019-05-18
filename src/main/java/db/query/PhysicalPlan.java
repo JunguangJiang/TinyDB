@@ -11,10 +11,10 @@ import java.util.ArrayList;
 /**
  * Only used for select
  */
-public class Query {
+public class PhysicalPlan {
     OpIterator root;
 
-    public Query(OpIterator root) {
+    public PhysicalPlan(OpIterator root) {
         this.root = root;
     }
 
@@ -22,7 +22,7 @@ public class Query {
      * execute the select operation
      * @return the result String of select query
      */
-    public QueryResult executeSelect(String[] header) {
+    public QueryResult execute(String[] header) {
         try {
             this.root.open();
             // add tuple desc to the result
@@ -48,24 +48,6 @@ public class Query {
             return new QueryResult(false, e.toString());
         } finally {
             this.root.close();
-        }
-    }
-
-    /**
-     * execute the delete or update operation
-     * @return the result String of the operation
-     */
-    public QueryResult executeDeleteOrUpdate() {
-        try {
-            root.open();
-            Tuple tuple = root.next();
-            root.close();
-            return new QueryResult(true, "Query OK, " + tuple.getField(0).toString() + " rows affected.");
-        } catch (DbException e){
-            e.printStackTrace();
-            return new QueryResult(false, e.toString());
-        } catch (TypeMismatch e) {
-            return new QueryResult(false, e.toString());
         }
     }
 }

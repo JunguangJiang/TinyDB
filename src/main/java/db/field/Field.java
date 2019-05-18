@@ -1,7 +1,5 @@
 package db.field;
 
-import db.query.ComparisonPredicate;
-
 import java.io.*;
 
 /**
@@ -22,7 +20,7 @@ public interface Field extends Serializable{
      * @param value The value to compare this Field to
      * @return Whether or not the comparison yields true.
      */
-    public boolean compare(ComparisonPredicate.Op op, Field value);
+    public boolean compare(Op op, Field value);
 
     /**
      * Returns the type of this field (see {@link Type#INT_TYPE} or {@link Type#STRING_TYPE}

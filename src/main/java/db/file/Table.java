@@ -104,7 +104,7 @@ public class Table {
             Tuple tuple = new Tuple(tupleDesc);
             // Set each attribute to the corresponding value
             for (int i=0; i<tupleDesc.numFields(); i++) {
-                TDItem tdItem = tupleDesc.getField(i);
+                TDItem tdItem = tupleDesc.getTDItem(i);
                 Object value = hashMap.remove(tdItem.fieldName);
                 if (value != null) {
                     try {
@@ -114,14 +114,14 @@ public class Table {
                     }
                 } else {
                     if (tdItem.notNull || tdItem.isPrimaryKey) {
-                        return new QueryResult(false, "Attribute " + tdItem.fieldName + " can not be null");
+                        return new QueryResult(false, "FullColumnName " + tdItem.fieldName + " can not be null");
                     }
                 }
             }
             // Ensure that all insert attributes exist.
             if (!hashMap.isEmpty()) {
                 String attribute = hashMap.keySet().toArray(new String[0])[0];
-                return new QueryResult(false, "Attribute " + attribute +" doesn't exist.");
+                return new QueryResult(false, "FullColumnName " + attribute +" doesn't exist.");
             }
 
             return insertTuple(tuple);
@@ -134,4 +134,5 @@ public class Table {
     public DbFileIterator iterator() {
         return dbFile.iterator();
     }
+
 }

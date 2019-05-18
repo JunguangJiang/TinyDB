@@ -1,5 +1,4 @@
 package db.parser;
-
 // Generated from TinyDBParser.g4 by ANTLR 4.7.1
 import db.parser.TinyDBParser;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -31,23 +30,17 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSqlStatement(TinyDBParser.SqlStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#ddlStatement}.
+	 * Visit a parse tree produced by {@link TinyDBParser#dbSpecifiedStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDdlStatement(TinyDBParser.DdlStatementContext ctx);
+	T visitDbSpecifiedStatement(TinyDBParser.DbSpecifiedStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#dmlStatement}.
+	 * Visit a parse tree produced by {@link TinyDBParser#dbUnspecifiedStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDmlStatement(TinyDBParser.DmlStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#administrationStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAdministrationStatement(TinyDBParser.AdministrationStatementContext ctx);
+	T visitDbUnspecifiedStatement(TinyDBParser.DbUnspecifiedStatementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#createDatabase}.
 	 * @param ctx the parse tree
@@ -105,6 +98,12 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelectStatement(TinyDBParser.SelectStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TinyDBParser#fullColumnNames}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFullColumnNames(TinyDBParser.FullColumnNamesContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#fullColumnName}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -156,33 +155,45 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeleteStatement(TinyDBParser.DeleteStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code comparisonExpressionPredicate}
-	 * labeled alternative in {@link TinyDBParser#predicate}.
+	 * Visit a parse tree produced by {@link TinyDBParser#predicate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComparisonExpressionPredicate(TinyDBParser.ComparisonExpressionPredicateContext ctx);
+	T visitPredicate(TinyDBParser.PredicateContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code logicalExpressionPredicate}
-	 * labeled alternative in {@link TinyDBParser#predicate}.
+	 * Visit a parse tree produced by {@link TinyDBParser#andExpressionPredicate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLogicalExpressionPredicate(TinyDBParser.LogicalExpressionPredicateContext ctx);
+	T visitAndExpressionPredicate(TinyDBParser.AndExpressionPredicateContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code constantExpressionAtom}
-	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
+	 * Visit a parse tree produced by the {@code vkCmpExpressionPredicate}
+	 * labeled alternative in {@link TinyDBParser#comparisonExpressionPredicate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitConstantExpressionAtom(TinyDBParser.ConstantExpressionAtomContext ctx);
+	T visitVkCmpExpressionPredicate(TinyDBParser.VkCmpExpressionPredicateContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code fullColumnNameExpressionAtom}
-	 * labeled alternative in {@link TinyDBParser#expressionAtom}.
+	 * Visit a parse tree produced by the {@code kvCmpExpressionPredicate}
+	 * labeled alternative in {@link TinyDBParser#comparisonExpressionPredicate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFullColumnNameExpressionAtom(TinyDBParser.FullColumnNameExpressionAtomContext ctx);
+	T visitKvCmpExpressionPredicate(TinyDBParser.KvCmpExpressionPredicateContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code kkCmpExpressionPredicate}
+	 * labeled alternative in {@link TinyDBParser#comparisonExpressionPredicate}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitKkCmpExpressionPredicate(TinyDBParser.KkCmpExpressionPredicateContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code vvCmpExpressionPredicate}
+	 * labeled alternative in {@link TinyDBParser#comparisonExpressionPredicate}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVvCmpExpressionPredicate(TinyDBParser.VvCmpExpressionPredicateContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#dataType}.
 	 * @param ctx the parse tree
@@ -213,12 +224,6 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitComparisonOperator(TinyDBParser.ComparisonOperatorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link TinyDBParser#logicalOperator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLogicalOperator(TinyDBParser.LogicalOperatorContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#showStatement}.
 	 * @param ctx the parse tree

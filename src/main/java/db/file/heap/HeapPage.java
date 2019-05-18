@@ -115,7 +115,7 @@ public class HeapPage implements Page {
         t.setRecordId(rid);
         try {
             for (int j=0; j<td.numFields(); j++) {
-                Field f= td.getField(j).parse(dis);
+                Field f= td.getTDItem(j).parse(dis);
                 t.setField(j, f);
             }
         } catch (java.text.ParseException e) {

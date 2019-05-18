@@ -32,7 +32,7 @@ public class Tuple implements Serializable {
         int length = td.numFields();
         fields = new Field[length];
         for(int i=0; i<length; i++){
-            switch (td.getField(i).fieldType){
+            switch (td.getTDItem(i).fieldType){
                 case INT_TYPE:
                     fields[i] = new IntField(0, true);
                     break;
@@ -46,7 +46,7 @@ public class Tuple implements Serializable {
                     fields[i] = new DoubleField(0.0, true);
                     break;
                 case STRING_TYPE:
-                    fields[i] = new StringField("", td.getField(i).maxLen, true);
+                    fields[i] = new StringField("", td.getTDItem(i).maxLen, true);
                     break;
                 default:
                     throw new NotImplementedException();

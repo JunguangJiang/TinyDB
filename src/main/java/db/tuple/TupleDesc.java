@@ -1,5 +1,7 @@
 package db.tuple;
 
+import db.query.FullColumnName;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -12,6 +14,12 @@ public class TupleDesc implements Serializable, Cloneable {
     private TDItem[] tdItems;
     private String[] primaryKeys;
     private int[] primaryKeysIndex;
+
+    public TupleDesc() {
+        tdItems = new TDItem[0];
+        primaryKeys = new String[0];
+        primaryKeysIndex = new int[0];
+    }
 
     /**
      *
@@ -64,7 +72,7 @@ public class TupleDesc implements Serializable, Cloneable {
      * @throws NoSuchElementException
      *             if i is not a valid field reference.
      */
-    public TDItem getField(int i) throws NoSuchElementException {
+    public TDItem getTDItem(int i) throws NoSuchElementException {
         if (i < 0 || i >= tdItems.length) {
             throw new NoSuchElementException("index " + i);
         }
@@ -74,7 +82,7 @@ public class TupleDesc implements Serializable, Cloneable {
     public String[] getAttrNames() {
         String[] attrNames = new String[numFields()];
         for (int i=0; i<numFields(); i++) {
-            attrNames[i] = getField(i).fieldName;
+            attrNames[i] = getTDItem(i).fieldName;
         }
         return attrNames;
     }
@@ -101,13 +109,13 @@ public class TupleDesc implements Serializable, Cloneable {
                 return i;
             }
         }
-        throw new NoSuchElementException(String.format("Attribute %s doesn't exist.", name));
+        throw new NoSuchElementException(String.format("FullColumnName %s doesn't exist.", name));
     }
 
     /**
      *  Find the index of the field with a given tableName and attrName.
      * @param tableName name of the Table
-     * @param attrName name of the Attribute
+     * @param attrName name of the FullColumnName
      * @return the index of the field that is first to have the given tableName and attrName.
      * @throws NoSuchElementException
      *          if no field with a matching name is found
@@ -119,6 +127,23 @@ public class TupleDesc implements Serializable, Cloneable {
             }
         }
         throw new NoSuchElementException(String.format("Table %s attribute %s doesn't exist.", tableName, attrName));
+    }
+
+    /**
+     * Find the index of the Field with a given FullColumnName
+     * @param fullColumnName
+     * @return
+     */
+    public int fullColunmnNameToIndex(FullColumnName fullColumnName) {
+        for (int i=0; i<tdItems.length; i++) {
+            System.out.println("tdItem:"+tdItems[i].tableName+" "+tdItems[i].fieldName);
+            System.out.println("fullColumnName:"+fullColumnName.tableName+" "+fullColumnName.attrName);
+            System.out.println(tdItems[i].hasName(fullColumnName.tableName, fullColumnName.attrName));
+            if (tdItems[i].hasName(fullColumnName.tableName, fullColumnName.attrName)) {
+                return i;
+            }
+        }
+        throw new NoSuchElementException(String.format("Table %s attribute %s doesn't exist.", fullColumnName.tableName, fullColumnName.attrName));
     }
 
     /**
@@ -157,10 +182,10 @@ public class TupleDesc implements Serializable, Cloneable {
         int numFields = td1.numFields() + td2.numFields();
         TDItem[] tdItems = new TDItem[numFields];
         for (int i=0; i<td1.numFields(); i++) {
-            tdItems[i] = td1.getField(i);
+            tdItems[i] = td1.getTDItem(i);
         }
         for (int i=0, j=td1.numFields(); i<td2.numFields(); i++, j++) {
-            tdItems[j] = td2.getField(i);
+            tdItems[j] = td2.getTDItem(i);
         }
         return new TupleDesc(tdItems, null);
     }
@@ -184,7 +209,7 @@ public class TupleDesc implements Serializable, Cloneable {
                 return false;
             }
             for(int i=0; i<this.numFields(); i++){
-                if(!getField(i).equals(tupleDesc.getField(i))){
+                if(!getTDItem(i).equals(tupleDesc.getTDItem(i))){
                     return false;
                 }
             }
@@ -199,6 +224,14 @@ public class TupleDesc implements Serializable, Cloneable {
      */
     public int[] getPrimaryKeysIndex() {
         return primaryKeysIndex;
+    }
+
+    /**
+     * @param attrName
+     * @return whether attrName is the primary key of the Table
+     */
+    public boolean isPrimaryKey(String attrName) {
+        return Arrays.asList(this.getPrimaryKeys()).contains(attrName);
     }
 
     public int hashCode() {
@@ -232,7 +265,5 @@ public class TupleDesc implements Serializable, Cloneable {
         stringBuilder.append(")");
         return stringBuilder.toString();
     }
-
-
 }
 

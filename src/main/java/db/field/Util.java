@@ -27,6 +27,10 @@ public class Util {
         }
     }
 
+    public static Field getField(Object value, TDItem tdItem) throws TypeMismatch {
+        return getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName);
+    }
+
     /**
      *
      * @param value value of the Field, might be Integer, Float or String

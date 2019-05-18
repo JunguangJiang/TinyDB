@@ -6,10 +6,6 @@ import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
-import javax.swing.*;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
 /**
  * Project is an operator that implements a relational projection.
  */
@@ -21,22 +17,21 @@ public class Project extends Operator{
     private int[] attributes;
 
     /**
-     * @param attributes an array of attributes
+     * @param fullColumnNames an array of fullColumnNames
      * @param child a child operator to read tuples to apply projection to
      */
-    public Project(Attribute[] attributes, OpIterator child) {
+    public Project(FullColumnName[] fullColumnNames, OpIterator child) {
         this.child = child;
 
         TupleDesc childTD = child.getTupleDesc();
-        this.attributes = new int[attributes.length];
-        for (int i=0; i<attributes.length; i++) {
-            this.attributes[i] = childTD.fieldNameToIndex(
-                    attributes[i].tableName, attributes[i].attrName);
+        this.attributes = new int[fullColumnNames.length];
+        for (int i = 0; i< fullColumnNames.length; i++) {
+            this.attributes[i] = childTD.fullColunmnNameToIndex(fullColumnNames[i]);
         }
 
-        TDItem[] tdItems = new TDItem[attributes.length];
+        TDItem[] tdItems = new TDItem[fullColumnNames.length];
         for (int i=0; i<tdItems.length; i++){
-            tdItems[i] =  childTD.getField(this.attributes[i]); // TODO Is shallow copy right?
+            tdItems[i] =  childTD.getTDItem(this.attributes[i]); // TODO Is shallow copy right?
         }
         this.tupleDesc = new TupleDesc(tdItems, null);
     }

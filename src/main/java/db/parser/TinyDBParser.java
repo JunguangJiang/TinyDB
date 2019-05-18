@@ -36,27 +36,28 @@ public class TinyDBParser extends Parser {
 		DECIMAL_LITERAL=102, HEXADECIMAL_LITERAL=103, REAL_LITERAL=104, NULL_SPEC_LITERAL=105, 
 		ID=106, ERROR_RECONGNIGION=107;
 	public static final int
-		RULE_root = 0, RULE_sqlStatements = 1, RULE_sqlStatement = 2, RULE_ddlStatement = 3, 
-		RULE_dmlStatement = 4, RULE_administrationStatement = 5, RULE_createDatabase = 6, 
-		RULE_createTable = 7, RULE_createDefinition = 8, RULE_dropDatabase = 9, 
-		RULE_dropTable = 10, RULE_useDatabase = 11, RULE_insertStatement = 12, 
-		RULE_selectStatement = 13, RULE_fullColumnName = 14, RULE_tableSources = 15, 
+		RULE_root = 0, RULE_sqlStatements = 1, RULE_sqlStatement = 2, RULE_dbSpecifiedStatement = 3, 
+		RULE_dbUnspecifiedStatement = 4, RULE_createDatabase = 5, RULE_createTable = 6, 
+		RULE_createDefinition = 7, RULE_dropDatabase = 8, RULE_dropTable = 9, 
+		RULE_useDatabase = 10, RULE_insertStatement = 11, RULE_selectStatement = 12, 
+		RULE_fullColumnNames = 13, RULE_fullColumnName = 14, RULE_tableSources = 15, 
 		RULE_tableSource = 16, RULE_joinPart = 17, RULE_updateStatement = 18, 
 		RULE_updatedElement = 19, RULE_deleteStatement = 20, RULE_predicate = 21, 
-		RULE_expressionAtom = 22, RULE_dataType = 23, RULE_lengthOneDimension = 24, 
-		RULE_constants = 25, RULE_constant = 26, RULE_comparisonOperator = 27, 
-		RULE_logicalOperator = 28, RULE_showStatement = 29, RULE_shutdownStatement = 30, 
-		RULE_dbName = 31, RULE_table = 32, RULE_tableName = 33, RULE_attrName = 34, 
-		RULE_attrNames = 35, RULE_nullNotnull = 36, RULE_decimalLiteral = 37;
+		RULE_andExpressionPredicate = 22, RULE_comparisonExpressionPredicate = 23, 
+		RULE_dataType = 24, RULE_lengthOneDimension = 25, RULE_constants = 26, 
+		RULE_constant = 27, RULE_comparisonOperator = 28, RULE_showStatement = 29, 
+		RULE_shutdownStatement = 30, RULE_dbName = 31, RULE_table = 32, RULE_tableName = 33, 
+		RULE_attrName = 34, RULE_attrNames = 35, RULE_nullNotnull = 36, RULE_decimalLiteral = 37;
 	public static final String[] ruleNames = {
-		"root", "sqlStatements", "sqlStatement", "ddlStatement", "dmlStatement", 
-		"administrationStatement", "createDatabase", "createTable", "createDefinition", 
-		"dropDatabase", "dropTable", "useDatabase", "insertStatement", "selectStatement", 
+		"root", "sqlStatements", "sqlStatement", "dbSpecifiedStatement", "dbUnspecifiedStatement", 
+		"createDatabase", "createTable", "createDefinition", "dropDatabase", "dropTable", 
+		"useDatabase", "insertStatement", "selectStatement", "fullColumnNames", 
 		"fullColumnName", "tableSources", "tableSource", "joinPart", "updateStatement", 
-		"updatedElement", "deleteStatement", "predicate", "expressionAtom", "dataType", 
-		"lengthOneDimension", "constants", "constant", "comparisonOperator", "logicalOperator", 
-		"showStatement", "shutdownStatement", "dbName", "table", "tableName", 
-		"attrName", "attrNames", "nullNotnull", "decimalLiteral"
+		"updatedElement", "deleteStatement", "predicate", "andExpressionPredicate", 
+		"comparisonExpressionPredicate", "dataType", "lengthOneDimension", "constants", 
+		"constant", "comparisonOperator", "showStatement", "shutdownStatement", 
+		"dbName", "table", "tableName", "attrName", "attrNames", "nullNotnull", 
+		"decimalLiteral"
 	};
 
 	private static final String[] _LITERAL_NAMES = {
@@ -236,14 +237,11 @@ public class TinyDBParser extends Parser {
 	}
 
 	public static class SqlStatementContext extends ParserRuleContext {
-		public DdlStatementContext ddlStatement() {
-			return getRuleContext(DdlStatementContext.class,0);
+		public DbSpecifiedStatementContext dbSpecifiedStatement() {
+			return getRuleContext(DbSpecifiedStatementContext.class,0);
 		}
-		public DmlStatementContext dmlStatement() {
-			return getRuleContext(DmlStatementContext.class,0);
-		}
-		public AdministrationStatementContext administrationStatement() {
-			return getRuleContext(AdministrationStatementContext.class,0);
+		public DbUnspecifiedStatementContext dbUnspecifiedStatement() {
+			return getRuleContext(DbUnspecifiedStatementContext.class,0);
 		}
 		public SqlStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -260,118 +258,21 @@ public class TinyDBParser extends Parser {
 		SqlStatementContext _localctx = new SqlStatementContext(_ctx, getState());
 		enterRule(_localctx, 4, RULE_sqlStatement);
 		try {
-			setState(90);
+			setState(89);
 			_errHandler.sync(this);
-			switch (_input.LA(1)) {
-			case CREATE:
-			case DROP:
-			case USE:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(87);
-				ddlStatement();
-				}
-				break;
-			case DELETE:
-			case INSERT:
-			case SELECT:
-			case UPDATE:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(88);
-				dmlStatement();
-				}
-				break;
-			case SHOW:
-			case SHUTDOWN:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(89);
-				administrationStatement();
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class DdlStatementContext extends ParserRuleContext {
-		public CreateDatabaseContext createDatabase() {
-			return getRuleContext(CreateDatabaseContext.class,0);
-		}
-		public CreateTableContext createTable() {
-			return getRuleContext(CreateTableContext.class,0);
-		}
-		public DropDatabaseContext dropDatabase() {
-			return getRuleContext(DropDatabaseContext.class,0);
-		}
-		public DropTableContext dropTable() {
-			return getRuleContext(DropTableContext.class,0);
-		}
-		public UseDatabaseContext useDatabase() {
-			return getRuleContext(UseDatabaseContext.class,0);
-		}
-		public DdlStatementContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_ddlStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitDdlStatement(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final DdlStatementContext ddlStatement() throws RecognitionException {
-		DdlStatementContext _localctx = new DdlStatementContext(_ctx, getState());
-		enterRule(_localctx, 6, RULE_ddlStatement);
-		try {
-			setState(97);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,2,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(92);
-				createDatabase();
+				setState(87);
+				dbSpecifiedStatement();
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(93);
-				createTable();
-				}
-				break;
-			case 3:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(94);
-				dropDatabase();
-				}
-				break;
-			case 4:
-				enterOuterAlt(_localctx, 4);
-				{
-				setState(95);
-				dropTable();
-				}
-				break;
-			case 5:
-				enterOuterAlt(_localctx, 5);
-				{
-				setState(96);
-				useDatabase();
+				setState(88);
+				dbUnspecifiedStatement();
 				}
 				break;
 			}
@@ -387,7 +288,13 @@ public class TinyDBParser extends Parser {
 		return _localctx;
 	}
 
-	public static class DmlStatementContext extends ParserRuleContext {
+	public static class DbSpecifiedStatementContext extends ParserRuleContext {
+		public CreateTableContext createTable() {
+			return getRuleContext(CreateTableContext.class,0);
+		}
+		public DropTableContext dropTable() {
+			return getRuleContext(DropTableContext.class,0);
+		}
 		public SelectStatementContext selectStatement() {
 			return getRuleContext(SelectStatementContext.class,0);
 		}
@@ -400,49 +307,63 @@ public class TinyDBParser extends Parser {
 		public DeleteStatementContext deleteStatement() {
 			return getRuleContext(DeleteStatementContext.class,0);
 		}
-		public DmlStatementContext(ParserRuleContext parent, int invokingState) {
+		public DbSpecifiedStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_dmlStatement; }
+		@Override public int getRuleIndex() { return RULE_dbSpecifiedStatement; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitDmlStatement(this);
+			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitDbSpecifiedStatement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final DmlStatementContext dmlStatement() throws RecognitionException {
-		DmlStatementContext _localctx = new DmlStatementContext(_ctx, getState());
-		enterRule(_localctx, 8, RULE_dmlStatement);
+	public final DbSpecifiedStatementContext dbSpecifiedStatement() throws RecognitionException {
+		DbSpecifiedStatementContext _localctx = new DbSpecifiedStatementContext(_ctx, getState());
+		enterRule(_localctx, 6, RULE_dbSpecifiedStatement);
 		try {
-			setState(103);
+			setState(97);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case SELECT:
+			case CREATE:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(99);
+				setState(91);
+				createTable();
+				}
+				break;
+			case DROP:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(92);
+				dropTable();
+				}
+				break;
+			case SELECT:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(93);
 				selectStatement();
 				}
 				break;
 			case INSERT:
-				enterOuterAlt(_localctx, 2);
+				enterOuterAlt(_localctx, 4);
 				{
-				setState(100);
+				setState(94);
 				insertStatement();
 				}
 				break;
 			case UPDATE:
-				enterOuterAlt(_localctx, 3);
+				enterOuterAlt(_localctx, 5);
 				{
-				setState(101);
+				setState(95);
 				updateStatement();
 				}
 				break;
 			case DELETE:
-				enterOuterAlt(_localctx, 4);
+				enterOuterAlt(_localctx, 6);
 				{
-				setState(102);
+				setState(96);
 				deleteStatement();
 				}
 				break;
@@ -461,42 +382,72 @@ public class TinyDBParser extends Parser {
 		return _localctx;
 	}
 
-	public static class AdministrationStatementContext extends ParserRuleContext {
+	public static class DbUnspecifiedStatementContext extends ParserRuleContext {
+		public CreateDatabaseContext createDatabase() {
+			return getRuleContext(CreateDatabaseContext.class,0);
+		}
+		public DropDatabaseContext dropDatabase() {
+			return getRuleContext(DropDatabaseContext.class,0);
+		}
+		public UseDatabaseContext useDatabase() {
+			return getRuleContext(UseDatabaseContext.class,0);
+		}
 		public ShowStatementContext showStatement() {
 			return getRuleContext(ShowStatementContext.class,0);
 		}
 		public ShutdownStatementContext shutdownStatement() {
 			return getRuleContext(ShutdownStatementContext.class,0);
 		}
-		public AdministrationStatementContext(ParserRuleContext parent, int invokingState) {
+		public DbUnspecifiedStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_administrationStatement; }
+		@Override public int getRuleIndex() { return RULE_dbUnspecifiedStatement; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitAdministrationStatement(this);
+			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitDbUnspecifiedStatement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final AdministrationStatementContext administrationStatement() throws RecognitionException {
-		AdministrationStatementContext _localctx = new AdministrationStatementContext(_ctx, getState());
-		enterRule(_localctx, 10, RULE_administrationStatement);
+	public final DbUnspecifiedStatementContext dbUnspecifiedStatement() throws RecognitionException {
+		DbUnspecifiedStatementContext _localctx = new DbUnspecifiedStatementContext(_ctx, getState());
+		enterRule(_localctx, 8, RULE_dbUnspecifiedStatement);
 		try {
-			setState(107);
+			setState(104);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case SHOW:
+			case CREATE:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(105);
+				setState(99);
+				createDatabase();
+				}
+				break;
+			case DROP:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(100);
+				dropDatabase();
+				}
+				break;
+			case USE:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(101);
+				useDatabase();
+				}
+				break;
+			case SHOW:
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(102);
 				showStatement();
 				}
 				break;
 			case SHUTDOWN:
-				enterOuterAlt(_localctx, 2);
+				enterOuterAlt(_localctx, 5);
 				{
-				setState(106);
+				setState(103);
 				shutdownStatement();
 				}
 				break;
@@ -534,15 +485,15 @@ public class TinyDBParser extends Parser {
 
 	public final CreateDatabaseContext createDatabase() throws RecognitionException {
 		CreateDatabaseContext _localctx = new CreateDatabaseContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_createDatabase);
+		enterRule(_localctx, 10, RULE_createDatabase);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(109);
+			setState(106);
 			match(CREATE);
-			setState(110);
+			setState(107);
 			match(DATABASE);
-			setState(111);
+			setState(108);
 			dbName();
 			}
 		}
@@ -582,38 +533,38 @@ public class TinyDBParser extends Parser {
 
 	public final CreateTableContext createTable() throws RecognitionException {
 		CreateTableContext _localctx = new CreateTableContext(_ctx, getState());
-		enterRule(_localctx, 14, RULE_createTable);
+		enterRule(_localctx, 12, RULE_createTable);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(113);
+			setState(110);
 			match(CREATE);
-			setState(114);
+			setState(111);
 			match(TABLE);
-			setState(115);
+			setState(112);
 			tableName();
-			setState(116);
+			setState(113);
 			match(LR_BRACKET);
-			setState(117);
+			setState(114);
 			createDefinition();
-			setState(122);
+			setState(119);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA) {
 				{
 				{
-				setState(118);
+				setState(115);
 				match(COMMA);
-				setState(119);
+				setState(116);
 				createDefinition();
 				}
 				}
-				setState(124);
+				setState(121);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(125);
+			setState(122);
 			match(RR_BRACKET);
 			}
 		}
@@ -672,26 +623,26 @@ public class TinyDBParser extends Parser {
 
 	public final CreateDefinitionContext createDefinition() throws RecognitionException {
 		CreateDefinitionContext _localctx = new CreateDefinitionContext(_ctx, getState());
-		enterRule(_localctx, 16, RULE_createDefinition);
+		enterRule(_localctx, 14, RULE_createDefinition);
 		int _la;
 		try {
-			setState(138);
+			setState(135);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case ID:
 				_localctx = new ColumnDeclarationContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(127);
+				setState(124);
 				attrName();
-				setState(128);
+				setState(125);
 				dataType();
-				setState(130);
+				setState(127);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==NOT) {
 					{
-					setState(129);
+					setState(126);
 					nullNotnull();
 					}
 				}
@@ -702,15 +653,15 @@ public class TinyDBParser extends Parser {
 				_localctx = new ConstraintDeclarationContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(132);
+				setState(129);
 				match(PRIMARY);
-				setState(133);
+				setState(130);
 				match(KEY);
-				setState(134);
+				setState(131);
 				match(LR_BRACKET);
-				setState(135);
+				setState(132);
 				attrNames();
-				setState(136);
+				setState(133);
 				match(RR_BRACKET);
 				}
 				break;
@@ -748,15 +699,15 @@ public class TinyDBParser extends Parser {
 
 	public final DropDatabaseContext dropDatabase() throws RecognitionException {
 		DropDatabaseContext _localctx = new DropDatabaseContext(_ctx, getState());
-		enterRule(_localctx, 18, RULE_dropDatabase);
+		enterRule(_localctx, 16, RULE_dropDatabase);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(140);
+			setState(137);
 			match(DROP);
-			setState(141);
+			setState(138);
 			match(DATABASE);
-			setState(142);
+			setState(139);
 			dbName();
 			}
 		}
@@ -790,15 +741,15 @@ public class TinyDBParser extends Parser {
 
 	public final DropTableContext dropTable() throws RecognitionException {
 		DropTableContext _localctx = new DropTableContext(_ctx, getState());
-		enterRule(_localctx, 20, RULE_dropTable);
+		enterRule(_localctx, 18, RULE_dropTable);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(144);
+			setState(141);
 			match(DROP);
-			setState(145);
+			setState(142);
 			match(TABLE);
-			setState(146);
+			setState(143);
 			tableName();
 			}
 		}
@@ -832,15 +783,15 @@ public class TinyDBParser extends Parser {
 
 	public final UseDatabaseContext useDatabase() throws RecognitionException {
 		UseDatabaseContext _localctx = new UseDatabaseContext(_ctx, getState());
-		enterRule(_localctx, 22, RULE_useDatabase);
+		enterRule(_localctx, 20, RULE_useDatabase);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(148);
+			setState(145);
 			match(USE);
-			setState(149);
+			setState(146);
 			match(DATABASE);
-			setState(150);
+			setState(147);
 			dbName();
 			}
 		}
@@ -858,8 +809,8 @@ public class TinyDBParser extends Parser {
 	public static class InsertStatementContext extends ParserRuleContext {
 		public TerminalNode INSERT() { return getToken(TinyDBParser.INSERT, 0); }
 		public TerminalNode INTO() { return getToken(TinyDBParser.INTO, 0); }
-		public TableContext table() {
-			return getRuleContext(TableContext.class,0);
+		public TableNameContext tableName() {
+			return getRuleContext(TableNameContext.class,0);
 		}
 		public TerminalNode VALUES() { return getToken(TinyDBParser.VALUES, 0); }
 		public ConstantsContext constants() {
@@ -881,38 +832,38 @@ public class TinyDBParser extends Parser {
 
 	public final InsertStatementContext insertStatement() throws RecognitionException {
 		InsertStatementContext _localctx = new InsertStatementContext(_ctx, getState());
-		enterRule(_localctx, 24, RULE_insertStatement);
+		enterRule(_localctx, 22, RULE_insertStatement);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(152);
+			setState(149);
 			match(INSERT);
-			setState(153);
+			setState(150);
 			match(INTO);
-			setState(154);
-			table();
-			setState(159);
+			setState(151);
+			tableName();
+			setState(156);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==LR_BRACKET) {
 				{
-				setState(155);
+				setState(152);
 				match(LR_BRACKET);
-				setState(156);
+				setState(153);
 				attrNames();
-				setState(157);
+				setState(154);
 				match(RR_BRACKET);
 				}
 			}
 
-			setState(161);
+			setState(158);
 			match(VALUES);
-			setState(162);
+			setState(159);
 			match(LR_BRACKET);
-			setState(163);
+			setState(160);
 			constants();
-			setState(164);
+			setState(161);
 			match(RR_BRACKET);
 			}
 		}
@@ -930,11 +881,8 @@ public class TinyDBParser extends Parser {
 	public static class SelectStatementContext extends ParserRuleContext {
 		public PredicateContext whereExpr;
 		public TerminalNode SELECT() { return getToken(TinyDBParser.SELECT, 0); }
-		public List<FullColumnNameContext> fullColumnName() {
-			return getRuleContexts(FullColumnNameContext.class);
-		}
-		public FullColumnNameContext fullColumnName(int i) {
-			return getRuleContext(FullColumnNameContext.class,i);
+		public FullColumnNamesContext fullColumnNames() {
+			return getRuleContext(FullColumnNamesContext.class,0);
 		}
 		public TerminalNode FROM() { return getToken(TinyDBParser.FROM, 0); }
 		public TableSourcesContext tableSources() {
@@ -957,44 +905,28 @@ public class TinyDBParser extends Parser {
 
 	public final SelectStatementContext selectStatement() throws RecognitionException {
 		SelectStatementContext _localctx = new SelectStatementContext(_ctx, getState());
-		enterRule(_localctx, 26, RULE_selectStatement);
+		enterRule(_localctx, 24, RULE_selectStatement);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(166);
+			setState(163);
 			match(SELECT);
-			setState(167);
-			fullColumnName();
-			setState(172);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==COMMA) {
-				{
-				{
-				setState(168);
-				match(COMMA);
-				setState(169);
-				fullColumnName();
-				}
-				}
-				setState(174);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			setState(175);
+			setState(164);
+			fullColumnNames();
+			setState(165);
 			match(FROM);
-			setState(176);
+			setState(166);
 			tableSources();
-			setState(179);
+			setState(169);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==WHERE) {
 				{
-				setState(177);
+				setState(167);
 				match(WHERE);
-				setState(178);
-				((SelectStatementContext)_localctx).whereExpr = predicate(0);
+				setState(168);
+				((SelectStatementContext)_localctx).whereExpr = predicate();
 				}
 			}
 
@@ -1011,13 +943,88 @@ public class TinyDBParser extends Parser {
 		return _localctx;
 	}
 
-	public static class FullColumnNameContext extends ParserRuleContext {
-		public TableContext table() {
-			return getRuleContext(TableContext.class,0);
+	public static class FullColumnNamesContext extends ParserRuleContext {
+		public TerminalNode STAR() { return getToken(TinyDBParser.STAR, 0); }
+		public List<FullColumnNameContext> fullColumnName() {
+			return getRuleContexts(FullColumnNameContext.class);
 		}
+		public FullColumnNameContext fullColumnName(int i) {
+			return getRuleContext(FullColumnNameContext.class,i);
+		}
+		public FullColumnNamesContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_fullColumnNames; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitFullColumnNames(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final FullColumnNamesContext fullColumnNames() throws RecognitionException {
+		FullColumnNamesContext _localctx = new FullColumnNamesContext(_ctx, getState());
+		enterRule(_localctx, 26, RULE_fullColumnNames);
+		int _la;
+		try {
+			setState(180);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case STAR:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(171);
+				match(STAR);
+				}
+				break;
+			case ID:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(172);
+				fullColumnName();
+				setState(177);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				while (_la==COMMA) {
+					{
+					{
+					setState(173);
+					match(COMMA);
+					setState(174);
+					fullColumnName();
+					}
+					}
+					setState(179);
+					_errHandler.sync(this);
+					_la = _input.LA(1);
+				}
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class FullColumnNameContext extends ParserRuleContext {
+		public Token alias;
 		public AttrNameContext attrName() {
 			return getRuleContext(AttrNameContext.class,0);
 		}
+		public TableNameContext tableName() {
+			return getRuleContext(TableNameContext.class,0);
+		}
+		public TerminalNode AS() { return getToken(TinyDBParser.AS, 0); }
+		public TerminalNode ID() { return getToken(TinyDBParser.ID, 0); }
 		public FullColumnNameContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1032,28 +1039,36 @@ public class TinyDBParser extends Parser {
 	public final FullColumnNameContext fullColumnName() throws RecognitionException {
 		FullColumnNameContext _localctx = new FullColumnNameContext(_ctx, getState());
 		enterRule(_localctx, 28, RULE_fullColumnName);
+		int _la;
 		try {
-			setState(186);
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(185);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
 			case 1:
-				enterOuterAlt(_localctx, 1);
 				{
-				setState(181);
-				table();
 				setState(182);
-				match(DOT);
+				tableName();
 				setState(183);
-				attrName();
+				match(DOT);
 				}
 				break;
-			case 2:
-				enterOuterAlt(_localctx, 2);
+			}
+			setState(187);
+			attrName();
+			setState(190);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==AS) {
 				{
-				setState(185);
-				attrName();
+				setState(188);
+				match(AS);
+				setState(189);
+				((FullColumnNameContext)_localctx).alias = match(ID);
 				}
-				break;
+			}
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -1092,21 +1107,21 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(188);
+			setState(192);
 			tableSource();
-			setState(193);
+			setState(197);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA) {
 				{
 				{
-				setState(189);
+				setState(193);
 				match(COMMA);
-				setState(190);
+				setState(194);
 				tableSource();
 				}
 				}
-				setState(195);
+				setState(199);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -1160,19 +1175,19 @@ public class TinyDBParser extends Parser {
 			_localctx = new TableSourceBaseContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(196);
-			table();
 			setState(200);
+			table();
+			setState(204);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << JOIN) | (1L << LEFT) | (1L << RIGHT))) != 0)) {
 				{
 				{
-				setState(197);
+				setState(201);
 				joinPart();
 				}
 				}
-				setState(202);
+				setState(206);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -1206,8 +1221,8 @@ public class TinyDBParser extends Parser {
 			return getRuleContext(TableContext.class,0);
 		}
 		public TerminalNode ON() { return getToken(TinyDBParser.ON, 0); }
-		public PredicateContext predicate() {
-			return getRuleContext(PredicateContext.class,0);
+		public ComparisonExpressionPredicateContext comparisonExpressionPredicate() {
+			return getRuleContext(ComparisonExpressionPredicateContext.class,0);
 		}
 		public InnerJoinContext(JoinPartContext ctx) { copyFrom(ctx); }
 		@Override
@@ -1224,8 +1239,8 @@ public class TinyDBParser extends Parser {
 		public TerminalNode LEFT() { return getToken(TinyDBParser.LEFT, 0); }
 		public TerminalNode RIGHT() { return getToken(TinyDBParser.RIGHT, 0); }
 		public TerminalNode ON() { return getToken(TinyDBParser.ON, 0); }
-		public PredicateContext predicate() {
-			return getRuleContext(PredicateContext.class,0);
+		public ComparisonExpressionPredicateContext comparisonExpressionPredicate() {
+			return getRuleContext(ComparisonExpressionPredicateContext.class,0);
 		}
 		public TerminalNode OUTER() { return getToken(TinyDBParser.OUTER, 0); }
 		public OuterJoinContext(JoinPartContext ctx) { copyFrom(ctx); }
@@ -1241,26 +1256,26 @@ public class TinyDBParser extends Parser {
 		enterRule(_localctx, 34, RULE_joinPart);
 		int _la;
 		try {
-			setState(218);
+			setState(222);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case JOIN:
 				_localctx = new InnerJoinContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(203);
-				match(JOIN);
-				setState(204);
-				table();
 				setState(207);
+				match(JOIN);
+				setState(208);
+				table();
+				setState(211);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==ON) {
 					{
-					setState(205);
+					setState(209);
 					match(ON);
-					setState(206);
-					predicate(0);
+					setState(210);
+					comparisonExpressionPredicate();
 					}
 				}
 
@@ -1271,7 +1286,7 @@ public class TinyDBParser extends Parser {
 				_localctx = new OuterJoinContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(209);
+				setState(213);
 				_la = _input.LA(1);
 				if ( !(_la==LEFT || _la==RIGHT) ) {
 				_errHandler.recoverInline(this);
@@ -1281,25 +1296,25 @@ public class TinyDBParser extends Parser {
 					_errHandler.reportMatch(this);
 					consume();
 				}
-				setState(211);
+				setState(215);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==OUTER) {
 					{
-					setState(210);
+					setState(214);
 					match(OUTER);
 					}
 				}
 
-				setState(213);
+				setState(217);
 				match(JOIN);
-				setState(214);
+				setState(218);
 				table();
 				{
-				setState(215);
+				setState(219);
 				match(ON);
-				setState(216);
-				predicate(0);
+				setState(220);
+				comparisonExpressionPredicate();
 				}
 				}
 				break;
@@ -1320,8 +1335,8 @@ public class TinyDBParser extends Parser {
 
 	public static class UpdateStatementContext extends ParserRuleContext {
 		public TerminalNode UPDATE() { return getToken(TinyDBParser.UPDATE, 0); }
-		public TableContext table() {
-			return getRuleContext(TableContext.class,0);
+		public TableNameContext tableName() {
+			return getRuleContext(TableNameContext.class,0);
 		}
 		public TerminalNode SET() { return getToken(TinyDBParser.SET, 0); }
 		public List<UpdatedElementContext> updatedElement() {
@@ -1352,39 +1367,39 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(220);
+			setState(224);
 			match(UPDATE);
-			setState(221);
-			table();
-			setState(222);
+			setState(225);
+			tableName();
+			setState(226);
 			match(SET);
-			setState(223);
+			setState(227);
 			updatedElement();
-			setState(228);
+			setState(232);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA) {
 				{
 				{
-				setState(224);
+				setState(228);
 				match(COMMA);
-				setState(225);
+				setState(229);
 				updatedElement();
 				}
 				}
-				setState(230);
+				setState(234);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(233);
+			setState(237);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==WHERE) {
 				{
-				setState(231);
+				setState(235);
 				match(WHERE);
-				setState(232);
-				predicate(0);
+				setState(236);
+				predicate();
 				}
 			}
 
@@ -1425,11 +1440,11 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(235);
+			setState(239);
 			attrName();
-			setState(236);
+			setState(240);
 			match(EQUAL_SYMBOL);
-			setState(237);
+			setState(241);
 			constant();
 			}
 		}
@@ -1447,8 +1462,8 @@ public class TinyDBParser extends Parser {
 	public static class DeleteStatementContext extends ParserRuleContext {
 		public TerminalNode DELETE() { return getToken(TinyDBParser.DELETE, 0); }
 		public TerminalNode FROM() { return getToken(TinyDBParser.FROM, 0); }
-		public TableContext table() {
-			return getRuleContext(TableContext.class,0);
+		public TableNameContext tableName() {
+			return getRuleContext(TableNameContext.class,0);
 		}
 		public TerminalNode WHERE() { return getToken(TinyDBParser.WHERE, 0); }
 		public PredicateContext predicate() {
@@ -1472,21 +1487,21 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(239);
+			setState(243);
 			match(DELETE);
-			setState(240);
-			match(FROM);
-			setState(241);
-			table();
 			setState(244);
+			match(FROM);
+			setState(245);
+			tableName();
+			setState(248);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==WHERE) {
 				{
-				setState(242);
+				setState(246);
 				match(WHERE);
-				setState(243);
-				predicate(0);
+				setState(247);
+				predicate();
 				}
 			}
 
@@ -1504,107 +1519,51 @@ public class TinyDBParser extends Parser {
 	}
 
 	public static class PredicateContext extends ParserRuleContext {
+		public List<AndExpressionPredicateContext> andExpressionPredicate() {
+			return getRuleContexts(AndExpressionPredicateContext.class);
+		}
+		public AndExpressionPredicateContext andExpressionPredicate(int i) {
+			return getRuleContext(AndExpressionPredicateContext.class,i);
+		}
+		public List<TerminalNode> OR() { return getTokens(TinyDBParser.OR); }
+		public TerminalNode OR(int i) {
+			return getToken(TinyDBParser.OR, i);
+		}
 		public PredicateContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_predicate; }
-	 
-		public PredicateContext() { }
-		public void copyFrom(PredicateContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class ComparisonExpressionPredicateContext extends PredicateContext {
-		public ExpressionAtomContext left;
-		public ExpressionAtomContext right;
-		public ComparisonOperatorContext comparisonOperator() {
-			return getRuleContext(ComparisonOperatorContext.class,0);
-		}
-		public List<ExpressionAtomContext> expressionAtom() {
-			return getRuleContexts(ExpressionAtomContext.class);
-		}
-		public ExpressionAtomContext expressionAtom(int i) {
-			return getRuleContext(ExpressionAtomContext.class,i);
-		}
-		public ComparisonExpressionPredicateContext(PredicateContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitComparisonExpressionPredicate(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class LogicalExpressionPredicateContext extends PredicateContext {
-		public PredicateContext left;
-		public PredicateContext right;
-		public LogicalOperatorContext logicalOperator() {
-			return getRuleContext(LogicalOperatorContext.class,0);
-		}
-		public List<PredicateContext> predicate() {
-			return getRuleContexts(PredicateContext.class);
-		}
-		public PredicateContext predicate(int i) {
-			return getRuleContext(PredicateContext.class,i);
-		}
-		public LogicalExpressionPredicateContext(PredicateContext ctx) { copyFrom(ctx); }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitLogicalExpressionPredicate(this);
+			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitPredicate(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
 	public final PredicateContext predicate() throws RecognitionException {
-		return predicate(0);
-	}
-
-	private PredicateContext predicate(int _p) throws RecognitionException {
-		ParserRuleContext _parentctx = _ctx;
-		int _parentState = getState();
-		PredicateContext _localctx = new PredicateContext(_ctx, _parentState);
-		PredicateContext _prevctx = _localctx;
-		int _startState = 42;
-		enterRecursionRule(_localctx, 42, RULE_predicate, _p);
+		PredicateContext _localctx = new PredicateContext(_ctx, getState());
+		enterRule(_localctx, 42, RULE_predicate);
+		int _la;
 		try {
-			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			{
-			_localctx = new ComparisonExpressionPredicateContext(_localctx);
-			_ctx = _localctx;
-			_prevctx = _localctx;
-
-			setState(247);
-			((ComparisonExpressionPredicateContext)_localctx).left = expressionAtom();
-			setState(248);
-			comparisonOperator();
-			setState(249);
-			((ComparisonExpressionPredicateContext)_localctx).right = expressionAtom();
-			}
-			_ctx.stop = _input.LT(-1);
-			setState(257);
+			setState(250);
+			andExpressionPredicate();
+			setState(255);
 			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,20,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
-				if ( _alt==1 ) {
-					if ( _parseListeners!=null ) triggerExitRuleEvent();
-					_prevctx = _localctx;
-					{
-					{
-					_localctx = new LogicalExpressionPredicateContext(new PredicateContext(_parentctx, _parentState));
-					((LogicalExpressionPredicateContext)_localctx).left = _prevctx;
-					pushNewRecursionContext(_localctx, _startState, RULE_predicate);
-					setState(251);
-					if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
-					setState(252);
-					logicalOperator();
-					setState(253);
-					((LogicalExpressionPredicateContext)_localctx).right = predicate(3);
-					}
-					} 
+			_la = _input.LA(1);
+			while (_la==OR) {
+				{
+				{
+				setState(251);
+				match(OR);
+				setState(252);
+				andExpressionPredicate();
 				}
-				setState(259);
+				}
+				setState(257);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,20,_ctx);
+				_la = _input.LA(1);
 			}
 			}
 		}
@@ -1614,76 +1573,206 @@ public class TinyDBParser extends Parser {
 			_errHandler.recover(this, re);
 		}
 		finally {
-			unrollRecursionContexts(_parentctx);
+			exitRule();
 		}
 		return _localctx;
 	}
 
-	public static class ExpressionAtomContext extends ParserRuleContext {
-		public ExpressionAtomContext(ParserRuleContext parent, int invokingState) {
+	public static class AndExpressionPredicateContext extends ParserRuleContext {
+		public List<ComparisonExpressionPredicateContext> comparisonExpressionPredicate() {
+			return getRuleContexts(ComparisonExpressionPredicateContext.class);
+		}
+		public ComparisonExpressionPredicateContext comparisonExpressionPredicate(int i) {
+			return getRuleContext(ComparisonExpressionPredicateContext.class,i);
+		}
+		public List<TerminalNode> AND() { return getTokens(TinyDBParser.AND); }
+		public TerminalNode AND(int i) {
+			return getToken(TinyDBParser.AND, i);
+		}
+		public AndExpressionPredicateContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_expressionAtom; }
-	 
-		public ExpressionAtomContext() { }
-		public void copyFrom(ExpressionAtomContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class ConstantExpressionAtomContext extends ExpressionAtomContext {
-		public ConstantContext constant() {
-			return getRuleContext(ConstantContext.class,0);
-		}
-		public ConstantExpressionAtomContext(ExpressionAtomContext ctx) { copyFrom(ctx); }
+		@Override public int getRuleIndex() { return RULE_andExpressionPredicate; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitConstantExpressionAtom(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class FullColumnNameExpressionAtomContext extends ExpressionAtomContext {
-		public FullColumnNameContext fullColumnName() {
-			return getRuleContext(FullColumnNameContext.class,0);
-		}
-		public FullColumnNameExpressionAtomContext(ExpressionAtomContext ctx) { copyFrom(ctx); }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitFullColumnNameExpressionAtom(this);
+			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitAndExpressionPredicate(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final ExpressionAtomContext expressionAtom() throws RecognitionException {
-		ExpressionAtomContext _localctx = new ExpressionAtomContext(_ctx, getState());
-		enterRule(_localctx, 44, RULE_expressionAtom);
+	public final AndExpressionPredicateContext andExpressionPredicate() throws RecognitionException {
+		AndExpressionPredicateContext _localctx = new AndExpressionPredicateContext(_ctx, getState());
+		enterRule(_localctx, 44, RULE_andExpressionPredicate);
+		int _la;
 		try {
-			setState(262);
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(258);
+			comparisonExpressionPredicate();
+			setState(263);
 			_errHandler.sync(this);
-			switch (_input.LA(1)) {
-			case MINUS:
-			case ZERO_DECIMAL:
-			case ONE_DECIMAL:
-			case TWO_DECIMAL:
-			case STRING_LITERAL:
-			case DECIMAL_LITERAL:
-			case REAL_LITERAL:
-				_localctx = new ConstantExpressionAtomContext(_localctx);
+			_la = _input.LA(1);
+			while (_la==AND) {
+				{
+				{
+				setState(259);
+				match(AND);
+				setState(260);
+				comparisonExpressionPredicate();
+				}
+				}
+				setState(265);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ComparisonExpressionPredicateContext extends ParserRuleContext {
+		public ComparisonExpressionPredicateContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_comparisonExpressionPredicate; }
+	 
+		public ComparisonExpressionPredicateContext() { }
+		public void copyFrom(ComparisonExpressionPredicateContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class KvCmpExpressionPredicateContext extends ComparisonExpressionPredicateContext {
+		public FullColumnNameContext fullColumnName() {
+			return getRuleContext(FullColumnNameContext.class,0);
+		}
+		public ComparisonOperatorContext comparisonOperator() {
+			return getRuleContext(ComparisonOperatorContext.class,0);
+		}
+		public ConstantContext constant() {
+			return getRuleContext(ConstantContext.class,0);
+		}
+		public KvCmpExpressionPredicateContext(ComparisonExpressionPredicateContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitKvCmpExpressionPredicate(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class KkCmpExpressionPredicateContext extends ComparisonExpressionPredicateContext {
+		public List<FullColumnNameContext> fullColumnName() {
+			return getRuleContexts(FullColumnNameContext.class);
+		}
+		public FullColumnNameContext fullColumnName(int i) {
+			return getRuleContext(FullColumnNameContext.class,i);
+		}
+		public ComparisonOperatorContext comparisonOperator() {
+			return getRuleContext(ComparisonOperatorContext.class,0);
+		}
+		public KkCmpExpressionPredicateContext(ComparisonExpressionPredicateContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitKkCmpExpressionPredicate(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class VvCmpExpressionPredicateContext extends ComparisonExpressionPredicateContext {
+		public List<ConstantContext> constant() {
+			return getRuleContexts(ConstantContext.class);
+		}
+		public ConstantContext constant(int i) {
+			return getRuleContext(ConstantContext.class,i);
+		}
+		public ComparisonOperatorContext comparisonOperator() {
+			return getRuleContext(ComparisonOperatorContext.class,0);
+		}
+		public VvCmpExpressionPredicateContext(ComparisonExpressionPredicateContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitVvCmpExpressionPredicate(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class VkCmpExpressionPredicateContext extends ComparisonExpressionPredicateContext {
+		public ConstantContext constant() {
+			return getRuleContext(ConstantContext.class,0);
+		}
+		public ComparisonOperatorContext comparisonOperator() {
+			return getRuleContext(ComparisonOperatorContext.class,0);
+		}
+		public FullColumnNameContext fullColumnName() {
+			return getRuleContext(FullColumnNameContext.class,0);
+		}
+		public VkCmpExpressionPredicateContext(ComparisonExpressionPredicateContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitVkCmpExpressionPredicate(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ComparisonExpressionPredicateContext comparisonExpressionPredicate() throws RecognitionException {
+		ComparisonExpressionPredicateContext _localctx = new ComparisonExpressionPredicateContext(_ctx, getState());
+		enterRule(_localctx, 46, RULE_comparisonExpressionPredicate);
+		try {
+			setState(282);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,23,_ctx) ) {
+			case 1:
+				_localctx = new VkCmpExpressionPredicateContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(260);
+				setState(266);
 				constant();
-				}
-				break;
-			case ID:
-				_localctx = new FullColumnNameExpressionAtomContext(_localctx);
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(261);
+				setState(267);
+				comparisonOperator();
+				setState(268);
 				fullColumnName();
 				}
 				break;
-			default:
-				throw new NoViableAltException(this);
+			case 2:
+				_localctx = new KvCmpExpressionPredicateContext(_localctx);
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(270);
+				fullColumnName();
+				setState(271);
+				comparisonOperator();
+				setState(272);
+				constant();
+				}
+				break;
+			case 3:
+				_localctx = new KkCmpExpressionPredicateContext(_localctx);
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(274);
+				fullColumnName();
+				setState(275);
+				comparisonOperator();
+				setState(276);
+				fullColumnName();
+				}
+				break;
+			case 4:
+				_localctx = new VvCmpExpressionPredicateContext(_localctx);
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(278);
+				constant();
+				setState(279);
+				comparisonOperator();
+				setState(280);
+				constant();
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -1719,36 +1808,36 @@ public class TinyDBParser extends Parser {
 
 	public final DataTypeContext dataType() throws RecognitionException {
 		DataTypeContext _localctx = new DataTypeContext(_ctx, getState());
-		enterRule(_localctx, 46, RULE_dataType);
+		enterRule(_localctx, 48, RULE_dataType);
 		try {
-			setState(270);
+			setState(290);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case INT:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(264);
+				setState(284);
 				match(INT);
 				}
 				break;
 			case LONG:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(265);
+				setState(285);
 				match(LONG);
 				}
 				break;
 			case FLOAT:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(266);
+				setState(286);
 				match(FLOAT);
 				}
 				break;
 			case DOUBLE:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(267);
+				setState(287);
 				match(DOUBLE);
 				}
 				break;
@@ -1756,10 +1845,10 @@ public class TinyDBParser extends Parser {
 				enterOuterAlt(_localctx, 5);
 				{
 				{
-				setState(268);
+				setState(288);
 				match(STRING);
 				}
-				setState(269);
+				setState(289);
 				lengthOneDimension();
 				}
 				break;
@@ -1793,15 +1882,15 @@ public class TinyDBParser extends Parser {
 
 	public final LengthOneDimensionContext lengthOneDimension() throws RecognitionException {
 		LengthOneDimensionContext _localctx = new LengthOneDimensionContext(_ctx, getState());
-		enterRule(_localctx, 48, RULE_lengthOneDimension);
+		enterRule(_localctx, 50, RULE_lengthOneDimension);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(272);
+			setState(292);
 			match(LR_BRACKET);
-			setState(273);
+			setState(293);
 			match(DECIMAL_LITERAL);
-			setState(274);
+			setState(294);
 			match(RR_BRACKET);
 			}
 		}
@@ -1836,26 +1925,26 @@ public class TinyDBParser extends Parser {
 
 	public final ConstantsContext constants() throws RecognitionException {
 		ConstantsContext _localctx = new ConstantsContext(_ctx, getState());
-		enterRule(_localctx, 50, RULE_constants);
+		enterRule(_localctx, 52, RULE_constants);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(276);
+			setState(296);
 			constant();
-			setState(281);
+			setState(301);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA) {
 				{
 				{
-				setState(277);
+				setState(297);
 				match(COMMA);
-				setState(278);
+				setState(298);
 				constant();
 				}
 				}
-				setState(283);
+				setState(303);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -1878,6 +1967,7 @@ public class TinyDBParser extends Parser {
 			return getRuleContext(DecimalLiteralContext.class,0);
 		}
 		public TerminalNode REAL_LITERAL() { return getToken(TinyDBParser.REAL_LITERAL, 0); }
+		public TerminalNode NULL_LITERAL() { return getToken(TinyDBParser.NULL_LITERAL, 0); }
 		public ConstantContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1891,15 +1981,15 @@ public class TinyDBParser extends Parser {
 
 	public final ConstantContext constant() throws RecognitionException {
 		ConstantContext _localctx = new ConstantContext(_ctx, getState());
-		enterRule(_localctx, 52, RULE_constant);
+		enterRule(_localctx, 54, RULE_constant);
 		try {
-			setState(289);
+			setState(310);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case STRING_LITERAL:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(284);
+				setState(304);
 				match(STRING_LITERAL);
 				}
 				break;
@@ -1909,24 +1999,31 @@ public class TinyDBParser extends Parser {
 			case DECIMAL_LITERAL:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(285);
+				setState(305);
 				decimalLiteral();
 				}
 				break;
 			case MINUS:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(286);
+				setState(306);
 				match(MINUS);
-				setState(287);
+				setState(307);
 				decimalLiteral();
 				}
 				break;
 			case REAL_LITERAL:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(288);
+				setState(308);
 				match(REAL_LITERAL);
+				}
+				break;
+			case NULL_LITERAL:
+				enterOuterAlt(_localctx, 5);
+				{
+				setState(309);
+				match(NULL_LITERAL);
 				}
 				break;
 			default:
@@ -1958,136 +2055,68 @@ public class TinyDBParser extends Parser {
 
 	public final ComparisonOperatorContext comparisonOperator() throws RecognitionException {
 		ComparisonOperatorContext _localctx = new ComparisonOperatorContext(_ctx, getState());
-		enterRule(_localctx, 54, RULE_comparisonOperator);
+		enterRule(_localctx, 56, RULE_comparisonOperator);
 		try {
-			setState(302);
+			setState(323);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,25,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,27,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(291);
+				setState(312);
 				match(EQUAL_SYMBOL);
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(292);
+				setState(313);
 				match(GREATER_SYMBOL);
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(293);
+				setState(314);
 				match(LESS_SYMBOL);
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(294);
+				setState(315);
 				match(LESS_SYMBOL);
-				setState(295);
+				setState(316);
 				match(EQUAL_SYMBOL);
 				}
 				break;
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(296);
+				setState(317);
 				match(GREATER_SYMBOL);
-				setState(297);
+				setState(318);
 				match(EQUAL_SYMBOL);
 				}
 				break;
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(298);
+				setState(319);
 				match(LESS_SYMBOL);
-				setState(299);
+				setState(320);
 				match(GREATER_SYMBOL);
 				}
 				break;
 			case 7:
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(300);
+				setState(321);
 				match(EXCLAMATION_SYMBOL);
-				setState(301);
+				setState(322);
 				match(EQUAL_SYMBOL);
 				}
 				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class LogicalOperatorContext extends ParserRuleContext {
-		public TerminalNode AND() { return getToken(TinyDBParser.AND, 0); }
-		public TerminalNode OR() { return getToken(TinyDBParser.OR, 0); }
-		public LogicalOperatorContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_logicalOperator; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof TinyDBParserVisitor ) return ((TinyDBParserVisitor<? extends T>)visitor).visitLogicalOperator(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final LogicalOperatorContext logicalOperator() throws RecognitionException {
-		LogicalOperatorContext _localctx = new LogicalOperatorContext(_ctx, getState());
-		enterRule(_localctx, 56, RULE_logicalOperator);
-		try {
-			setState(310);
-			_errHandler.sync(this);
-			switch (_input.LA(1)) {
-			case AND:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(304);
-				match(AND);
-				}
-				break;
-			case BIT_AND_OP:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(305);
-				match(BIT_AND_OP);
-				setState(306);
-				match(BIT_AND_OP);
-				}
-				break;
-			case OR:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(307);
-				match(OR);
-				}
-				break;
-			case BIT_OR_OP:
-				enterOuterAlt(_localctx, 4);
-				{
-				setState(308);
-				match(BIT_OR_OP);
-				setState(309);
-				match(BIT_OR_OP);
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2127,37 +2156,37 @@ public class TinyDBParser extends Parser {
 		ShowStatementContext _localctx = new ShowStatementContext(_ctx, getState());
 		enterRule(_localctx, 58, RULE_showStatement);
 		try {
-			setState(320);
+			setState(333);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,27,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,28,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(312);
+				setState(325);
 				match(SHOW);
-				setState(313);
+				setState(326);
 				match(DATABASES);
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(314);
+				setState(327);
 				match(SHOW);
-				setState(315);
+				setState(328);
 				match(DATABASE);
-				setState(316);
+				setState(329);
 				dbName();
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(317);
+				setState(330);
 				match(SHOW);
-				setState(318);
+				setState(331);
 				match(TABLE);
-				setState(319);
+				setState(332);
 				table();
 				}
 				break;
@@ -2193,7 +2222,7 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(322);
+			setState(335);
 			match(SHUTDOWN);
 			}
 		}
@@ -2227,7 +2256,7 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(324);
+			setState(337);
 			match(ID);
 			}
 		}
@@ -2243,9 +2272,15 @@ public class TinyDBParser extends Parser {
 	}
 
 	public static class TableContext extends ParserRuleContext {
-		public TableNameContext tableName() {
-			return getRuleContext(TableNameContext.class,0);
+		public TableNameContext originalName;
+		public TableNameContext alias;
+		public List<TableNameContext> tableName() {
+			return getRuleContexts(TableNameContext.class);
 		}
+		public TableNameContext tableName(int i) {
+			return getRuleContext(TableNameContext.class,i);
+		}
+		public TerminalNode AS() { return getToken(TinyDBParser.AS, 0); }
 		public TableContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2260,11 +2295,24 @@ public class TinyDBParser extends Parser {
 	public final TableContext table() throws RecognitionException {
 		TableContext _localctx = new TableContext(_ctx, getState());
 		enterRule(_localctx, 64, RULE_table);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(326);
-			tableName();
+			setState(339);
+			((TableContext)_localctx).originalName = tableName();
+			setState(342);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==AS) {
+				{
+				setState(340);
+				match(AS);
+				setState(341);
+				((TableContext)_localctx).alias = tableName();
+				}
+			}
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -2297,7 +2345,7 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(328);
+			setState(344);
 			match(ID);
 			}
 		}
@@ -2331,7 +2379,7 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(330);
+			setState(346);
 			match(ID);
 			}
 		}
@@ -2371,21 +2419,21 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(332);
+			setState(348);
 			attrName();
-			setState(337);
+			setState(353);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA) {
 				{
 				{
-				setState(333);
+				setState(349);
 				match(COMMA);
-				setState(334);
+				setState(350);
 				attrName();
 				}
 				}
-				setState(339);
+				setState(355);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -2422,9 +2470,9 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(340);
+			setState(356);
 			match(NOT);
-			setState(341);
+			setState(357);
 			match(NULL_LITERAL);
 			}
 		}
@@ -2462,7 +2510,7 @@ public class TinyDBParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(343);
+			setState(359);
 			_la = _input.LA(1);
 			if ( !(((((_la - 93)) & ~0x3f) == 0 && ((1L << (_la - 93)) & ((1L << (ZERO_DECIMAL - 93)) | (1L << (ONE_DECIMAL - 93)) | (1L << (TWO_DECIMAL - 93)) | (1L << (DECIMAL_LITERAL - 93)))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -2485,139 +2533,132 @@ public class TinyDBParser extends Parser {
 		return _localctx;
 	}
 
-	public boolean sempred(RuleContext _localctx, int ruleIndex, int predIndex) {
-		switch (ruleIndex) {
-		case 21:
-			return predicate_sempred((PredicateContext)_localctx, predIndex);
-		}
-		return true;
-	}
-	private boolean predicate_sempred(PredicateContext _localctx, int predIndex) {
-		switch (predIndex) {
-		case 0:
-			return precpred(_ctx, 2);
-		}
-		return true;
-	}
-
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3m\u015c\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3m\u016c\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
 		"\4\32\t\32\4\33\t\33\4\34\t\34\4\35\t\35\4\36\t\36\4\37\t\37\4 \t \4!"+
 		"\t!\4\"\t\"\4#\t#\4$\t$\4%\t%\4&\t&\4\'\t\'\3\2\3\2\3\2\3\3\3\3\3\3\7"+
-		"\3U\n\3\f\3\16\3X\13\3\3\4\3\4\3\4\5\4]\n\4\3\5\3\5\3\5\3\5\3\5\5\5d\n"+
-		"\5\3\6\3\6\3\6\3\6\5\6j\n\6\3\7\3\7\5\7n\n\7\3\b\3\b\3\b\3\b\3\t\3\t\3"+
-		"\t\3\t\3\t\3\t\3\t\7\t{\n\t\f\t\16\t~\13\t\3\t\3\t\3\n\3\n\3\n\5\n\u0085"+
-		"\n\n\3\n\3\n\3\n\3\n\3\n\3\n\5\n\u008d\n\n\3\13\3\13\3\13\3\13\3\f\3\f"+
-		"\3\f\3\f\3\r\3\r\3\r\3\r\3\16\3\16\3\16\3\16\3\16\3\16\3\16\5\16\u00a2"+
-		"\n\16\3\16\3\16\3\16\3\16\3\16\3\17\3\17\3\17\3\17\7\17\u00ad\n\17\f\17"+
-		"\16\17\u00b0\13\17\3\17\3\17\3\17\3\17\5\17\u00b6\n\17\3\20\3\20\3\20"+
-		"\3\20\3\20\5\20\u00bd\n\20\3\21\3\21\3\21\7\21\u00c2\n\21\f\21\16\21\u00c5"+
-		"\13\21\3\22\3\22\7\22\u00c9\n\22\f\22\16\22\u00cc\13\22\3\23\3\23\3\23"+
-		"\3\23\5\23\u00d2\n\23\3\23\3\23\5\23\u00d6\n\23\3\23\3\23\3\23\3\23\3"+
-		"\23\5\23\u00dd\n\23\3\24\3\24\3\24\3\24\3\24\3\24\7\24\u00e5\n\24\f\24"+
-		"\16\24\u00e8\13\24\3\24\3\24\5\24\u00ec\n\24\3\25\3\25\3\25\3\25\3\26"+
-		"\3\26\3\26\3\26\3\26\5\26\u00f7\n\26\3\27\3\27\3\27\3\27\3\27\3\27\3\27"+
-		"\3\27\3\27\7\27\u0102\n\27\f\27\16\27\u0105\13\27\3\30\3\30\5\30\u0109"+
-		"\n\30\3\31\3\31\3\31\3\31\3\31\3\31\5\31\u0111\n\31\3\32\3\32\3\32\3\32"+
-		"\3\33\3\33\3\33\7\33\u011a\n\33\f\33\16\33\u011d\13\33\3\34\3\34\3\34"+
-		"\3\34\3\34\5\34\u0124\n\34\3\35\3\35\3\35\3\35\3\35\3\35\3\35\3\35\3\35"+
-		"\3\35\3\35\5\35\u0131\n\35\3\36\3\36\3\36\3\36\3\36\3\36\5\36\u0139\n"+
-		"\36\3\37\3\37\3\37\3\37\3\37\3\37\3\37\3\37\5\37\u0143\n\37\3 \3 \3!\3"+
-		"!\3\"\3\"\3#\3#\3$\3$\3%\3%\3%\7%\u0152\n%\f%\16%\u0155\13%\3&\3&\3&\3"+
-		"\'\3\'\3\'\2\3,(\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62"+
-		"\64\668:<>@BDFHJL\2\4\4\2\35\35\'\'\4\2_ahh\2\u0165\2N\3\2\2\2\4V\3\2"+
-		"\2\2\6\\\3\2\2\2\bc\3\2\2\2\ni\3\2\2\2\fm\3\2\2\2\16o\3\2\2\2\20s\3\2"+
-		"\2\2\22\u008c\3\2\2\2\24\u008e\3\2\2\2\26\u0092\3\2\2\2\30\u0096\3\2\2"+
-		"\2\32\u009a\3\2\2\2\34\u00a8\3\2\2\2\36\u00bc\3\2\2\2 \u00be\3\2\2\2\""+
-		"\u00c6\3\2\2\2$\u00dc\3\2\2\2&\u00de\3\2\2\2(\u00ed\3\2\2\2*\u00f1\3\2"+
-		"\2\2,\u00f8\3\2\2\2.\u0108\3\2\2\2\60\u0110\3\2\2\2\62\u0112\3\2\2\2\64"+
-		"\u0116\3\2\2\2\66\u0123\3\2\2\28\u0130\3\2\2\2:\u0138\3\2\2\2<\u0142\3"+
-		"\2\2\2>\u0144\3\2\2\2@\u0146\3\2\2\2B\u0148\3\2\2\2D\u014a\3\2\2\2F\u014c"+
-		"\3\2\2\2H\u014e\3\2\2\2J\u0156\3\2\2\2L\u0159\3\2\2\2NO\5\4\3\2OP\7\2"+
-		"\2\3P\3\3\2\2\2QR\5\6\4\2RS\7]\2\2SU\3\2\2\2TQ\3\2\2\2UX\3\2\2\2VT\3\2"+
-		"\2\2VW\3\2\2\2W\5\3\2\2\2XV\3\2\2\2Y]\5\b\5\2Z]\5\n\6\2[]\5\f\7\2\\Y\3"+
-		"\2\2\2\\Z\3\2\2\2\\[\3\2\2\2]\7\3\2\2\2^d\5\16\b\2_d\5\20\t\2`d\5\24\13"+
-		"\2ad\5\26\f\2bd\5\30\r\2c^\3\2\2\2c_\3\2\2\2c`\3\2\2\2ca\3\2\2\2cb\3\2"+
-		"\2\2d\t\3\2\2\2ej\5\34\17\2fj\5\32\16\2gj\5&\24\2hj\5*\26\2ie\3\2\2\2"+
-		"if\3\2\2\2ig\3\2\2\2ih\3\2\2\2j\13\3\2\2\2kn\5<\37\2ln\5> \2mk\3\2\2\2"+
-		"ml\3\2\2\2n\r\3\2\2\2op\7\13\2\2pq\7\r\2\2qr\5@!\2r\17\3\2\2\2st\7\13"+
-		"\2\2tu\7+\2\2uv\5D#\2vw\7Z\2\2w|\5\22\n\2xy\7\\\2\2y{\5\22\n\2zx\3\2\2"+
-		"\2{~\3\2\2\2|z\3\2\2\2|}\3\2\2\2}\177\3\2\2\2~|\3\2\2\2\177\u0080\7[\2"+
-		"\2\u0080\21\3\2\2\2\u0081\u0082\5F$\2\u0082\u0084\5\60\31\2\u0083\u0085"+
-		"\5J&\2\u0084\u0083\3\2\2\2\u0084\u0085\3\2\2\2\u0085\u008d\3\2\2\2\u0086"+
-		"\u0087\7&\2\2\u0087\u0088\7\34\2\2\u0088\u0089\7Z\2\2\u0089\u008a\5H%"+
-		"\2\u008a\u008b\7[\2\2\u008b\u008d\3\2\2\2\u008c\u0081\3\2\2\2\u008c\u0086"+
-		"\3\2\2\2\u008d\23\3\2\2\2\u008e\u008f\7\23\2\2\u008f\u0090\7\r\2\2\u0090"+
-		"\u0091\5@!\2\u0091\25\3\2\2\2\u0092\u0093\7\23\2\2\u0093\u0094\7+\2\2"+
-		"\u0094\u0095\5D#\2\u0095\27\3\2\2\2\u0096\u0097\7.\2\2\u0097\u0098\7\r"+
-		"\2\2\u0098\u0099\5@!\2\u0099\31\3\2\2\2\u009a\u009b\7\30\2\2\u009b\u009c"+
-		"\7\31\2\2\u009c\u00a1\5B\"\2\u009d\u009e\7Z\2\2\u009e\u009f\5H%\2\u009f"+
-		"\u00a0\7[\2\2\u00a0\u00a2\3\2\2\2\u00a1\u009d\3\2\2\2\u00a1\u00a2\3\2"+
-		"\2\2\u00a2\u00a3\3\2\2\2\u00a3\u00a4\7/\2\2\u00a4\u00a5\7Z\2\2\u00a5\u00a6"+
-		"\5\64\33\2\u00a6\u00a7\7[\2\2\u00a7\33\3\2\2\2\u00a8\u00a9\7(\2\2\u00a9"+
-		"\u00ae\5\36\20\2\u00aa\u00ab\7\\\2\2\u00ab\u00ad\5\36\20\2\u00ac\u00aa"+
-		"\3\2\2\2\u00ad\u00b0\3\2\2\2\u00ae\u00ac\3\2\2\2\u00ae\u00af\3\2\2\2\u00af"+
-		"\u00b1\3\2\2\2\u00b0\u00ae\3\2\2\2\u00b1\u00b2\7\25\2\2\u00b2\u00b5\5"+
-		" \21\2\u00b3\u00b4\7\60\2\2\u00b4\u00b6\5,\27\2\u00b5\u00b3\3\2\2\2\u00b5"+
-		"\u00b6\3\2\2\2\u00b6\35\3\2\2\2\u00b7\u00b8\5B\"\2\u00b8\u00b9\7Y\2\2"+
-		"\u00b9\u00ba\5F$\2\u00ba\u00bd\3\2\2\2\u00bb\u00bd\5F$\2\u00bc\u00b7\3"+
-		"\2\2\2\u00bc\u00bb\3\2\2\2\u00bd\37\3\2\2\2\u00be\u00c3\5\"\22\2\u00bf"+
-		"\u00c0\7\\\2\2\u00c0\u00c2\5\"\22\2\u00c1\u00bf\3\2\2\2\u00c2\u00c5\3"+
-		"\2\2\2\u00c3\u00c1\3\2\2\2\u00c3\u00c4\3\2\2\2\u00c4!\3\2\2\2\u00c5\u00c3"+
-		"\3\2\2\2\u00c6\u00ca\5B\"\2\u00c7\u00c9\5$\23\2\u00c8\u00c7\3\2\2\2\u00c9"+
-		"\u00cc\3\2\2\2\u00ca\u00c8\3\2\2\2\u00ca\u00cb\3\2\2\2\u00cb#\3\2\2\2"+
-		"\u00cc\u00ca\3\2\2\2\u00cd\u00ce\7\33\2\2\u00ce\u00d1\5B\"\2\u00cf\u00d0"+
-		"\7\"\2\2\u00d0\u00d2\5,\27\2\u00d1\u00cf\3\2\2\2\u00d1\u00d2\3\2\2\2\u00d2"+
-		"\u00dd\3\2\2\2\u00d3\u00d5\t\2\2\2\u00d4\u00d6\7%\2\2\u00d5\u00d4\3\2"+
-		"\2\2\u00d5\u00d6\3\2\2\2\u00d6\u00d7\3\2\2\2\u00d7\u00d8\7\33\2\2\u00d8"+
-		"\u00d9\5B\"\2\u00d9\u00da\7\"\2\2\u00da\u00db\5,\27\2\u00db\u00dd\3\2"+
-		"\2\2\u00dc\u00cd\3\2\2\2\u00dc\u00d3\3\2\2\2\u00dd%\3\2\2\2\u00de\u00df"+
-		"\7-\2\2\u00df\u00e0\5B\"\2\u00e0\u00e1\7)\2\2\u00e1\u00e6\5(\25\2\u00e2"+
-		"\u00e3\7\\\2\2\u00e3\u00e5\5(\25\2\u00e4\u00e2\3\2\2\2\u00e5\u00e8\3\2"+
-		"\2\2\u00e6\u00e4\3\2\2\2\u00e6\u00e7\3\2\2\2\u00e7\u00eb\3\2\2\2\u00e8"+
-		"\u00e6\3\2\2\2\u00e9\u00ea\7\60\2\2\u00ea\u00ec\5,\27\2\u00eb\u00e9\3"+
-		"\2\2\2\u00eb\u00ec\3\2\2\2\u00ec\'\3\2\2\2\u00ed\u00ee\5F$\2\u00ee\u00ef"+
-		"\7Q\2\2\u00ef\u00f0\5\66\34\2\u00f0)\3\2\2\2\u00f1\u00f2\7\20\2\2\u00f2"+
-		"\u00f3\7\25\2\2\u00f3\u00f6\5B\"\2\u00f4\u00f5\7\60\2\2\u00f5\u00f7\5"+
-		",\27\2\u00f6\u00f4\3\2\2\2\u00f6\u00f7\3\2\2\2\u00f7+\3\2\2\2\u00f8\u00f9"+
-		"\b\27\1\2\u00f9\u00fa\5.\30\2\u00fa\u00fb\58\35\2\u00fb\u00fc\5.\30\2"+
-		"\u00fc\u0103\3\2\2\2\u00fd\u00fe\f\4\2\2\u00fe\u00ff\5:\36\2\u00ff\u0100"+
-		"\5,\27\5\u0100\u0102\3\2\2\2\u0101\u00fd\3\2\2\2\u0102\u0105\3\2\2\2\u0103"+
-		"\u0101\3\2\2\2\u0103\u0104\3\2\2\2\u0104-\3\2\2\2\u0105\u0103\3\2\2\2"+
-		"\u0106\u0109\5\66\34\2\u0107\u0109\5\36\20\2\u0108\u0106\3\2\2\2\u0108"+
-		"\u0107\3\2\2\2\u0109/\3\2\2\2\u010a\u0111\7\63\2\2\u010b\u0111\7\64\2"+
-		"\2\u010c\u0111\7\66\2\2\u010d\u0111\7\65\2\2\u010e\u010f\79\2\2\u010f"+
-		"\u0111\5\62\32\2\u0110\u010a\3\2\2\2\u0110\u010b\3\2\2\2\u0110\u010c\3"+
-		"\2\2\2\u0110\u010d\3\2\2\2\u0110\u010e\3\2\2\2\u0111\61\3\2\2\2\u0112"+
-		"\u0113\7Z\2\2\u0113\u0114\7h\2\2\u0114\u0115\7[\2\2\u0115\63\3\2\2\2\u0116"+
-		"\u011b\5\66\34\2\u0117\u0118\7\\\2\2\u0118\u011a\5\66\34\2\u0119\u0117"+
-		"\3\2\2\2\u011a\u011d\3\2\2\2\u011b\u0119\3\2\2\2\u011b\u011c\3\2\2\2\u011c"+
-		"\65\3\2\2\2\u011d\u011b\3\2\2\2\u011e\u0124\7g\2\2\u011f\u0124\5L\'\2"+
-		"\u0120\u0121\7N\2\2\u0121\u0124\5L\'\2\u0122\u0124\7j\2\2\u0123\u011e"+
-		"\3\2\2\2\u0123\u011f\3\2\2\2\u0123\u0120\3\2\2\2\u0123\u0122\3\2\2\2\u0124"+
-		"\67\3\2\2\2\u0125\u0131\7Q\2\2\u0126\u0131\7R\2\2\u0127\u0131\7S\2\2\u0128"+
-		"\u0129\7S\2\2\u0129\u0131\7Q\2\2\u012a\u012b\7R\2\2\u012b\u0131\7Q\2\2"+
-		"\u012c\u012d\7S\2\2\u012d\u0131\7R\2\2\u012e\u012f\7T\2\2\u012f\u0131"+
-		"\7Q\2\2\u0130\u0125\3\2\2\2\u0130\u0126\3\2\2\2\u0130\u0127\3\2\2\2\u0130"+
-		"\u0128\3\2\2\2\u0130\u012a\3\2\2\2\u0130\u012c\3\2\2\2\u0130\u012e\3\2"+
-		"\2\2\u01319\3\2\2\2\u0132\u0139\7\7\2\2\u0133\u0134\7W\2\2\u0134\u0139"+
-		"\7W\2\2\u0135\u0139\7#\2\2\u0136\u0137\7V\2\2\u0137\u0139\7V\2\2\u0138"+
-		"\u0132\3\2\2\2\u0138\u0133\3\2\2\2\u0138\u0135\3\2\2\2\u0138\u0136\3\2"+
-		"\2\2\u0139;\3\2\2\2\u013a\u013b\7*\2\2\u013b\u0143\7\16\2\2\u013c\u013d"+
-		"\7*\2\2\u013d\u013e\7\r\2\2\u013e\u0143\5@!\2\u013f\u0140\7*\2\2\u0140"+
-		"\u0141\7+\2\2\u0141\u0143\5B\"\2\u0142\u013a\3\2\2\2\u0142\u013c\3\2\2"+
-		"\2\u0142\u013f\3\2\2\2\u0143=\3\2\2\2\u0144\u0145\7?\2\2\u0145?\3\2\2"+
-		"\2\u0146\u0147\7l\2\2\u0147A\3\2\2\2\u0148\u0149\5D#\2\u0149C\3\2\2\2"+
-		"\u014a\u014b\7l\2\2\u014bE\3\2\2\2\u014c\u014d\7l\2\2\u014dG\3\2\2\2\u014e"+
-		"\u0153\5F$\2\u014f\u0150\7\\\2\2\u0150\u0152\5F$\2\u0151\u014f\3\2\2\2"+
-		"\u0152\u0155\3\2\2\2\u0153\u0151\3\2\2\2\u0153\u0154\3\2\2\2\u0154I\3"+
-		"\2\2\2\u0155\u0153\3\2\2\2\u0156\u0157\7 \2\2\u0157\u0158\7!\2\2\u0158"+
-		"K\3\2\2\2\u0159\u015a\t\3\2\2\u015aM\3\2\2\2\37V\\cim|\u0084\u008c\u00a1"+
-		"\u00ae\u00b5\u00bc\u00c3\u00ca\u00d1\u00d5\u00dc\u00e6\u00eb\u00f6\u0103"+
-		"\u0108\u0110\u011b\u0123\u0130\u0138\u0142\u0153";
+		"\3U\n\3\f\3\16\3X\13\3\3\4\3\4\5\4\\\n\4\3\5\3\5\3\5\3\5\3\5\3\5\5\5d"+
+		"\n\5\3\6\3\6\3\6\3\6\3\6\5\6k\n\6\3\7\3\7\3\7\3\7\3\b\3\b\3\b\3\b\3\b"+
+		"\3\b\3\b\7\bx\n\b\f\b\16\b{\13\b\3\b\3\b\3\t\3\t\3\t\5\t\u0082\n\t\3\t"+
+		"\3\t\3\t\3\t\3\t\3\t\5\t\u008a\n\t\3\n\3\n\3\n\3\n\3\13\3\13\3\13\3\13"+
+		"\3\f\3\f\3\f\3\f\3\r\3\r\3\r\3\r\3\r\3\r\3\r\5\r\u009f\n\r\3\r\3\r\3\r"+
+		"\3\r\3\r\3\16\3\16\3\16\3\16\3\16\3\16\5\16\u00ac\n\16\3\17\3\17\3\17"+
+		"\3\17\7\17\u00b2\n\17\f\17\16\17\u00b5\13\17\5\17\u00b7\n\17\3\20\3\20"+
+		"\3\20\5\20\u00bc\n\20\3\20\3\20\3\20\5\20\u00c1\n\20\3\21\3\21\3\21\7"+
+		"\21\u00c6\n\21\f\21\16\21\u00c9\13\21\3\22\3\22\7\22\u00cd\n\22\f\22\16"+
+		"\22\u00d0\13\22\3\23\3\23\3\23\3\23\5\23\u00d6\n\23\3\23\3\23\5\23\u00da"+
+		"\n\23\3\23\3\23\3\23\3\23\3\23\5\23\u00e1\n\23\3\24\3\24\3\24\3\24\3\24"+
+		"\3\24\7\24\u00e9\n\24\f\24\16\24\u00ec\13\24\3\24\3\24\5\24\u00f0\n\24"+
+		"\3\25\3\25\3\25\3\25\3\26\3\26\3\26\3\26\3\26\5\26\u00fb\n\26\3\27\3\27"+
+		"\3\27\7\27\u0100\n\27\f\27\16\27\u0103\13\27\3\30\3\30\3\30\7\30\u0108"+
+		"\n\30\f\30\16\30\u010b\13\30\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3"+
+		"\31\3\31\3\31\3\31\3\31\3\31\3\31\3\31\5\31\u011d\n\31\3\32\3\32\3\32"+
+		"\3\32\3\32\3\32\5\32\u0125\n\32\3\33\3\33\3\33\3\33\3\34\3\34\3\34\7\34"+
+		"\u012e\n\34\f\34\16\34\u0131\13\34\3\35\3\35\3\35\3\35\3\35\3\35\5\35"+
+		"\u0139\n\35\3\36\3\36\3\36\3\36\3\36\3\36\3\36\3\36\3\36\3\36\3\36\5\36"+
+		"\u0146\n\36\3\37\3\37\3\37\3\37\3\37\3\37\3\37\3\37\5\37\u0150\n\37\3"+
+		" \3 \3!\3!\3\"\3\"\3\"\5\"\u0159\n\"\3#\3#\3$\3$\3%\3%\3%\7%\u0162\n%"+
+		"\f%\16%\u0165\13%\3&\3&\3&\3\'\3\'\3\'\2\2(\2\4\6\b\n\f\16\20\22\24\26"+
+		"\30\32\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJL\2\4\4\2\35\35\'\'\4\2_ah"+
+		"h\2\u0179\2N\3\2\2\2\4V\3\2\2\2\6[\3\2\2\2\bc\3\2\2\2\nj\3\2\2\2\fl\3"+
+		"\2\2\2\16p\3\2\2\2\20\u0089\3\2\2\2\22\u008b\3\2\2\2\24\u008f\3\2\2\2"+
+		"\26\u0093\3\2\2\2\30\u0097\3\2\2\2\32\u00a5\3\2\2\2\34\u00b6\3\2\2\2\36"+
+		"\u00bb\3\2\2\2 \u00c2\3\2\2\2\"\u00ca\3\2\2\2$\u00e0\3\2\2\2&\u00e2\3"+
+		"\2\2\2(\u00f1\3\2\2\2*\u00f5\3\2\2\2,\u00fc\3\2\2\2.\u0104\3\2\2\2\60"+
+		"\u011c\3\2\2\2\62\u0124\3\2\2\2\64\u0126\3\2\2\2\66\u012a\3\2\2\28\u0138"+
+		"\3\2\2\2:\u0145\3\2\2\2<\u014f\3\2\2\2>\u0151\3\2\2\2@\u0153\3\2\2\2B"+
+		"\u0155\3\2\2\2D\u015a\3\2\2\2F\u015c\3\2\2\2H\u015e\3\2\2\2J\u0166\3\2"+
+		"\2\2L\u0169\3\2\2\2NO\5\4\3\2OP\7\2\2\3P\3\3\2\2\2QR\5\6\4\2RS\7]\2\2"+
+		"SU\3\2\2\2TQ\3\2\2\2UX\3\2\2\2VT\3\2\2\2VW\3\2\2\2W\5\3\2\2\2XV\3\2\2"+
+		"\2Y\\\5\b\5\2Z\\\5\n\6\2[Y\3\2\2\2[Z\3\2\2\2\\\7\3\2\2\2]d\5\16\b\2^d"+
+		"\5\24\13\2_d\5\32\16\2`d\5\30\r\2ad\5&\24\2bd\5*\26\2c]\3\2\2\2c^\3\2"+
+		"\2\2c_\3\2\2\2c`\3\2\2\2ca\3\2\2\2cb\3\2\2\2d\t\3\2\2\2ek\5\f\7\2fk\5"+
+		"\22\n\2gk\5\26\f\2hk\5<\37\2ik\5> \2je\3\2\2\2jf\3\2\2\2jg\3\2\2\2jh\3"+
+		"\2\2\2ji\3\2\2\2k\13\3\2\2\2lm\7\13\2\2mn\7\r\2\2no\5@!\2o\r\3\2\2\2p"+
+		"q\7\13\2\2qr\7+\2\2rs\5D#\2st\7Z\2\2ty\5\20\t\2uv\7\\\2\2vx\5\20\t\2w"+
+		"u\3\2\2\2x{\3\2\2\2yw\3\2\2\2yz\3\2\2\2z|\3\2\2\2{y\3\2\2\2|}\7[\2\2}"+
+		"\17\3\2\2\2~\177\5F$\2\177\u0081\5\62\32\2\u0080\u0082\5J&\2\u0081\u0080"+
+		"\3\2\2\2\u0081\u0082\3\2\2\2\u0082\u008a\3\2\2\2\u0083\u0084\7&\2\2\u0084"+
+		"\u0085\7\34\2\2\u0085\u0086\7Z\2\2\u0086\u0087\5H%\2\u0087\u0088\7[\2"+
+		"\2\u0088\u008a\3\2\2\2\u0089~\3\2\2\2\u0089\u0083\3\2\2\2\u008a\21\3\2"+
+		"\2\2\u008b\u008c\7\23\2\2\u008c\u008d\7\r\2\2\u008d\u008e\5@!\2\u008e"+
+		"\23\3\2\2\2\u008f\u0090\7\23\2\2\u0090\u0091\7+\2\2\u0091\u0092\5D#\2"+
+		"\u0092\25\3\2\2\2\u0093\u0094\7.\2\2\u0094\u0095\7\r\2\2\u0095\u0096\5"+
+		"@!\2\u0096\27\3\2\2\2\u0097\u0098\7\30\2\2\u0098\u0099\7\31\2\2\u0099"+
+		"\u009e\5D#\2\u009a\u009b\7Z\2\2\u009b\u009c\5H%\2\u009c\u009d\7[\2\2\u009d"+
+		"\u009f\3\2\2\2\u009e\u009a\3\2\2\2\u009e\u009f\3\2\2\2\u009f\u00a0\3\2"+
+		"\2\2\u00a0\u00a1\7/\2\2\u00a1\u00a2\7Z\2\2\u00a2\u00a3\5\66\34\2\u00a3"+
+		"\u00a4\7[\2\2\u00a4\31\3\2\2\2\u00a5\u00a6\7(\2\2\u00a6\u00a7\5\34\17"+
+		"\2\u00a7\u00a8\7\25\2\2\u00a8\u00ab\5 \21\2\u00a9\u00aa\7\60\2\2\u00aa"+
+		"\u00ac\5,\27\2\u00ab\u00a9\3\2\2\2\u00ab\u00ac\3\2\2\2\u00ac\33\3\2\2"+
+		"\2\u00ad\u00b7\7I\2\2\u00ae\u00b3\5\36\20\2\u00af\u00b0\7\\\2\2\u00b0"+
+		"\u00b2\5\36\20\2\u00b1\u00af\3\2\2\2\u00b2\u00b5\3\2\2\2\u00b3\u00b1\3"+
+		"\2\2\2\u00b3\u00b4\3\2\2\2\u00b4\u00b7\3\2\2\2\u00b5\u00b3\3\2\2\2\u00b6"+
+		"\u00ad\3\2\2\2\u00b6\u00ae\3\2\2\2\u00b7\35\3\2\2\2\u00b8\u00b9\5D#\2"+
+		"\u00b9\u00ba\7Y\2\2\u00ba\u00bc\3\2\2\2\u00bb\u00b8\3\2\2\2\u00bb\u00bc"+
+		"\3\2\2\2\u00bc\u00bd\3\2\2\2\u00bd\u00c0\5F$\2\u00be\u00bf\7\b\2\2\u00bf"+
+		"\u00c1\7l\2\2\u00c0\u00be\3\2\2\2\u00c0\u00c1\3\2\2\2\u00c1\37\3\2\2\2"+
+		"\u00c2\u00c7\5\"\22\2\u00c3\u00c4\7\\\2\2\u00c4\u00c6\5\"\22\2\u00c5\u00c3"+
+		"\3\2\2\2\u00c6\u00c9\3\2\2\2\u00c7\u00c5\3\2\2\2\u00c7\u00c8\3\2\2\2\u00c8"+
+		"!\3\2\2\2\u00c9\u00c7\3\2\2\2\u00ca\u00ce\5B\"\2\u00cb\u00cd\5$\23\2\u00cc"+
+		"\u00cb\3\2\2\2\u00cd\u00d0\3\2\2\2\u00ce\u00cc\3\2\2\2\u00ce\u00cf\3\2"+
+		"\2\2\u00cf#\3\2\2\2\u00d0\u00ce\3\2\2\2\u00d1\u00d2\7\33\2\2\u00d2\u00d5"+
+		"\5B\"\2\u00d3\u00d4\7\"\2\2\u00d4\u00d6\5\60\31\2\u00d5\u00d3\3\2\2\2"+
+		"\u00d5\u00d6\3\2\2\2\u00d6\u00e1\3\2\2\2\u00d7\u00d9\t\2\2\2\u00d8\u00da"+
+		"\7%\2\2\u00d9\u00d8\3\2\2\2\u00d9\u00da\3\2\2\2\u00da\u00db\3\2\2\2\u00db"+
+		"\u00dc\7\33\2\2\u00dc\u00dd\5B\"\2\u00dd\u00de\7\"\2\2\u00de\u00df\5\60"+
+		"\31\2\u00df\u00e1\3\2\2\2\u00e0\u00d1\3\2\2\2\u00e0\u00d7\3\2\2\2\u00e1"+
+		"%\3\2\2\2\u00e2\u00e3\7-\2\2\u00e3\u00e4\5D#\2\u00e4\u00e5\7)\2\2\u00e5"+
+		"\u00ea\5(\25\2\u00e6\u00e7\7\\\2\2\u00e7\u00e9\5(\25\2\u00e8\u00e6\3\2"+
+		"\2\2\u00e9\u00ec\3\2\2\2\u00ea\u00e8\3\2\2\2\u00ea\u00eb\3\2\2\2\u00eb"+
+		"\u00ef\3\2\2\2\u00ec\u00ea\3\2\2\2\u00ed\u00ee\7\60\2\2\u00ee\u00f0\5"+
+		",\27\2\u00ef\u00ed\3\2\2\2\u00ef\u00f0\3\2\2\2\u00f0\'\3\2\2\2\u00f1\u00f2"+
+		"\5F$\2\u00f2\u00f3\7Q\2\2\u00f3\u00f4\58\35\2\u00f4)\3\2\2\2\u00f5\u00f6"+
+		"\7\20\2\2\u00f6\u00f7\7\25\2\2\u00f7\u00fa\5D#\2\u00f8\u00f9\7\60\2\2"+
+		"\u00f9\u00fb\5,\27\2\u00fa\u00f8\3\2\2\2\u00fa\u00fb\3\2\2\2\u00fb+\3"+
+		"\2\2\2\u00fc\u0101\5.\30\2\u00fd\u00fe\7#\2\2\u00fe\u0100\5.\30\2\u00ff"+
+		"\u00fd\3\2\2\2\u0100\u0103\3\2\2\2\u0101\u00ff\3\2\2\2\u0101\u0102\3\2"+
+		"\2\2\u0102-\3\2\2\2\u0103\u0101\3\2\2\2\u0104\u0109\5\60\31\2\u0105\u0106"+
+		"\7\7\2\2\u0106\u0108\5\60\31\2\u0107\u0105\3\2\2\2\u0108\u010b\3\2\2\2"+
+		"\u0109\u0107\3\2\2\2\u0109\u010a\3\2\2\2\u010a/\3\2\2\2\u010b\u0109\3"+
+		"\2\2\2\u010c\u010d\58\35\2\u010d\u010e\5:\36\2\u010e\u010f\5\36\20\2\u010f"+
+		"\u011d\3\2\2\2\u0110\u0111\5\36\20\2\u0111\u0112\5:\36\2\u0112\u0113\5"+
+		"8\35\2\u0113\u011d\3\2\2\2\u0114\u0115\5\36\20\2\u0115\u0116\5:\36\2\u0116"+
+		"\u0117\5\36\20\2\u0117\u011d\3\2\2\2\u0118\u0119\58\35\2\u0119\u011a\5"+
+		":\36\2\u011a\u011b\58\35\2\u011b\u011d\3\2\2\2\u011c\u010c\3\2\2\2\u011c"+
+		"\u0110\3\2\2\2\u011c\u0114\3\2\2\2\u011c\u0118\3\2\2\2\u011d\61\3\2\2"+
+		"\2\u011e\u0125\7\63\2\2\u011f\u0125\7\64\2\2\u0120\u0125\7\66\2\2\u0121"+
+		"\u0125\7\65\2\2\u0122\u0123\79\2\2\u0123\u0125\5\64\33\2\u0124\u011e\3"+
+		"\2\2\2\u0124\u011f\3\2\2\2\u0124\u0120\3\2\2\2\u0124\u0121\3\2\2\2\u0124"+
+		"\u0122\3\2\2\2\u0125\63\3\2\2\2\u0126\u0127\7Z\2\2\u0127\u0128\7h\2\2"+
+		"\u0128\u0129\7[\2\2\u0129\65\3\2\2\2\u012a\u012f\58\35\2\u012b\u012c\7"+
+		"\\\2\2\u012c\u012e\58\35\2\u012d\u012b\3\2\2\2\u012e\u0131\3\2\2\2\u012f"+
+		"\u012d\3\2\2\2\u012f\u0130\3\2\2\2\u0130\67\3\2\2\2\u0131\u012f\3\2\2"+
+		"\2\u0132\u0139\7g\2\2\u0133\u0139\5L\'\2\u0134\u0135\7N\2\2\u0135\u0139"+
+		"\5L\'\2\u0136\u0139\7j\2\2\u0137\u0139\7!\2\2\u0138\u0132\3\2\2\2\u0138"+
+		"\u0133\3\2\2\2\u0138\u0134\3\2\2\2\u0138\u0136\3\2\2\2\u0138\u0137\3\2"+
+		"\2\2\u01399\3\2\2\2\u013a\u0146\7Q\2\2\u013b\u0146\7R\2\2\u013c\u0146"+
+		"\7S\2\2\u013d\u013e\7S\2\2\u013e\u0146\7Q\2\2\u013f\u0140\7R\2\2\u0140"+
+		"\u0146\7Q\2\2\u0141\u0142\7S\2\2\u0142\u0146\7R\2\2\u0143\u0144\7T\2\2"+
+		"\u0144\u0146\7Q\2\2\u0145\u013a\3\2\2\2\u0145\u013b\3\2\2\2\u0145\u013c"+
+		"\3\2\2\2\u0145\u013d\3\2\2\2\u0145\u013f\3\2\2\2\u0145\u0141\3\2\2\2\u0145"+
+		"\u0143\3\2\2\2\u0146;\3\2\2\2\u0147\u0148\7*\2\2\u0148\u0150\7\16\2\2"+
+		"\u0149\u014a\7*\2\2\u014a\u014b\7\r\2\2\u014b\u0150\5@!\2\u014c\u014d"+
+		"\7*\2\2\u014d\u014e\7+\2\2\u014e\u0150\5B\"\2\u014f\u0147\3\2\2\2\u014f"+
+		"\u0149\3\2\2\2\u014f\u014c\3\2\2\2\u0150=\3\2\2\2\u0151\u0152\7?\2\2\u0152"+
+		"?\3\2\2\2\u0153\u0154\7l\2\2\u0154A\3\2\2\2\u0155\u0158\5D#\2\u0156\u0157"+
+		"\7\b\2\2\u0157\u0159\5D#\2\u0158\u0156\3\2\2\2\u0158\u0159\3\2\2\2\u0159"+
+		"C\3\2\2\2\u015a\u015b\7l\2\2\u015bE\3\2\2\2\u015c\u015d\7l\2\2\u015dG"+
+		"\3\2\2\2\u015e\u0163\5F$\2\u015f\u0160\7\\\2\2\u0160\u0162\5F$\2\u0161"+
+		"\u015f\3\2\2\2\u0162\u0165\3\2\2\2\u0163\u0161\3\2\2\2\u0163\u0164\3\2"+
+		"\2\2\u0164I\3\2\2\2\u0165\u0163\3\2\2\2\u0166\u0167\7 \2\2\u0167\u0168"+
+		"\7!\2\2\u0168K\3\2\2\2\u0169\u016a\t\3\2\2\u016aM\3\2\2\2!V[cjy\u0081"+
+		"\u0089\u009e\u00ab\u00b3\u00b6\u00bb\u00c0\u00c7\u00ce\u00d5\u00d9\u00e0"+
+		"\u00ea\u00ef\u00fa\u0101\u0109\u011c\u0124\u012f\u0138\u0145\u014f\u0158"+
+		"\u0163";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

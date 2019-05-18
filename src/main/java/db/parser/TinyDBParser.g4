@@ -11,19 +11,17 @@ sqlStatements
     ;
 
 sqlStatement
-    : ddlStatement | dmlStatement | administrationStatement
+    : dbSpecifiedStatement | dbUnspecifiedStatement
     ;
 
-ddlStatement
-    : createDatabase | createTable | dropDatabase | dropTable | useDatabase
+dbSpecifiedStatement
+    : createTable | dropTable
+    | selectStatement | insertStatement | updateStatement | deleteStatement
     ;
 
-dmlStatement
-    : selectStatement | insertStatement | updateStatement | deleteStatement
-    ;
-
-administrationStatement
-    : showStatement | shutdownStatement
+dbUnspecifiedStatement
+    : createDatabase | dropDatabase | useDatabase
+    | showStatement | shutdownStatement
     ;
 
 createDatabase
@@ -52,16 +50,20 @@ useDatabase
     ;
 
 insertStatement
-    : INSERT INTO table ( '(' attrNames ')' )? VALUES '(' constants ')'
+    : INSERT INTO tableName ( '(' attrNames ')' )? VALUES '(' constants ')'
     ;
 
 selectStatement
-    : SELECT fullColumnName (',' fullColumnName)* FROM tableSources (WHERE whereExpr=predicate)?
+    : SELECT fullColumnNames FROM tableSources (WHERE whereExpr=predicate)?
+    ;
+
+fullColumnNames
+    : STAR
+    | fullColumnName (',' fullColumnName)*
     ;
 
 fullColumnName
-    : table '.' attrName
-    | attrName
+    : (tableName '.')? attrName (AS alias=ID)?
     ;
 
 tableSources
@@ -75,16 +77,16 @@ tableSource
 joinPart
     : JOIN table
       (
-        ON predicate
+        ON comparisonExpressionPredicate
       )?                                                            #innerJoin
     | (LEFT | RIGHT) OUTER? JOIN table
         (
-          ON predicate
+          ON comparisonExpressionPredicate
         )                                                           #outerJoin
     ;
 
 updateStatement
-    : UPDATE table
+    : UPDATE tableName
     SET updatedElement (',' updatedElement)*
           (WHERE predicate)?
     ;
@@ -94,19 +96,23 @@ updatedElement
     ;
 
 deleteStatement
-    : DELETE FROM table (WHERE predicate)?
+    : DELETE FROM tableName (WHERE predicate)?
     ;
 
 // Simplified approach for predicate
 predicate
-    : left=predicate logicalOperator right=predicate                #logicalExpressionPredicate
-    | left=expressionAtom comparisonOperator right=expressionAtom   #comparisonExpressionPredicate
+    : andExpressionPredicate (OR andExpressionPredicate)*
     ;
 
-// Add in ASTVisitor nullNotnull in constant
-expressionAtom
-    : constant                                                      #constantExpressionAtom
-    | fullColumnName                                                #fullColumnNameExpressionAtom
+andExpressionPredicate
+    : comparisonExpressionPredicate (AND comparisonExpressionPredicate)*
+    ;
+
+comparisonExpressionPredicate
+    : constant comparisonOperator fullColumnName                    #vkCmpExpressionPredicate
+    | fullColumnName comparisonOperator constant                    #kvCmpExpressionPredicate
+    | fullColumnName comparisonOperator fullColumnName              #kkCmpExpressionPredicate
+    | constant comparisonOperator constant                          #vvCmpExpressionPredicate
     ;
 
 dataType
@@ -126,15 +132,12 @@ constant
     : STRING_LITERAL | decimalLiteral
     | '-' decimalLiteral
     | REAL_LITERAL
+    | NULL_LITERAL
     ;
 
 comparisonOperator
     : '=' | '>' | '<' | '<' '=' | '>' '='
     | '<' '>' | '!' '='
-    ;
-
-logicalOperator
-    : AND | '&' '&' | OR | '|' '|'
     ;
 
 showStatement
@@ -152,7 +155,7 @@ dbName
     ;
 
 table
-    : tableName
+    : originalName=tableName (AS alias=tableName)?
     ;
 
 tableName

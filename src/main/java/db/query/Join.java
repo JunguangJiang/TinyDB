@@ -15,44 +15,21 @@ public class Join extends Operator{
     private static final long serialVersionUID = 1L;
 
     private OpIterator lhs, rhs;
-    private TupleDesc tupleDesc1, tupleDesc2;
+    private TupleDesc mergedTupleDesc;
     private Predicate predicate;
     private ArrayList<Tuple> tuples = new ArrayList<>();
     private Iterator<Tuple> iterator;
 
-    /**
-     * A helper class which wraps predicate and rhs in Join.
-     */
-    public static class JoinPart{
-        public Predicate predicate;
-        public OpIterator rhs;
-        public JoinPart(Predicate predicate, OpIterator rhs) {
-            this.predicate = predicate;
-            this.rhs = rhs;
-        }
-    }
-
-    /**
-     * `lhs` JOIN `rhs` ON `predicate`
-     * @param lhs
-     * @param predicate
-     * @param rhs
-     */
-    public Join(OpIterator lhs, Predicate predicate, OpIterator rhs) {
+    public Join(OpIterator lhs, LogicalFilterNode.Cmp cmp, OpIterator rhs) throws TypeMismatch{
         this.lhs = lhs;
         this.rhs = rhs;
-        this.predicate = predicate;
-        this.tupleDesc1 = lhs.getTupleDesc();
-        this.tupleDesc2 = rhs.getTupleDesc();
-    }
-
-    public Join(OpIterator lhs, JoinPart joinPart) {
-        this(lhs, joinPart.predicate, joinPart.rhs);
+        this.mergedTupleDesc = TupleDesc.merge(lhs.getTupleDesc(), rhs.getTupleDesc());
+        this.predicate = cmp.predicate(mergedTupleDesc);
     }
 
     @Override
     public TupleDesc getTupleDesc() {
-        return TupleDesc.merge(this.tupleDesc1, this.tupleDesc2);
+        return mergedTupleDesc;
     }
 
     @Override
@@ -104,7 +81,6 @@ public class Join extends Operator{
      * joined on equality of the first column, then this returns {1,2,3,1,5,6}.
      *
      * @return The next matching tuple.
-     * @see ComparisonPredicate#filter
      */
     @Override
     protected Tuple fetchNext() throws DbException {

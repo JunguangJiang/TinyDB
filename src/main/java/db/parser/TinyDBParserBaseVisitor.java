@@ -1,5 +1,4 @@
 package db.parser;
-
 // Generated from TinyDBParser.g4 by ANTLR 4.7.1
 import db.parser.TinyDBParser;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
@@ -40,21 +39,14 @@ public class TinyDBParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitDdlStatement(TinyDBParser.DdlStatementContext ctx) { return visitChildren(ctx); }
+	@Override public T visitDbSpecifiedStatement(TinyDBParser.DbSpecifiedStatementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitDmlStatement(TinyDBParser.DmlStatementContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitAdministrationStatement(TinyDBParser.AdministrationStatementContext ctx) { return visitChildren(ctx); }
+	@Override public T visitDbUnspecifiedStatement(TinyDBParser.DbUnspecifiedStatementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -124,6 +116,13 @@ public class TinyDBParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitFullColumnNames(TinyDBParser.FullColumnNamesContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitFullColumnName(TinyDBParser.FullColumnNameContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
@@ -180,28 +179,42 @@ public class TinyDBParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitComparisonExpressionPredicate(TinyDBParser.ComparisonExpressionPredicateContext ctx) { return visitChildren(ctx); }
+	@Override public T visitPredicate(TinyDBParser.PredicateContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLogicalExpressionPredicate(TinyDBParser.LogicalExpressionPredicateContext ctx) { return visitChildren(ctx); }
+	@Override public T visitAndExpressionPredicate(TinyDBParser.AndExpressionPredicateContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitConstantExpressionAtom(TinyDBParser.ConstantExpressionAtomContext ctx) { return visitChildren(ctx); }
+	@Override public T visitVkCmpExpressionPredicate(TinyDBParser.VkCmpExpressionPredicateContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitFullColumnNameExpressionAtom(TinyDBParser.FullColumnNameExpressionAtomContext ctx) { return visitChildren(ctx); }
+	@Override public T visitKvCmpExpressionPredicate(TinyDBParser.KvCmpExpressionPredicateContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitKkCmpExpressionPredicate(TinyDBParser.KkCmpExpressionPredicateContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitVvCmpExpressionPredicate(TinyDBParser.VvCmpExpressionPredicateContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -237,13 +250,6 @@ public class TinyDBParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitComparisonOperator(TinyDBParser.ComparisonOperatorContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitLogicalOperator(TinyDBParser.LogicalOperatorContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

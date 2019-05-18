@@ -1,7 +1,7 @@
 package db.file.BTree;
 
 import db.field.Field;
-import db.query.ComparisonPredicate.Op;
+import db.field.Op;
 import java.io.Serializable;
 
 
@@ -19,9 +19,9 @@ public class IndexPredicate implements Serializable {
      * Constructor.
      *
      * @param fvalue The value that the predicate compares against.
-     * @param op The operation to apply (as defined in ComparisonPredicate.Op); either
-     *   ComparisonPredicate.Op.GREATER_THAN, ComparisonPredicate.Op.LESS_THAN, ComparisonPredicate.Op.EQUAL,
-     *   ComparisonPredicate.Op.GREATER_THAN_OR_EQ, or ComparisonPredicate.Op.LESS_THAN_OR_EQ
+     * @param op The operation to apply (as defined in Op); either
+     *   Op.GREATER_THAN, Op.LESS_THAN, Op.EQUAL,
+     *   Op.GREATER_THAN_OR_EQ, or Op.LESS_THAN_OR_EQ
      * @see Op
      */
     public IndexPredicate(Op op, Field fvalue) {

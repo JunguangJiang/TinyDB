@@ -5,8 +5,8 @@ import java.util.*;
 
 import db.*;
 import db.field.Field;
+import db.field.Op;
 import db.file.*;
-import db.query.ComparisonPredicate;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -208,11 +208,11 @@ public class BTreeFile implements DbFile {
 			if (f == null) {
 				nextSearchId = entry.getLeftChild();
 			} else {
-				while (f.compare(ComparisonPredicate.Op.GREATER_THAN, entry.getKey()) && it.hasNext()) {
+				while (f.compare(Op.GREATER_THAN, entry.getKey()) && it.hasNext()) {
 					entry = it.next();
 				}
 
-				if (f.compare(ComparisonPredicate.Op.LESS_THAN_OR_EQ, entry.getKey())) {
+				if (f.compare(Op.LESS_THAN_OR_EQ, entry.getKey())) {
 					nextSearchId = entry.getLeftChild();
 				} else {
 					// greater than the last one
@@ -301,7 +301,7 @@ public class BTreeFile implements DbFile {
 		dirtypages.put(page.getId(), page);
 		dirtypages.put(newRightSib.getId(), newRightSib);
 
-		if (field.compare(ComparisonPredicate.Op.GREATER_THAN, midkey)) {
+		if (field.compare(Op.GREATER_THAN, midkey)) {
 			return newRightSib;
 		} else {
 			return page;
@@ -368,7 +368,7 @@ public class BTreeFile implements DbFile {
 		dirtypages.put(newInternalPg.getId(), newInternalPg);
 		dirtypages.put(parent.getId(), parent);
 
-		if (field.compare(ComparisonPredicate.Op.GREATER_THAN, midKey.getKey())) {
+		if (field.compare(Op.GREATER_THAN, midKey.getKey())) {
 			return newInternalPg;
 		} else {
 			return page;
@@ -1308,8 +1308,8 @@ class BTreeSearchIterator extends AbstractDbFileIterator {
 		BTreeRootPtrPage rootPtr = (BTreeRootPtrPage) GlobalManager.getBufferPool().getPage(
 		        BTreeRootPtrPage.getId(f.getId()));
 		BTreePageId root = rootPtr.getRootId();
-		if(ipred.getOp() == ComparisonPredicate.Op.EQUALS || ipred.getOp() == ComparisonPredicate.Op.GREATER_THAN
-				|| ipred.getOp() == ComparisonPredicate.Op.GREATER_THAN_OR_EQ) {
+		if(ipred.getOp() == Op.EQUALS || ipred.getOp() == Op.GREATER_THAN
+				|| ipred.getOp() == Op.GREATER_THAN_OR_EQ) {
 			curp = f.findLeafPage(root, ipred.getField());
 		}
 		else {
@@ -1333,13 +1333,13 @@ class BTreeSearchIterator extends AbstractDbFileIterator {
 				if (t.getField(f.keyField()).compare(ipred.getOp(), ipred.getField())) {
 					return t;
 				}
-				else if(ipred.getOp() == ComparisonPredicate.Op.LESS_THAN || ipred.getOp() == ComparisonPredicate.Op.LESS_THAN_OR_EQ) {
+				else if(ipred.getOp() == Op.LESS_THAN || ipred.getOp() == Op.LESS_THAN_OR_EQ) {
 					// if the predicate was not satisfied and the operation is less than, we have
 					// hit the end
 					return null;
 				}
-				else if(ipred.getOp() == ComparisonPredicate.Op.EQUALS &&
-						t.getField(f.keyField()).compare(ComparisonPredicate.Op.GREATER_THAN, ipred.getField())) {
+				else if(ipred.getOp() == Op.EQUALS &&
+						t.getField(f.keyField()).compare(Op.GREATER_THAN, ipred.getField())) {
 					// if the tuple is now greater than the field passed in and the operation
 					// is equals, we have reached the end
 					return null;

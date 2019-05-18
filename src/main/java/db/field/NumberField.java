@@ -1,7 +1,4 @@
 package db.field;
-
-import db.query.ComparisonPredicate;
-
 import java.io.File;
 
 /**
@@ -56,9 +53,9 @@ public abstract class NumberField implements Field {
      * @see Field#compare
      */
     @Override
-    public boolean compare(ComparisonPredicate.Op op, Field val) {
+    public boolean compare(Op op, Field val) {
         if (this.isNull || val.isNull()) {
-            return op == ComparisonPredicate.Op.NOT_EQUALS;
+            return op == Op.NOT_EQUALS;
         }
         switch (op) {
             case EQUALS:

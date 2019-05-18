@@ -1,7 +1,4 @@
 package db.field;
-
-import db.query.ComparisonPredicate;
-
 import java.io.*;
 
 /**
@@ -90,9 +87,9 @@ public class StringField implements Field {
      *
      * @see Field#compare
      */
-    public boolean compare(ComparisonPredicate.Op op, Field val) {
+    public boolean compare(Op op, Field val) {
         if (this.isNull || val.isNull()) {
-            return op == ComparisonPredicate.Op.NOT_EQUALS;
+            return op == Op.NOT_EQUALS;
         }
 
         StringField iVal = (StringField) val;

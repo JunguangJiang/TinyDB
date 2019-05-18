@@ -1,21 +1,23 @@
 package db.parser;
 
 import com.github.freva.asciitable.AsciiTable;
-import db.*;
+import db.DbException;
+import db.GlobalManager;
+import db.field.Op;
 import db.field.Type;
 import db.field.TypeMismatch;
+import db.file.BTree.BTreeScan;
+import db.file.BTree.IndexPredicate;
 import db.file.Table;
 import db.query.*;
-import db.query.Predicate;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import org.antlr.v4.runtime.misc.Interval;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
-import org.antlr.v4.runtime.misc.Interval;
 
 /**
  * Visitor visits the AST of SQL code, and execute the SQL query in the Database.
@@ -23,70 +25,7 @@ import org.antlr.v4.runtime.misc.Interval;
  */
 
 public class Visitor extends TinyDBParserBaseVisitor<Object> {
-    /**
-     * AttributeTable records the table each attribute belonging to
-     * in a certain parsing context.
-     *
-     * E.g. If we have Table A (attr1 type1, attr2 type2),
-     * then in the context "from table A",
-     * we have maps :
-     *      attr1 -> A
-     *      attr2 -> A
-     *
-     * If two tables has the same attribute, then throw NoSuchElementException
-     * to indicate ambiguity.
-     *
-     */
-    private class AttributeTable {
-        private HashMap<String, Table> map;
-        private AttributeTable() {
-            map = new HashMap<>();
-        }
-
-        /**
-         * Clear all the attributes in the AttributeTable.
-         */
-        private void clear(){
-            map.clear();
-        }
-
-        /**
-         * Add a table and all its associated attributes into the AttributeTable
-         * @param table
-         */
-        private void addTable(Table table){
-            String[] attrNames = table.getTupleDesc().getAttrNames();
-            for (String attrName : attrNames) {
-                if (map.containsKey(attrName)) { // If two tables has the same attribute,
-                    map.put(attrName, null); // then return null.
-                } else {
-                    map.put(attrName, table);
-                }
-            }
-            table.getTupleDesc().setTableName(table.getName());
-        }
-
-        /**
-         * @param attrName the name of an attribute
-         * @return the Table which an attribute belongs to,
-         * @throws NoSuchElementException if the attrName doesn't exist or is ambiguous
-         */
-        private Table getBelongingTable(String attrName) {
-            if (map.containsKey(attrName)) {
-                Table table = map.get(attrName);
-                if (table == null) {
-                    throw new NoSuchElementException("Attribute " + attrName + " is ambiguous.");
-                } else {
-                    return table;
-                }
-            } else {
-                throw new NoSuchElementException("Attribute " + attrName + " doesn't exist.");
-            }
-        }
-    }
-
     private TinyDBOutput output;
-    private AttributeTable attributeTable;
     private Boolean isLog;
     /**
      * Visitor parse the sql file and print the result to the out(BufferWriter).
@@ -95,7 +34,6 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     public Visitor(TinyDBOutput output, Boolean isLog){
         super();
         this.output = output;
-        this.attributeTable = new AttributeTable();
         this.isLog = isLog;
     }
 
@@ -116,7 +54,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
     /**
      * sqlStatement
-     *     : ddlStatement | dmlStatement | administrationStatement
+     *     : dbSpecifiedStatement | dbUnspecifiedStatement
      *     ;
      * For each sqlStatement, we will record the query time.
      * If the statement was executed correctly, then output the query result with the query time.
@@ -126,7 +64,6 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitSqlStatement(TinyDBParser.SqlStatementContext ctx) {
-        this.attributeTable.clear();
         long startTime = System.currentTimeMillis();
         QueryResult queryResult;
         try {
@@ -146,6 +83,23 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             output.print(msg);
         }
         return null;
+    }
+
+    /**
+     * dbSpecifiedStatement
+     *     : createTable | dropTable
+     *     | selectStatement | insertStatement | updateStatement | deleteStatement
+     *     ;
+     * @param ctx
+     * @return
+     */
+    @Override
+    public Object visitDbSpecifiedStatement(TinyDBParser.DbSpecifiedStatementContext ctx) {
+        if (GlobalManager.getDatabase() == null) {
+            return new QueryResult(false, "Database not set. Please input the sql 'USE DATABASE $NAME' first");
+        } else {
+            return super.visitDbSpecifiedStatement(ctx);
+        }
     }
 
     /**
@@ -210,11 +164,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         int a = ctx.start.getStartIndex();
         int b = ctx.stop.getStopIndex();
         Interval interval = new Interval(a,b);
-        if (GlobalManager.getDatabase() == null) {
-            return new QueryResult(false, "Database not set. Please input the sql 'USE DATABASE $NAME' first");
-        } else{
-            return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog);
-        }
+        return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog);
     }
 
     /**
@@ -298,7 +248,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
     /**
      * insertStatement
-     *     : INSERT INTO table ( '(' attrNames ')' )? VALUES '(' constants ')'
+     *     : INSERT INTO tableName ( '(' attrNames ')' )? VALUES '(' constants ')'
      *     ;
      * @param ctx
      * @return
@@ -313,8 +263,12 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             return new QueryResult(false, "values can not be empty");
         }
         Object[] values = (Object[]) visit(ctx.constants());
-        Table table = (Table)visit(ctx.table());
-        return table.insertTuple(attrNames, values);
+        try {
+            Table table = GlobalManager.getDatabase().getTable(ctx.tableName().getText());
+            return table.insertTuple(attrNames, values);
+        } catch (NoSuchElementException e) {
+            return new QueryResult(false, e.getMessage());
+        }
     }
 
     /**
@@ -338,6 +292,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      *     : STRING_LITERAL | decimalLiteral
      *     | '-' decimalLiteral
      *     | REAL_LITERAL
+     *     | NULL_LITERAL
      *     ;
      * @param ctx
      * @return
@@ -353,39 +308,99 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
                 number = -number;
             }
             return number;
-        } else {
+        } else if (ctx.REAL_LITERAL() != null){
             return Double.valueOf(ctx.REAL_LITERAL().getText());
+        } else {
+            return null;
         }
     }
 
     /**
-     * #logicalExpressionPredicate := left=predicate logicalOperator right=predicate
-     * @param ctx
-     * @return
-     */
-    @Override
-    public Object visitLogicalExpressionPredicate(TinyDBParser.LogicalExpressionPredicateContext ctx) {
-        LogicalPredicate.Op op = (LogicalPredicate.Op)visit(ctx.logicalOperator());
-        return new LogicalPredicate((Predicate)visit(ctx.left), op, (Predicate)visit(ctx.right));
-    }
-
-    /**
-     *logicalOperator
-     *     : AND | '&' '&' | OR | '|' '|'
+     * predicate
+     *     : andExpressionPredicate (OR andExpressionPredicate)*
      *     ;
      * @param ctx
      * @return
      */
     @Override
-    public Object visitLogicalOperator(TinyDBParser.LogicalOperatorContext ctx) {
-        String text = ctx.getText();
-        if (text.equals("AND") || text.equals("&&")){
-            return LogicalPredicate.Op.AND;
-        } else if (text.equals("OR") || text.equals("||")) {
-            return LogicalPredicate.Op.OR;
-        } else {
-            throw new NotImplementedException();
+    public Object visitPredicate(TinyDBParser.PredicateContext ctx) {
+        LogicalFilterNode.Or or = new LogicalFilterNode.Or();
+        for (TinyDBParser.AndExpressionPredicateContext context: ctx.andExpressionPredicate()) {
+            or.add((LogicalFilterNode.And) visit(context));
         }
+        return or;
+    }
+
+    /**
+     * andExpressionPredicate
+     *     : comparisonExpressionPredicate (AND comparisonExpressionPredicate)*
+     *     ;
+     * @param ctx
+     * @return
+     */
+    @Override
+    public Object visitAndExpressionPredicate(TinyDBParser.AndExpressionPredicateContext ctx) {
+        LogicalFilterNode.And and = new LogicalFilterNode.And();
+        for (TinyDBParser.ComparisonExpressionPredicateContext context: ctx.comparisonExpressionPredicate()) {
+            and.add((LogicalFilterNode.Cmp)visit(context));
+        }
+        return and;
+    }
+
+    /**
+     *  fullColumnName comparisonOperator constant
+     * @param ctx
+     * @return
+     */
+    @Override
+    public Object visitKvCmpExpressionPredicate(TinyDBParser.KvCmpExpressionPredicateContext ctx) {
+        return new LogicalFilterNode.KVCmp(
+                (FullColumnName)visit(ctx.fullColumnName()),
+                (Op) visit(ctx.comparisonOperator()),
+                visit(ctx.constant())
+                );
+    }
+
+    /**
+     *  constant comparisonOperator fullColumnName
+     * @param ctx
+     * @return
+     */
+    @Override
+    public Object visitVkCmpExpressionPredicate(TinyDBParser.VkCmpExpressionPredicateContext ctx) {
+        return new LogicalFilterNode.KVCmp(
+                (FullColumnName)visit(ctx.fullColumnName()),
+                Op.reverse((Op)visit(ctx.comparisonOperator())),
+                visit(ctx.constant())
+        );
+    }
+
+    /**
+     * fullColumnName comparisonOperator fullColumnName
+     * @param ctx
+     * @return
+     */
+    @Override
+    public Object visitKkCmpExpressionPredicate(TinyDBParser.KkCmpExpressionPredicateContext ctx) {
+        return new LogicalFilterNode.KKCmp(
+                (FullColumnName)visit(ctx.fullColumnName(0)),
+                (Op) visit(ctx.comparisonOperator()),
+                (FullColumnName)visit(ctx.fullColumnName(1))
+        );
+    }
+
+    /**
+     * constant comparisonOperator constant
+     * @param ctx
+     * @return
+     */
+    @Override
+    public Object visitVvCmpExpressionPredicate(TinyDBParser.VvCmpExpressionPredicateContext ctx) {
+        return new LogicalFilterNode.VVCmp(
+                visit(ctx.constant(0)),
+                (Op)visit(ctx.comparisonOperator()),
+                visit(ctx.constant(1))
+        );
     }
 
     /**
@@ -399,40 +414,30 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     @Override
     public Object visitComparisonOperator(TinyDBParser.ComparisonOperatorContext ctx) {
         String text = ctx.getText();
+        System.out.println("text="+text);
         switch (text) {
             case "=":
-                return ComparisonPredicate.Op.EQUALS;
+                return Op.EQUALS;
             case ">":
-                return ComparisonPredicate.Op.GREATER_THAN;
+                return Op.GREATER_THAN;
             case "<":
-                return ComparisonPredicate.Op.LESS_THAN;
+                return Op.LESS_THAN;
             case "<=":
-                return ComparisonPredicate.Op.LESS_THAN_OR_EQ;
+                return Op.LESS_THAN_OR_EQ;
             case ">=":
-                return ComparisonPredicate.Op.GREATER_THAN_OR_EQ;
+                return Op.GREATER_THAN_OR_EQ;
             case "<>":
             case "!=":
-                return ComparisonPredicate.Op.NOT_EQUALS;
+                return Op.NOT_EQUALS;
             default:
                 throw new IllegalStateException();
         }
     }
 
-    /**
-     * #comparisonExpressionPredicate := left=expressionAtom comparisonOperator right=expressionAtom
-     * @param ctx
-     * @return
-     */
-    @Override
-    public Object visitComparisonExpressionPredicate(TinyDBParser.ComparisonExpressionPredicateContext ctx) {
-        ComparisonPredicate.Op op = (ComparisonPredicate.Op)visit(ctx.comparisonOperator());
-        return new ComparisonPredicate(visit(ctx.left), op, visit(ctx.right));
-    }
 
     /**
      * fullColumnName
-     *     : table '.' attrName
-     *     | attrName
+     *     : (tableName '.')? attrName (AS alias=ID)?
      *     ;
      * @param ctx
      * @return
@@ -440,49 +445,65 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     @Override
     public Object visitFullColumnName(TinyDBParser.FullColumnNameContext ctx) {
         String attrName = ctx.attrName().getText();
-        String tableName;
-        if (ctx.table() != null) {
-            tableName = ctx.table().getText();
-            return new Attribute(tableName, attrName, tableName+'.'+attrName);
-        } else {
-            tableName = attributeTable.getBelongingTable(attrName).getName();
-            return new Attribute(tableName, attrName, attrName);
+        String tableName = null;
+        if (ctx.tableName() != null) {
+            tableName = ctx.tableName().getText();
         }
+        String alias = null;
+        if (ctx.alias != null) {
+            alias = ctx.alias.getText();
+        }
+        return new FullColumnName(tableName, attrName, alias);
     }
 
     /**
      * selectStatement
-     *     : SELECT fullColumnName (',' fullColumnName)* FROM tableSources (WHERE whereExpr=predicate)?
+     *     : SELECT fullColumnNames FROM tableSources (WHERE whereExpr=predicate)?
      *     ;
      * @param ctx
      * @return
      */
     @Override
     public Object visitSelectStatement(TinyDBParser.SelectStatementContext ctx) {
-        // A simple query plan without optimization
-        OpIterator join = (OpIterator) visit(ctx.tableSources());
-        // After we visit table sources, we have attributeTable ready to look up.
-
-        OpIterator filter;
-        if (ctx.whereExpr != null) {
-            Predicate predicate = (Predicate) visit(ctx.whereExpr);
-            filter = new Filter(predicate, join);
-        } else {
-            filter = join;
+        try {
+            LogicalFilterNode.Or or = null;
+            if (ctx.whereExpr != null) {
+                or = (LogicalFilterNode.Or) visit(ctx.whereExpr);
+            }
+            ArrayList<LogicalJoinNode> joinNodes = (ArrayList<LogicalJoinNode>) visit(ctx.tableSources());
+            ArrayList<FullColumnName> fullColumnNames = (ArrayList<FullColumnName>)visit(ctx.fullColumnNames());
+            LogicalPlan plan = new LogicalPlan(or, joinNodes, fullColumnNames);
+            PhysicalPlan physicalPlan = new PhysicalPlan(plan.physicalPlan());
+            String[] header = new String[fullColumnNames.size()];
+            for (int i=0; i<fullColumnNames.size(); i++) {
+                header[i] = fullColumnNames.get(i).toString();
+            }
+            return physicalPlan.execute(header);
+        } catch (NullPointerException | TypeMismatch | NoSuchElementException e) {
+            return new QueryResult(false, e.getMessage());
         }
+    }
 
-        ArrayList<Attribute> projectElements = new ArrayList<>();
-        for(TinyDBParser.FullColumnNameContext context : ctx.fullColumnName()) {
-            projectElements.add((Attribute) visit(context));
+    /**
+     * fullColumnNames
+     *     : STAR
+     *     | fullColumnName (',' fullColumnName)*
+     *     ;
+     * @param ctx
+     * @return
+     * null if project all the elements(*)
+     * else an array list of FullColumnName
+     */
+    @Override
+    public Object visitFullColumnNames(TinyDBParser.FullColumnNamesContext ctx) {
+        if (ctx.STAR() != null) {
+            return null;
         }
-        Project project = new Project(projectElements.toArray(new Attribute[0]), filter);
-        Query query = new Query(project);
-
-        String[] header = new String[projectElements.size()];
-        for (int i=0; i<projectElements.size(); i++) {
-            header[i] = projectElements.get(i).alias;
+        ArrayList<FullColumnName> names = new ArrayList<>();
+        for (TinyDBParser.FullColumnNameContext context: ctx.fullColumnName()) {
+            names.add((FullColumnName)visit(context));
         }
-        return query.executeSelect(header);
+        return names;
     }
 
     /**
@@ -494,38 +515,27 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitTableSources(TinyDBParser.TableSourcesContext ctx) {
-        OpIterator opIterator = null;
+        ArrayList<LogicalJoinNode> nodes = new ArrayList<>();
         for (TinyDBParser.TableSourceContext context : ctx.tableSource()) {
-            if (opIterator == null) {
-                opIterator = (OpIterator)visit(context);
-            } else {
-                opIterator = new Join(opIterator, new Predicate() {
-                    @Override
-                    public boolean filter(Tuple tuple) {
-                        return true;
-                    }
-                }, (OpIterator)visit(context));
-            }
+            nodes.addAll((ArrayList<LogicalJoinNode>)visit(context));
         }
-        return opIterator;
+        return nodes;
     }
 
     /**
      * table
-     *     : tableName
+     *     : originalName=tableName (AS alias=tableName)
      *     ;
      * @param ctx
      * @return
      */
     @Override
     public Object visitTable(TinyDBParser.TableContext ctx) {
-        String tableName = ctx.getText();
-        Table table = GlobalManager.getDatabase().getTable(tableName);
-        if (table == null) {
-            throw new NoSuchElementException("Table " + tableName + " doesn't exist.");
-        } else {
-            return table;
+        String alias = null;
+        if (ctx.alias != null) {
+            alias = ctx.alias.getText();
         }
+        return new LogicalScanNode(ctx.originalName.getText(), alias);
     }
 
     /**
@@ -537,33 +547,83 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitTableSourceBase(TinyDBParser.TableSourceBaseContext ctx) {
-        Table table = (Table) visit(ctx.table());
-        this.attributeTable.addTable(table);
-        OpIterator opIterator = new SeqScan(table);
-        for (TinyDBParser.JoinPartContext context : ctx.joinPart()) {
-            Join.JoinPart joinPart = (Join.JoinPart)visit(context);
-            opIterator = new Join(opIterator, joinPart);
+        ArrayList<LogicalJoinNode> joinNodes = new ArrayList<>();
+        joinNodes.add(new LogicalJoinNode(null, (LogicalScanNode)visit(ctx.table())));
+        for (TinyDBParser.JoinPartContext context: ctx.joinPart()){
+            joinNodes.add((LogicalJoinNode)visit(context));
         }
-        return opIterator;
+        return joinNodes;
     }
 
 
     /**
-     * #innerJoin := JOIN table ( ON predicate )?
+     * #innerJoin : JOIN table
+     *       (
+     *         ON comparisonExpressionPredicate
+     *       )?
      * @param ctx
      * @return
      */
     @Override
     public Object visitInnerJoin(TinyDBParser.InnerJoinContext ctx) {
-        Table table = (Table) visit(ctx.table());
-        this.attributeTable.addTable(table);
-        SeqScan seqScan = new SeqScan(table);
-        return new Join.JoinPart((Predicate) visit(ctx.predicate()),seqScan);
+        LogicalFilterNode.Cmp cmp = null;
+        if (ctx.comparisonExpressionPredicate() != null) {
+            cmp = (LogicalFilterNode.Cmp)visit(ctx.comparisonExpressionPredicate());
+        }
+        return new LogicalJoinNode(cmp, (LogicalScanNode)visit(ctx.table()));
+    }
+
+    /**
+     *
+     * @param tableName
+     * @param or
+     * @param isDelete
+     * @param updateElements
+     * @return
+     */
+    public Object visitUpdateOrDeleteStatement(String tableName, LogicalFilterNode.Or or,
+                                               boolean isDelete, Update.UpdateElement[] updateElements) {
+        LogicalScanNode scanNode = new LogicalScanNode(tableName);
+
+        OpIterator opIterator;
+        try {
+            if (or != null) {
+                IndexPredicate indexPredicate = null;
+                if (or.size() == 1) {
+                    indexPredicate = or.get(0).extractIndexPredicate(scanNode);
+                }
+                Predicate predicate = or.predicate(scanNode.tupleDesc);
+                opIterator = new BTreeScan(scanNode.tableName, indexPredicate);
+                opIterator = new Filter(predicate, opIterator);
+            } else {
+                opIterator = new BTreeScan(scanNode.tableName, null);
+            }
+
+            if (isDelete) {
+                opIterator = new Delete(opIterator);
+            } else {
+                try {
+                    opIterator = new Update(opIterator, updateElements);
+                } catch (NoSuchElementException e) {
+                    return new QueryResult(false, e.getMessage());
+                }
+            }
+            opIterator.open();
+            Tuple tuple = opIterator.next();
+            opIterator.close();
+            return new QueryResult(true, "Query OK, " + tuple.getField(0).toString() + " rows affected.");
+        } catch (DbException e){
+            e.printStackTrace();
+            return new QueryResult(false, e.toString());
+        } catch (TypeMismatch e) {
+            return new QueryResult(false, e.toString());
+        }
+
     }
 
     /**
      * deleteStatement
-     *     : DELETE FROM table
+     *     : DELETE FROM tableName
      *     (WHERE predicate)?
      *     ;
      * @param ctx
@@ -571,23 +631,16 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitDeleteStatement(TinyDBParser.DeleteStatementContext ctx) {
-        Table table = (Table) visit(ctx.table());
-        this.attributeTable.addTable(table);
-
-        OpIterator opIterator = new SeqScan(table);
+        LogicalFilterNode.Or or = null;
         if (ctx.predicate() != null) {
-            Predicate predicate = (Predicate) visit(ctx.predicate());
-            opIterator = new Filter(predicate, opIterator);
+            or = (LogicalFilterNode.Or) visit(ctx.predicate());
         }
-
-        Delete delete = new Delete(opIterator);
-        Query query = new Query(delete);
-        return query.executeDeleteOrUpdate();
+        return visitUpdateOrDeleteStatement(ctx.tableName().getText(), or, true, null);
     }
 
     /**
      * updateStatement
-     *     : UPDATE table
+     *     : UPDATE tableName
      *     SET updatedElement (',' updatedElement)*
      *           (WHERE predicate)?
      *     ;
@@ -596,26 +649,16 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitUpdateStatement(TinyDBParser.UpdateStatementContext ctx) {
-        Table table = (Table) visit(ctx.table());
-        this.attributeTable.addTable(table);
-
-        OpIterator opIterator = new SeqScan(table);
+        LogicalFilterNode.Or or = null;
         if (ctx.predicate() != null) {
-            opIterator = new Filter((Predicate) visit(ctx.predicate()), opIterator);
+            or = (LogicalFilterNode.Or) visit(ctx.predicate());
         }
-
         ArrayList<Update.UpdateElement> updateElements = new ArrayList<>();
         for (TinyDBParser.UpdatedElementContext context : ctx.updatedElement()) {
             updateElements.add((Update.UpdateElement)visit(context));
         }
-
-        try {
-            Update update = new Update(opIterator, updateElements.toArray(new Update.UpdateElement[0]));
-            Query query = new Query(update);
-            return query.executeDeleteOrUpdate();
-        } catch (NoSuchElementException | TypeMismatch e) {
-            return new QueryResult(false, e.getMessage());
-        }
+        return visitUpdateOrDeleteStatement(ctx.tableName().getText(), or, false,
+                updateElements.toArray(new Update.UpdateElement[0]));
     }
 
     /**

@@ -3,10 +3,10 @@ package db.file.BTree;
 import db.DbException;
 import db.field.Field;
 import db.field.IntField;
+import db.field.Op;
 import db.field.Type;
 import db.file.Debug;
 import db.file.RecordId;
-import db.query.ComparisonPredicate;
 import db.tuple.Tuple;
 import db.file.BufferPool;
 
@@ -79,21 +79,21 @@ public class BTreeLeafPage extends BTreePage {
 		// Read the parent and sibling pointers
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
-			this.parent = ((IntField) f).getValue();
+			this.parent = (int)((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}
 
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
-			this.leftSibling = ((IntField) f).getValue();
+			this.leftSibling = (int)((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}
 
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
-			this.rightSibling = ((IntField) f).getValue();
+			this.rightSibling = (int)((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}
@@ -186,7 +186,7 @@ public class BTreeLeafPage extends BTreePage {
 		t.setRecordId(rid);
 		try {
 			for (int j=0; j<td.numFields(); j++) {
-				Field f = td.getField(j).fieldType.parse(dis);
+				Field f = td.getTDItem(j).fieldType.parse(dis);
 				t.setField(j, f);
 			}
 		} catch (java.text.ParseException e) {
@@ -337,7 +337,7 @@ public class BTreeLeafPage extends BTreePage {
 		Field key = t.getField(keyField);
 		for (int i=0; i<numSlots; i++) {
 			if(isSlotUsed(i)) {
-				if(tuples[i].getField(keyField).compare(ComparisonPredicate.Op.LESS_THAN_OR_EQ, key))
+				if(tuples[i].getField(keyField).compare(Op.LESS_THAN_OR_EQ, key))
 					lessOrEqKey = i;
 				else
 					break;	

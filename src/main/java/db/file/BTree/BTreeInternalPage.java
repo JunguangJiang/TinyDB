@@ -5,12 +5,12 @@ import java.io.*;
 
 import db.DbException;
 import db.field.IntField;
+import db.field.Op;
 import db.field.Type;
 import db.file.BufferPool;
 import db.field.Field;
 import db.file.Debug;
 import db.file.RecordId;
-import db.query.ComparisonPredicate.Op;
 
 /**
  * Each instance of BTreeInternalPage stores data for one page of a BTreeFile and 
@@ -76,7 +76,7 @@ public class BTreeInternalPage extends BTreePage {
 		// Read the parent pointer
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
-			this.parent = ((IntField) f).getValue();
+			this.parent = (int)((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}
@@ -118,7 +118,7 @@ public class BTreeInternalPage extends BTreePage {
 	 * Retrieve the maximum number of entries this page can hold. (The number of keys)
  	 */
 	public int getMaxEntries() {        
-		int keySize = td.getField(keyField).fieldType.getBytes();
+		int keySize = td.getTDItem(keyField).fieldType.getBytes();
 		int bitsPerEntryIncludingHeader = keySize * 8 + INDEX_SIZE * 8 + 1;
 		// extraBits are: one parent pointer, 1 byte for child page category, 
 		// one extra child pointer (node with m entries has m+1 pointers to children), 1 bit for extra header
@@ -171,7 +171,7 @@ public class BTreeInternalPage extends BTreePage {
 		// if associated bit is not set, read forward to the next key, and
 		// return null.
 		if (!isSlotUsed(slotId)) {
-			for (int i=0; i<td.getField(keyField).fieldType.getBytes(); i++) {
+			for (int i=0; i<td.getTDItem(keyField).fieldType.getBytes(); i++) {
 				try {
 					dis.readByte();
 				} catch (IOException e) {
@@ -184,7 +184,7 @@ public class BTreeInternalPage extends BTreePage {
 		// read the key field
 		Field f = null;
 		try {
-			f = td.getField(keyField).fieldType.parse(dis);
+			f = td.getTDItem(keyField).fieldType.parse(dis);
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 			throw new NoSuchElementException("parsing error!");
@@ -214,7 +214,7 @@ public class BTreeInternalPage extends BTreePage {
 		int child = -1;
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
-			child = ((IntField) f).getValue();
+			child = (int)((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 			throw new NoSuchElementException("parsing error!");
@@ -268,7 +268,7 @@ public class BTreeInternalPage extends BTreePage {
 
 			// empty slot
 			if (!isSlotUsed(i)) {
-				for (int j=0; j<td.getField(keyField).fieldType.getBytes(); j++) {
+				for (int j=0; j<td.getTDItem(keyField).fieldType.getBytes(); j++) {
 					try {
 						dos.writeByte(0);
 					} catch (IOException e) {
@@ -315,7 +315,7 @@ public class BTreeInternalPage extends BTreePage {
 
 		// padding
 		int zerolen = BufferPool.getPageSize() - (INDEX_SIZE + 1 + header.length + 
-				td.getField(keyField).fieldType.getBytes() * (keys.length - 1) + INDEX_SIZE * children.length);
+				td.getTDItem(keyField).fieldType.getBytes() * (keys.length - 1) + INDEX_SIZE * children.length);
 		byte[] zeroes = new byte[zerolen];
 		try {
 			dos.write(zeroes, 0, zerolen);
@@ -440,7 +440,7 @@ public class BTreeInternalPage extends BTreePage {
 	 * @param e The entry to add.
 	 */
 	public void insertEntry(BTreeEntry e) throws DbException {
-		if (!e.getKey().getType().equals(td.getField(keyField).fieldType))
+		if (!e.getKey().getType().equals(td.getTDItem(keyField).fieldType))
 			throw new DbException("key field type mismatch, in insertEntry");
 
 		if(e.getLeftChild().getTableId() != pid.getTableId() || e.getRightChild().getTableId() != pid.getTableId())
