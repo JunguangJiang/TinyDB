@@ -600,7 +600,14 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
         OpIterator opIterator;
         try {
+            HashMap<String, String> attrNameToTable = new HashMap<>();
+            String[] attrNames = scanNode.tupleDesc.getAttrNames();
+            for(String attrName: attrNames) {
+                attrNameToTable.put(attrName, scanNode.tableName);
+            }
+
             if (or != null) {
+                or.disambiguateName(attrNameToTable);
                 IndexPredicate indexPredicate = null;
                 if (or.size() == 1) {
                     indexPredicate = or.get(0).extractIndexPredicate(scanNode);

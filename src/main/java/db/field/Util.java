@@ -40,6 +40,22 @@ public class Util {
      * @throws TypeMismatch when the Type was mismatched
      */
     public static Field getField(Object value, Type type, int maxLen, String name) throws TypeMismatch{
+        if (value == null) {
+            switch (type) {
+                case INT_TYPE:
+                    return new IntField(0, true);
+                case LONG_TYPE:
+                    return new LongField(0,true);
+                case FLOAT_TYPE:
+                    return new FloatField(0.0f, true);
+                case DOUBLE_TYPE:
+                    return new DoubleField(0.0,true);
+                case STRING_TYPE:
+                    return new StringField("", maxLen, true);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
         if (value instanceof Long) {
             switch (type) {
                 case INT_TYPE:
