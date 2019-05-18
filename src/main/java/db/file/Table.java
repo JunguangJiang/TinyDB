@@ -25,6 +25,7 @@ public class Table {
     private Integer id;
     private String name;
     public File file;
+    public long autoIncrementNumber=0;
 
     /**
      * @param id
@@ -66,12 +67,11 @@ public class Table {
     public QueryResult insertTuple(Tuple tuple) {
         try {
             GlobalManager.getBufferPool().insertTuple(this.id, tuple);
-        } catch (IOException e){
+        } catch (IOException | DbException e){
             e.printStackTrace();
         } catch (PrimaryKeyViolation e) {
-            return new QueryResult(false, "Violation of PRIMARY KEY constraint."+e.toString());
-        } catch (DbException e){
-            e.printStackTrace();
+            return new QueryResult(false,
+                    "Violation of PRIMARY KEY constraint."+e.toString());
         }
         return new QueryResult(true, "Query OK, 1 row affected.");
     }
@@ -81,56 +81,67 @@ public class Table {
      * the Tuple has the form
      *      INSERT attrNames VALUES(values);
      * must ensure each tuple satisfies the primary key and not null constraint
-     * @param attrNames attribute names. If attrNames is null, then it refers to all the attributes of the Tuple
+     * @param attrNames attribute names. If attrNames is null, then it refers to all
+     *                  the attributes of the Tuple
      * @param values each value might be String, Integer, Long, Float or Double
      * @return the QueryResult of the insert
      * @see QueryResult
      */
     public QueryResult insertTuple(String[] attrNames, Object[] values) {
+        try {
+            Tuple tuple = createTuple(attrNames, values);
+            return insertTuple(tuple);
+        } catch (Exception e) {
+            return new QueryResult(false, e.getMessage());
+        }
+
+    }
+
+    /**
+     * create a new Tuple
+     * the Tuple has the form
+     *      INSERT attrNames VALUES(values);
+     * @param attrNames attribute names. If attrNames is null, then it refers to all
+     *                  the attributes of the Tuple
+     * @param values each value might be String, Integer, Long, Float or Double
+     * @return the new Tuple
+     * @throws Exception
+     */
+    private Tuple createTuple(String[] attrNames, Object[] values) throws Exception{
         if (attrNames == null) {
             //attrNames are all the attribute names of the table
             attrNames = getTupleDesc().getAttrNames();
         }
         if (attrNames.length != values.length) {
-            return new QueryResult(false,
-                    "The length of attribute must equal to the length of values");
+            throw new Exception("The length of attribute must equal to the length of values");
         } else {
-            HashMap<String, Object> hashMap = new HashMap<>();
+            HashMap<String, Object> hashMap = new HashMap<>(); // map attrName to value
             for (int i=0; i<attrNames.length; i++) {
                 hashMap.put(attrNames[i], values[i]);
             }
+            hashMap.put("PRIMARY", autoIncrementNumber++); // PRIMARY is an auto increment attribute
 
             TupleDesc tupleDesc = getTupleDesc();
             Tuple tuple = new Tuple(tupleDesc);
             // Set each attribute to the corresponding value
             for (int i=0; i<tupleDesc.numFields(); i++) {
                 TDItem tdItem = tupleDesc.getTDItem(i);
-                Object value;
-                if (tdItem.fieldName.equals("PRIMARY")) {
-                    // TODO we need to set value to an auto incremental value
-                    value = 0;
-                } else {
-                    value = hashMap.remove(tdItem.fieldName);
-                }
+                Object value = hashMap.remove(tdItem.fieldName);
                 if (value != null) {
-                    try {
-                        tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName));
-                    } catch (TypeMismatch e) {
-                        return new QueryResult(false, e.toString());
-                    }
+                    tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName));
                 } else {
                     if (tdItem.notNull || tdItem.isPrimaryKey) {
-                        return new QueryResult(false, "FullColumnName " + tdItem.fieldName + " can not be null");
+                        throw new Exception("FullColumnName " + tdItem.fieldName + " can not be null");
                     }
                 }
             }
             // Ensure that all insert attributes exist.
             if (!hashMap.isEmpty()) {
                 String attribute = hashMap.keySet().toArray(new String[0])[0];
-                return new QueryResult(false, "FullColumnName " + attribute +" doesn't exist.");
+                throw new Exception("FullColumnName " + attribute +" doesn't exist.");
             }
 
-            return insertTuple(tuple);
+            return tuple;
         }
     }
 

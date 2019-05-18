@@ -1,13 +1,17 @@
-package db.query;
+package db.query.plan;
 import db.field.TypeMismatch;
-import db.file.BTree.BTreeScan;
+import db.query.pipe.BTreeScan;
 import db.file.BTree.IndexPredicate;
-import db.query.LogicalFilterNode.*;
-import db.tuple.TDItem;
+import db.query.*;
+import db.query.pipe.Filter;
+import db.query.pipe.Join;
+import db.query.pipe.OpIterator;
+import db.query.pipe.Project;
+import db.query.plan.LogicalFilterNode.*;
+import db.query.predicate.Predicate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 
@@ -23,7 +27,7 @@ import java.util.NoSuchElementException;
  */
 public class LogicalPlan
 {
-    private LogicalFilterNode.Or or;
+    private LogicalFilterNode.OrNode or;
     private ArrayList<LogicalJoinNode> joinNodes;
     private ArrayList<FullColumnName> fullColumnNames;
 
@@ -33,7 +37,7 @@ public class LogicalPlan
      * @param joinNodes nodes of joined table
      * @param fullColumnNames nodes of project elements. null if project all the elements
      */
-    public LogicalPlan(LogicalFilterNode.Or or,
+    public LogicalPlan(LogicalFilterNode.OrNode or,
                        ArrayList<LogicalJoinNode> joinNodes,
                        ArrayList<FullColumnName> fullColumnNames){
         this.or = or;
@@ -42,6 +46,7 @@ public class LogicalPlan
         disambiguateName();
     }
 
+
     /**
      * Fulfill the tableName of all the FullColumnNames
      *  inside `or`, `joinNodes` and `fullColumnNames`
@@ -49,18 +54,8 @@ public class LogicalPlan
      *      there exists different tables for one attribute.
      */
     private void disambiguateName() throws NoSuchElementException {
-        HashMap<String, String> attrToTable = new HashMap();
-        for (LogicalJoinNode node: joinNodes) {
-            String[] attrNames = node.scanNode.tupleDesc.getAttrNames();
-            String tableAlias = node.scanNode.tableAlias;
-            for(String attrName: attrNames) {
-                if (attrToTable.containsKey(attrName)) { //ambiguous attrName
-                    attrToTable.put(attrName, null);
-                } else {
-                    attrToTable.put(attrName, tableAlias);
-                }
-            }
-        }
+        HashMap<String, String> attrToTable = LogicalJoinNode.getAttrToTable(joinNodes);
+
         if (or != null) {
             or.disambiguateName(attrToTable);
         }
@@ -74,74 +69,62 @@ public class LogicalPlan
         }
     }
 
+    /**
+     * Get a Filter OpIterator from scanNode and andNode.
+     *  will do BTreeScan based on scanNode and IndexPredicate extracted from andNode
+     *  and then do Filter based on the KVCmpPredicate extracted from andNode.
+     * @param scanNode
+     * @param andNode
+     * @return
+     * @throws TypeMismatch
+     */
+    private OpIterator getBTreeScan(LogicalScanNode scanNode, AndNode andNode) throws TypeMismatch{
+        IndexPredicate indexPredicate = andNode.extractIndexPredicate(scanNode);
+        BTreeScan scan = new BTreeScan(scanNode.tableName, scanNode.tableAlias, indexPredicate);
+        Predicate predicate = andNode.extractKVPredicate(scanNode).predicate(scanNode.tupleDesc);
+        return new Filter(predicate, scan);
+    }
+
     /** Convert this LogicalPlan into a physicalPlan represented by a {@link OpIterator}.
      * Attempts to find the optimal plan to order the joins in the plan.
      *  @return A OpIterator representing this plan.
      */
     public OpIterator physicalPlan() throws TypeMismatch {
-        OpIterator opIterator = null;
         OpIterator scans[]= new OpIterator[this.joinNodes.size()];
-        Predicate filterPredicate;
 
         if (or != null && or.size() == 1) {
             // If there are only "AND", we first use BTreeIndexSearch,
             // then we Filter each Table separately.
-            LogicalFilterNode.And and = or.get(0);
+            LogicalFilterNode.AndNode andNode = or.get(0);
             for (int i=0; i<joinNodes.size(); i++) {
-                LogicalJoinNode joinNode = joinNodes.get(i);
-                IndexPredicate indexPredicate = and.extractIndexPredicate(joinNode.scanNode);
-                OpIterator scan = new BTreeScan(joinNode.scanNode.tableName,
-                        joinNode.scanNode.tableAlias, indexPredicate);
-                Predicate p = and.extractKVPredicate(joinNode.scanNode).predicate(
-                        joinNode.scanNode.tupleDesc);
-                scan = new Filter(p, scan);
-                scans[i] = scan;
+                scans[i] = getBTreeScan(joinNodes.get(i).scanNode,andNode);
             }
         } else {
             // If there are "OR", we do no optimization
             // If there are no where clause, we cannot do optimization
             for (int i = 0; i < joinNodes.size(); i++) {
-                scans[i] = new BTreeScan(joinNodes.get(i).scanNode.tableName,
-                        joinNodes.get(i).scanNode.tableAlias,null);
+                LogicalScanNode scanNode = joinNodes.get(i).scanNode;
+                scans[i] = new BTreeScan(scanNode.tableName, scanNode.tableAlias,null);
             }
         }
 
         // Join (no optimization here)
-        for (int i=0; i<scans.length; i++){
-            OpIterator scan = scans[i];
-            LogicalJoinNode joinNode = joinNodes.get(i);
-            if (opIterator == null) {
-                opIterator = scan;
-            } else {
-                if (joinNode.cmp != null) {
-                    opIterator = new Join(opIterator, joinNode.cmp, scan);
-                } else {
-                    opIterator = new Join(opIterator, new VVCmp(true), scan);
-                }
-            }
-        }
-
-        if (opIterator == null){
-            throw new IllegalStateException();
+        assert scans.length >= 1;
+        OpIterator opIterator = scans[0];
+        for (int i=1; i<scans.length; i++){
+            opIterator = new Join(opIterator, joinNodes.get(i).cmp, scans[i]);
         }
 
         // Filter the result
         if (or != null) {
-            filterPredicate = or.predicate(opIterator.getTupleDesc());
+            Predicate filterPredicate = or.predicate(opIterator.getTupleDesc());
             opIterator = new Filter(filterPredicate, opIterator);
         }
 
-        if (fullColumnNames == null) {
-            fullColumnNames = new ArrayList<>();
-            Iterator<TDItem> iterator = opIterator.getTupleDesc().iterator();
-            while (iterator.hasNext()) {
-                TDItem tdItem = iterator.next();
-                if (!tdItem.fieldName.equals("PRIMARY")) {
-                    fullColumnNames.add(new FullColumnName(tdItem.tableName, tdItem.fieldName, null));
-                }
-            }
-        }
         // Project the result
+        if (fullColumnNames == null) {
+            fullColumnNames = opIterator.getTupleDesc().fullColumnNames();
+        }
         opIterator = new Project(fullColumnNames.toArray(new FullColumnName[0]), opIterator);
 
         return opIterator;

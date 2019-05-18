@@ -20,10 +20,6 @@ public class FullColumnName {
         this.attrAlias = alias;
     }
 
-//    public FullColumnName(String tableName, String attrName) {
-//        this(tableName, attrName, "");
-//    }
-
     @Override
     public String toString() {
         if (attrAlias == null) {

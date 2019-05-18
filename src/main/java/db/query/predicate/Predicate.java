@@ -1,4 +1,4 @@
-package db.query;
+package db.query.predicate;
 
 import db.field.TypeMismatch;
 import db.tuple.Tuple;

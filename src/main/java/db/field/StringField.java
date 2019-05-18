@@ -24,6 +24,7 @@ public class StringField implements Field {
      *            The value of this field.
      * @param maxLen
      *            The maximum size of this string
+     * @param isNull whether the Field is null
      */
     public StringField(String s, int maxLen, boolean isNull) {
         this.maxLen = maxLen;

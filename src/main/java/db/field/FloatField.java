@@ -15,8 +15,8 @@ public class FloatField extends NumberField{
 
     /**
      * Constructor.
-     *
      * @param i The value of this field.
+     * @param isNull whether the Field is null
      */
     public FloatField(float i, boolean isNull) {
         super(i, Type.FLOAT_TYPE, isNull);
@@ -25,7 +25,6 @@ public class FloatField extends NumberField{
     public FloatField(float i) {
         this(i, false);
     }
-
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeFloat(value.floatValue());

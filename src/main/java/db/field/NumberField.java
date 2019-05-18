@@ -1,5 +1,4 @@
 package db.field;
-import java.io.File;
 
 /**
  * Class of Field that stores a single Number.
@@ -14,9 +13,9 @@ public abstract class NumberField implements Field {
 
     /**
      * Constructor.
-     *
      * @param value The value of this field.
      * @param type The type of this field
+     * @param isNull whether the Field is null
      */
     public NumberField(Number value, Type type, boolean isNull) {
         this.value = value;

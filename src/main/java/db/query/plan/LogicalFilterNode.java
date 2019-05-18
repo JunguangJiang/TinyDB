@@ -1,12 +1,16 @@
-package db.query;
+package db.query.plan;
 
 import db.field.Op;
 import db.field.TypeMismatch;
 import db.field.Util;
 import db.file.BTree.IndexPredicate;
+import db.query.FullColumnName;
+import db.query.predicate.KKCmpPredicate;
+import db.query.predicate.KVCmpPredicate;
+import db.query.predicate.LogicalPredicate;
+import db.query.predicate.Predicate;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
@@ -14,11 +18,10 @@ import java.util.NoSuchElementException;
 /** A LogicalFilterNode represents the parameters of a filter in the WHERE clause of a query.
  */
 public class LogicalFilterNode {
-    public interface Cmp{
+    public interface BaseFilterNode{
         /**
          * convert a clause into the corresponding Predicate
          * @param tupleDesc
-         * @return
          * @throws TypeMismatch
          */
         Predicate predicate(TupleDesc tupleDesc) throws TypeMismatch;
@@ -34,11 +37,11 @@ public class LogicalFilterNode {
 
 
     /**key op const*/
-    public static class KVCmp implements Cmp{
+    public static class KVCmpNode implements BaseFilterNode{
         public FullColumnName fullColumnName;
         public Op op;
         public Object value;
-        public KVCmp(FullColumnName fullColumnName, Op op, Object value) {
+        public KVCmpNode(FullColumnName fullColumnName, Op op, Object value) {
             this.fullColumnName = fullColumnName;
             this.op = op;
             this.value = value;
@@ -56,10 +59,10 @@ public class LogicalFilterNode {
     }
 
     /**key op key*/
-    public static class KKCmp implements Cmp {
+    public static class KKCmpNode implements BaseFilterNode {
         public FullColumnName lhs, rhs;
-        Op op;
-        public KKCmp(FullColumnName lhs, Op op, FullColumnName rhs) {
+        public Op op;
+        public KKCmpNode(FullColumnName lhs, Op op, FullColumnName rhs) {
             this.lhs = lhs;
             this.rhs = rhs;
             this.op = op;
@@ -81,12 +84,12 @@ public class LogicalFilterNode {
      * const op const
      * the result would only be true or false
      * */
-    public static class VVCmp implements Cmp{
+    public static class VVCmpNode implements BaseFilterNode{
         private boolean cmp;
-        public VVCmp(Object lhs, Op op, Object rhs) {
+        public VVCmpNode(Object lhs, Op op, Object rhs) {
             cmp = Util.getField(lhs).compare(op, Util.getField(rhs));
         }
-        public VVCmp(boolean cmp) {
+        public VVCmpNode(boolean cmp) {
             this.cmp = cmp;
         }
 
@@ -109,77 +112,64 @@ public class LogicalFilterNode {
         }
     }
 
-    public static class And extends ArrayList<Cmp> implements Cmp{
-//        /**
-//         * Extract one IndexPredicate from And
-//         *
-//         * @param table
-//         * @return
-//         */
-//        public IndexPredicate extractIndexPredicate(Table table) throws TypeMismatch{
-//            for(int i=0; i<size(); i++) {
-//                if (get(i) instanceof KVCmp) {
-//                    FullColumnName fullColumnName = ((KVCmp) get(i)).fullColumnName;
-//                    if (table.getTupleDesc().isPrimaryKey(fullColumnName.attrName)) {
-//                        KVCmp cmp = (KVCmp)remove(i);
-//                        TupleDesc tupleDesc = table.getTupleDesc();
-//                        int idx = tupleDesc.fieldNameToIndex(fullColumnName.attrName);
-//                        return new IndexPredicate(cmp.op, Util.getField(cmp.value, tupleDesc.getTDItem(idx)));
-//                    }
-//                }
-//            }
-//            return null;
-//        }
-
+    public static class AndNode extends ArrayList<BaseFilterNode> implements BaseFilterNode{
         /**
-         * Extract an IndexPredicate from And
+         * Extract an IndexPredicate from AndNode
          * IndexPredicate is a KVPredicate whose Key is a Primary Key in the LogicalScanNode's Table
-         * the KVCmp will be removed from And
-         * @param node
+         * the KVCmpNode will be removed from AndNode
+         * @param scanNode
          * @return
          * @throws TypeMismatch
          */
-        public IndexPredicate extractIndexPredicate(LogicalScanNode node) throws TypeMismatch {
-            for (int i=0; i<size(); i++) {
-                if (get(i) instanceof KVCmp) {
-                    FullColumnName fullColumnName = ((KVCmp) get(i)).fullColumnName;
-                    if (fullColumnName.tableName.equals(node.tableAlias) &&
-                            node.tupleDesc.isPrimaryKey(fullColumnName.attrName)) {
-                        KVCmp cmp = (KVCmp)remove(i);
-                        TupleDesc tupleDesc = node.tupleDesc;
-                        int idx = tupleDesc.fieldNameToIndex(fullColumnName.attrName);
-                        return new IndexPredicate(cmp.op, Util.getField(cmp.value, tupleDesc.getTDItem(idx)));
+        public IndexPredicate extractIndexPredicate(LogicalScanNode scanNode) throws TypeMismatch {
+            AndNode andNode = getKVCmpNodes(scanNode.tableName, scanNode.tupleDesc.getPrimaryKey());
+            if (andNode.size() >= 1) {
+                KVCmpNode cmpNode = (KVCmpNode)andNode.get(0);
+                this.remove(cmpNode);
+                TupleDesc tupleDesc = scanNode.tupleDesc;
+                int idx = tupleDesc.fieldNameToIndex(cmpNode.fullColumnName.attrName);
+                return new IndexPredicate(cmpNode.op, Util.getField(cmpNode.value, tupleDesc.getTDItem(idx)));
+            } else {
+                return null;
+            }
+        }
+
+        /**
+         * Extract KVPredicates from AndNode, all the KVCmps will be removed from AndNode
+         * @param node
+         * @return
+         */
+        public AndNode extractKVPredicate(LogicalScanNode node) throws TypeMismatch{
+            AndNode andNode = getKVCmpNodes(node.tableName,null);
+            this.removeAll(andNode);
+            return andNode;
+        }
+
+        /**
+         * Get all the KVCmpNodes that match the given tableName and primary key which means
+         * KVCmpNodes.fullColumnName = (`tableName`.`primary key` as *)
+         * @param tableName the table name, always match if null
+         * @param primaryKey the primary key of the table, always match if null
+         * @return
+         * @throws TypeMismatch
+         */
+        public AndNode getKVCmpNodes(String tableName, String primaryKey) throws TypeMismatch {
+            AndNode andNode = new AndNode();
+            for (BaseFilterNode filterNode: this) {
+                if (filterNode instanceof KVCmpNode) {
+                    FullColumnName fullColumnName = ((KVCmpNode)filterNode).fullColumnName;
+                    if ((tableName == null || tableName.equals(fullColumnName.tableName)) &&
+                            (primaryKey == null || primaryKey.equals(fullColumnName.attrName))) {
+                        andNode.add(filterNode);
                     }
                 }
             }
-            return null;
+            return andNode;
         }
 
-        /**
-         * Extract KVPredicates from And, all the KVCmps will be removed from And
-         * @param node
-         * @return
-         */
-        public And extractKVPredicate(LogicalScanNode node) {
-            And newAnd = new And();
-            for (Cmp cmp: this) {
-                if (cmp instanceof KVCmp) {
-                    newAnd.add(cmp);
-                }
-            }
-            this.removeIf(x -> x instanceof KVCmp);
-            return newAnd;
-        }
-
-        /**
-         *
-         * @param tupleDesc
-         * @return
-         * @throws TypeMismatch
-         */
         public Predicate predicate(TupleDesc tupleDesc) throws TypeMismatch{
             if (this.size() == 0) {
-                return (new VVCmp(true)).predicate();
+                return (new VVCmpNode(true)).predicate();
             } else {
                 Predicate predicate = this.get(0).predicate(tupleDesc);
                 for (int i=1; i<this.size(); i++) {
@@ -195,17 +185,11 @@ public class LogicalFilterNode {
         }
     }
 
-    public static class Or extends ArrayList<And> implements Cmp{
-        /**
-         *
-         * @param tupleDesc
-         * @return
-         * @throws TypeMismatch
-         */
+    public static class OrNode extends ArrayList<AndNode> implements BaseFilterNode{
         @Override
         public Predicate predicate(TupleDesc tupleDesc) throws TypeMismatch{
             if (this.size() == 0) {
-                return (new VVCmp(false)).predicate();
+                return (new VVCmpNode(false)).predicate();
             } else {
                 Predicate predicate = this.get(0).predicate(tupleDesc);
                 for (int i=1; i<this.size(); i++) {

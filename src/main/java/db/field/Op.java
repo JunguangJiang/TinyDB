@@ -1,7 +1,4 @@
 package db.field;
-
-import db.query.LogicalPredicate;
-
 import java.io.Serializable;
 
 /** Constants used for return codes in Field.compare */

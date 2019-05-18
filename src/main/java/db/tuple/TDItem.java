@@ -80,6 +80,9 @@ public class TDItem implements Serializable {
         return stringBuilder.toString();
     }
 
+    /**
+     * @return a full name of the Attribute
+     */
     public String fullName() {
         if (tableName != null) {
             return tableName + "." + fieldName;

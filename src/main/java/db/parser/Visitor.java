@@ -6,10 +6,16 @@ import db.GlobalManager;
 import db.field.Op;
 import db.field.Type;
 import db.field.TypeMismatch;
-import db.file.BTree.BTreeScan;
+import db.query.pipe.BTreeScan;
 import db.file.BTree.IndexPredicate;
 import db.file.Table;
 import db.query.*;
+import db.query.pipe.Delete;
+import db.query.pipe.Filter;
+import db.query.pipe.OpIterator;
+import db.query.pipe.Update;
+import db.query.plan.*;
+import db.query.predicate.Predicate;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -17,7 +23,6 @@ import org.antlr.v4.runtime.misc.Interval;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -330,9 +335,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitPredicate(TinyDBParser.PredicateContext ctx) {
-        LogicalFilterNode.Or or = new LogicalFilterNode.Or();
+        LogicalFilterNode.OrNode or = new LogicalFilterNode.OrNode();
         for (TinyDBParser.AndExpressionPredicateContext context: ctx.andExpressionPredicate()) {
-            or.add((LogicalFilterNode.And) visit(context));
+            or.add((LogicalFilterNode.AndNode) visit(context));
         }
         return or;
     }
@@ -346,9 +351,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitAndExpressionPredicate(TinyDBParser.AndExpressionPredicateContext ctx) {
-        LogicalFilterNode.And and = new LogicalFilterNode.And();
+        LogicalFilterNode.AndNode and = new LogicalFilterNode.AndNode();
         for (TinyDBParser.ComparisonExpressionPredicateContext context: ctx.comparisonExpressionPredicate()) {
-            and.add((LogicalFilterNode.Cmp)visit(context));
+            and.add((LogicalFilterNode.BaseFilterNode)visit(context));
         }
         return and;
     }
@@ -360,7 +365,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitKvCmpExpressionPredicate(TinyDBParser.KvCmpExpressionPredicateContext ctx) {
-        return new LogicalFilterNode.KVCmp(
+        return new LogicalFilterNode.KVCmpNode(
                 (FullColumnName)visit(ctx.fullColumnName()),
                 (Op) visit(ctx.comparisonOperator()),
                 visit(ctx.constant())
@@ -374,7 +379,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitVkCmpExpressionPredicate(TinyDBParser.VkCmpExpressionPredicateContext ctx) {
-        return new LogicalFilterNode.KVCmp(
+        return new LogicalFilterNode.KVCmpNode(
                 (FullColumnName)visit(ctx.fullColumnName()),
                 Op.reverse((Op)visit(ctx.comparisonOperator())),
                 visit(ctx.constant())
@@ -388,7 +393,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitKkCmpExpressionPredicate(TinyDBParser.KkCmpExpressionPredicateContext ctx) {
-        return new LogicalFilterNode.KKCmp(
+        return new LogicalFilterNode.KKCmpNode(
                 (FullColumnName)visit(ctx.fullColumnName(0)),
                 (Op) visit(ctx.comparisonOperator()),
                 (FullColumnName)visit(ctx.fullColumnName(1))
@@ -402,7 +407,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitVvCmpExpressionPredicate(TinyDBParser.VvCmpExpressionPredicateContext ctx) {
-        return new LogicalFilterNode.VVCmp(
+        return new LogicalFilterNode.VVCmpNode(
                 visit(ctx.constant(0)),
                 (Op)visit(ctx.comparisonOperator()),
                 visit(ctx.constant(1))
@@ -420,7 +425,6 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     @Override
     public Object visitComparisonOperator(TinyDBParser.ComparisonOperatorContext ctx) {
         String text = ctx.getText();
-        System.out.println("text="+text);
         switch (text) {
             case "=":
                 return Op.EQUALS;
@@ -472,25 +476,29 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     @Override
     public Object visitSelectStatement(TinyDBParser.SelectStatementContext ctx) {
         try {
-            LogicalFilterNode.Or or = null;
+            LogicalFilterNode.OrNode or = null;
             if (ctx.whereExpr != null) {
-                or = (LogicalFilterNode.Or) visit(ctx.whereExpr);
+                or = (LogicalFilterNode.OrNode) visit(ctx.whereExpr);
             }
             ArrayList<LogicalJoinNode> joinNodes = (ArrayList<LogicalJoinNode>) visit(ctx.tableSources());
             ArrayList<FullColumnName> fullColumnNames = (ArrayList<FullColumnName>)visit(ctx.fullColumnNames());
-            LogicalPlan plan = new LogicalPlan(or, joinNodes, fullColumnNames);
-            OpIterator planIterator = plan.physicalPlan();
-            PhysicalPlan physicalPlan = new PhysicalPlan(planIterator);
 
-            String[] header;
+            String[] header=null;
             if (fullColumnNames != null) {
                 header = new String[fullColumnNames.size()];
                 for (int i=0; i<fullColumnNames.size(); i++) {
                     header[i] = fullColumnNames.get(i).toString();
                 }
-            } else {
+            }
+
+            LogicalPlan plan = new LogicalPlan(or, joinNodes, fullColumnNames);
+            OpIterator planIterator = plan.physicalPlan();
+            PhysicalPlan physicalPlan = new PhysicalPlan(planIterator);
+
+            if (fullColumnNames == null) {
                 header = planIterator.getTupleDesc().fullNames();
             }
+
             return physicalPlan.execute(header);
         } catch (NullPointerException | TypeMismatch | NoSuchElementException e) {
             return new QueryResult(false, e.getMessage());
@@ -579,9 +587,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitInnerJoin(TinyDBParser.InnerJoinContext ctx) {
-        LogicalFilterNode.Cmp cmp = null;
+        LogicalFilterNode.BaseFilterNode cmp = null;
         if (ctx.comparisonExpressionPredicate() != null) {
-            cmp = (LogicalFilterNode.Cmp)visit(ctx.comparisonExpressionPredicate());
+            cmp = (LogicalFilterNode.BaseFilterNode)visit(ctx.comparisonExpressionPredicate());
         }
         return new LogicalJoinNode(cmp, (LogicalScanNode)visit(ctx.table()));
     }
@@ -594,7 +602,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      * @param updateElements
      * @return
      */
-    public Object visitUpdateOrDeleteStatement(String tableName, LogicalFilterNode.Or or,
+    public Object visitUpdateOrDeleteStatement(String tableName, LogicalFilterNode.OrNode or,
                                                boolean isDelete, Update.UpdateElement[] updateElements) {
         LogicalScanNode scanNode = new LogicalScanNode(tableName);
 
@@ -651,9 +659,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitDeleteStatement(TinyDBParser.DeleteStatementContext ctx) {
-        LogicalFilterNode.Or or = null;
+        LogicalFilterNode.OrNode or = null;
         if (ctx.predicate() != null) {
-            or = (LogicalFilterNode.Or) visit(ctx.predicate());
+            or = (LogicalFilterNode.OrNode) visit(ctx.predicate());
         }
         return visitUpdateOrDeleteStatement(ctx.tableName().getText(), or, true, null);
     }
@@ -669,9 +677,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitUpdateStatement(TinyDBParser.UpdateStatementContext ctx) {
-        LogicalFilterNode.Or or = null;
+        LogicalFilterNode.OrNode or = null;
         if (ctx.predicate() != null) {
-            or = (LogicalFilterNode.Or) visit(ctx.predicate());
+            or = (LogicalFilterNode.OrNode) visit(ctx.predicate());
         }
         ArrayList<Update.UpdateElement> updateElements = new ArrayList<>();
         for (TinyDBParser.UpdatedElementContext context : ctx.updatedElement()) {

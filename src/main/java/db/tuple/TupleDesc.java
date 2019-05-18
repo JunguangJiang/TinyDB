@@ -242,12 +242,31 @@ public class TupleDesc implements Serializable, Cloneable {
         return stringBuilder.toString();
     }
 
+    /**
+     * Full names of all the Attribute in the TupleDesc
+     * @return
+     */
     public String[] fullNames() {
         String[] strings = new String[this.numFields()];
         for (int i=0; i<numFields(); i++) {
             strings[i] = getTDItem(i).fullName();
         }
         return strings;
+    }
+
+    /**
+     * @return FullColumnNames of the TupleDesc
+     *          will remove PRIMARY column automatically
+     */
+    public ArrayList<FullColumnName> fullColumnNames() {
+        ArrayList<FullColumnName> fullColumnNames = new ArrayList<>();
+        for (int i=0; i<numFields(); i++) {
+            if (!tdItems[i].fieldName.equals("PRIMARY KEY")){
+                FullColumnName name = new FullColumnName(tdItems[i].tableName, tdItems[i].fieldName, null);
+                fullColumnNames.add(name);
+            }
+        }
+        return fullColumnNames;
     }
 }
 

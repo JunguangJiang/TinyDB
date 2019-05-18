@@ -1,9 +1,10 @@
-package db.query;
+package db.query.plan;
 
 import com.github.freva.asciitable.AsciiTable;
 import db.DbException;
 import db.field.TypeMismatch;
-import db.tuple.TDItem;
+import db.query.QueryResult;
+import db.query.pipe.OpIterator;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 import java.util.ArrayList;

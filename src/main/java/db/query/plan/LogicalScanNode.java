@@ -1,4 +1,4 @@
-package db.query;
+package db.query.plan;
 
 import db.GlobalManager;
 import db.file.Table;

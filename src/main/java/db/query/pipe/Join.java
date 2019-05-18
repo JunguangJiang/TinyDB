@@ -1,7 +1,9 @@
-package db.query;
+package db.query.pipe;
 
 import db.DbException;
 import db.field.TypeMismatch;
+import db.query.plan.LogicalFilterNode;
+import db.query.predicate.Predicate;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -20,10 +22,20 @@ public class Join extends Operator{
     private ArrayList<Tuple> tuples = new ArrayList<>();
     private Iterator<Tuple> iterator;
 
-    public Join(OpIterator lhs, LogicalFilterNode.Cmp cmp, OpIterator rhs) throws TypeMismatch{
+    /**
+     * Join lhs and rhs with cmp as filter predicate
+     * @param lhs
+     * @param cmp if cmp is null, then do no filtering
+     * @param rhs
+     * @throws TypeMismatch
+     */
+    public Join(OpIterator lhs, LogicalFilterNode.BaseFilterNode cmp, OpIterator rhs) throws TypeMismatch{
         this.lhs = lhs;
         this.rhs = rhs;
         this.mergedTupleDesc = TupleDesc.merge(lhs.getTupleDesc(), rhs.getTupleDesc());
+        if (cmp == null) {
+            cmp = new LogicalFilterNode.VVCmpNode(true);
+        }
         this.predicate = cmp.predicate(mergedTupleDesc);
     }
 

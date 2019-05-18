@@ -1,11 +1,12 @@
-package db.file.BTree;
+package db.query.pipe;
 
 import db.DbException;
 import db.GlobalManager;
+import db.file.BTree.BTreeFile;
+import db.file.BTree.IndexPredicate;
 import db.file.DbFileIterator;
 import db.file.Table;
-import db.query.OpIterator;
-import db.tuple.TDItem;
+import db.query.pipe.OpIterator;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -21,26 +22,34 @@ public class BTreeScan implements OpIterator {
 
 	private boolean isOpen;
 	private TupleDesc myTd;
-	private transient DbFileIterator it;
+	private transient DbFileIterator iterator;
 
-
-	/**
-	 * Creates a B+ tree scan over the specified table
-	 * @param ipred
-	 * 			  The index predicate to match. If null, the scan will return all tuples
-	 *            in sorted order
-	 */
-	public BTreeScan(String tableName, IndexPredicate ipred) {
-        this(tableName, tableName, ipred);
+    /**
+     * Creates a B+ tree scan over the specified table
+     * @param tableName the name of the Table
+     * @param indexPredicate
+     * 			  The index predicate to match. If null, the scan will return all tuples
+     *            in sorted order
+     */
+	public BTreeScan(String tableName, IndexPredicate indexPredicate) {
+        this(tableName, tableName, indexPredicate);
 	}
 
-	public BTreeScan(String tableName, String tableAlias, IndexPredicate ipred) {
+    /**
+     * Creates a B+ tree scan over the specified table
+     * @param tableName the name of the Table
+     * @param tableAlias the alias of the Table
+     * @param indexPredicate
+     *            The index predicate to match. If null, the scan will return all tuples
+     *            in sorted order
+     */
+	public BTreeScan(String tableName, String tableAlias, IndexPredicate indexPredicate) {
         this.isOpen = false;
         Table table = GlobalManager.getDatabase().getTable(tableName);
-        if (ipred == null) {
-            this.it = GlobalManager.getDatabase().getDbFile(tableName).iterator();
+        if (indexPredicate == null) {
+            this.iterator = GlobalManager.getDatabase().getDbFile(tableName).iterator();
         } else {
-            this.it = ((BTreeFile)GlobalManager.getDatabase().getDbFile(tableName)).indexIterator(ipred);
+            this.iterator = ((BTreeFile)GlobalManager.getDatabase().getDbFile(tableName)).indexIterator(indexPredicate);
         }
         myTd = table.getTupleDesc();
         myTd.setTableName(tableAlias);
@@ -50,7 +59,7 @@ public class BTreeScan implements OpIterator {
 		if (isOpen)
 			throw new DbException("double open on one OpIterator.");
 
-		it.open();
+		iterator.open();
 		isOpen = true;
 	}
 
@@ -70,18 +79,18 @@ public class BTreeScan implements OpIterator {
 	public boolean hasNext() throws DbException {
 		if (!isOpen)
 			throw new IllegalStateException("iterator is closed");
-		return it.hasNext();
+		return iterator.hasNext();
 	}
 
 	public Tuple next() throws NoSuchElementException, DbException {
 		if (!isOpen)
 			throw new IllegalStateException("iterator is closed");
 
-		return it.next();
+		return iterator.next();
 	}
 
 	public void close() {
-		it.close();
+		iterator.close();
 		isOpen = false;
 	}
 
