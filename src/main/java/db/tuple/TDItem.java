@@ -80,6 +80,14 @@ public class TDItem implements Serializable {
         return stringBuilder.toString();
     }
 
+    public String fullName() {
+        if (tableName != null) {
+            return tableName + "." + fieldName;
+        } else {
+            return fieldName;
+        }
+    }
+
     /**
      * Two TDItems are equal when their
      *      field type

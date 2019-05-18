@@ -105,7 +105,13 @@ public class Table {
             // Set each attribute to the corresponding value
             for (int i=0; i<tupleDesc.numFields(); i++) {
                 TDItem tdItem = tupleDesc.getTDItem(i);
-                Object value = hashMap.remove(tdItem.fieldName);
+                Object value;
+                if (tdItem.fieldName.equals("PRIMARY")) {
+                    // TODO we need to set value to an auto incremental value
+                    value = 0;
+                } else {
+                    value = hashMap.remove(tdItem.fieldName);
+                }
                 if (value != null) {
                     try {
                         tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName));

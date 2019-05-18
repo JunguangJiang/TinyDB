@@ -610,8 +610,8 @@ public class TinyDBParser extends Parser {
 	public static class ConstraintDeclarationContext extends CreateDefinitionContext {
 		public TerminalNode PRIMARY() { return getToken(TinyDBParser.PRIMARY, 0); }
 		public TerminalNode KEY() { return getToken(TinyDBParser.KEY, 0); }
-		public AttrNamesContext attrNames() {
-			return getRuleContext(AttrNamesContext.class,0);
+		public AttrNameContext attrName() {
+			return getRuleContext(AttrNameContext.class,0);
 		}
 		public ConstraintDeclarationContext(CreateDefinitionContext ctx) { copyFrom(ctx); }
 		@Override
@@ -660,7 +660,7 @@ public class TinyDBParser extends Parser {
 				setState(131);
 				match(LR_BRACKET);
 				setState(132);
-				attrNames();
+				attrName();
 				setState(133);
 				match(RR_BRACKET);
 				}
@@ -2582,7 +2582,7 @@ public class TinyDBParser extends Parser {
 		"u\3\2\2\2x{\3\2\2\2yw\3\2\2\2yz\3\2\2\2z|\3\2\2\2{y\3\2\2\2|}\7[\2\2}"+
 		"\17\3\2\2\2~\177\5F$\2\177\u0081\5\62\32\2\u0080\u0082\5J&\2\u0081\u0080"+
 		"\3\2\2\2\u0081\u0082\3\2\2\2\u0082\u008a\3\2\2\2\u0083\u0084\7&\2\2\u0084"+
-		"\u0085\7\34\2\2\u0085\u0086\7Z\2\2\u0086\u0087\5H%\2\u0087\u0088\7[\2"+
+		"\u0085\7\34\2\2\u0085\u0086\7Z\2\2\u0086\u0087\5F$\2\u0087\u0088\7[\2"+
 		"\2\u0088\u008a\3\2\2\2\u0089~\3\2\2\2\u0089\u0083\3\2\2\2\u008a\21\3\2"+
 		"\2\2\u008b\u008c\7\23\2\2\u008c\u008d\7\r\2\2\u008d\u008e\5@!\2\u008e"+
 		"\23\3\2\2\2\u008f\u0090\7\23\2\2\u0090\u0091\7+\2\2\u0091\u0092\5D#\2"+

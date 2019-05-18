@@ -41,7 +41,7 @@ public class BTreeFile implements DbFile {
 	public BTreeFile(int id, File f, TupleDesc td){
         this.f = f;
         this.tableid = id;
-        this.keyField = td.getPrimaryKeysIndex()[0];
+        this.keyField = td.getPrimaryKeyIndex();
         this.td = td;
     }
 

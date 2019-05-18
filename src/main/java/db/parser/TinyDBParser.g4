@@ -34,7 +34,7 @@ createTable
 
 createDefinition
     : attrName dataType nullNotnull?                                #columnDeclaration
-    | PRIMARY KEY '(' attrNames ')'                                 #constraintDeclaration
+    | PRIMARY KEY '(' attrName ')'                                 #constraintDeclaration
     ;
 
 dropDatabase

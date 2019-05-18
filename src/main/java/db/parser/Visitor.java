@@ -17,6 +17,7 @@ import org.antlr.v4.runtime.misc.Interval;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -150,17 +151,22 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         String tableName = ctx.tableName().getText();
 
         ArrayList<TDItem> tdItemArrayList = new ArrayList<>();
-        String[] primaryKeys = new String[0];
+        String primaryKey = null;
         for (TinyDBParser.CreateDefinitionContext context : ctx.createDefinition()) {
             Object object = visit(context);
             if (object instanceof TDItem) {
                 tdItemArrayList.add((TDItem)object);
-            } else if (object instanceof String[]){
-                primaryKeys = (String[]) object;
+            } else if (object instanceof String){
+                primaryKey = (String)object;
             }
         }
+        if (primaryKey == null) {
+            primaryKey = "PRIMARY";
+            TDItem primaryKeyItem = new TDItem(Type.LONG_TYPE, primaryKey, true);
+            tdItemArrayList.add(primaryKeyItem);
+        }
         TDItem[] tdItems = tdItemArrayList.toArray(new TDItem[0]);
-        TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKeys);
+        TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
         int a = ctx.start.getStartIndex();
         int b = ctx.stop.getStopIndex();
         Interval interval = new Interval(a,b);
@@ -225,13 +231,13 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     }
 
     /**
-     * #constraintDeclaration := PRIMARY KEY '(' attrNames ')'
+     * #constraintDeclaration := PRIMARY KEY '(' attrName ')'
      * @param ctx
      * @return a string array of all the attributes which are primary keys
      */
     @Override
     public Object visitConstraintDeclaration(TinyDBParser.ConstraintDeclarationContext ctx) {
-        return visit(ctx.attrNames());
+        return ctx.attrName().getText();
     }
 
     /**
@@ -473,10 +479,17 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             ArrayList<LogicalJoinNode> joinNodes = (ArrayList<LogicalJoinNode>) visit(ctx.tableSources());
             ArrayList<FullColumnName> fullColumnNames = (ArrayList<FullColumnName>)visit(ctx.fullColumnNames());
             LogicalPlan plan = new LogicalPlan(or, joinNodes, fullColumnNames);
-            PhysicalPlan physicalPlan = new PhysicalPlan(plan.physicalPlan());
-            String[] header = new String[fullColumnNames.size()];
-            for (int i=0; i<fullColumnNames.size(); i++) {
-                header[i] = fullColumnNames.get(i).toString();
+            OpIterator planIterator = plan.physicalPlan();
+            PhysicalPlan physicalPlan = new PhysicalPlan(planIterator);
+
+            String[] header;
+            if (fullColumnNames != null) {
+                header = new String[fullColumnNames.size()];
+                for (int i=0; i<fullColumnNames.size(); i++) {
+                    header[i] = fullColumnNames.get(i).toString();
+                }
+            } else {
+                header = planIterator.getTupleDesc().fullNames();
             }
             return physicalPlan.execute(header);
         } catch (NullPointerException | TypeMismatch | NoSuchElementException e) {

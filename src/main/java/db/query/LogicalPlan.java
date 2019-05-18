@@ -3,9 +3,11 @@ import db.field.TypeMismatch;
 import db.file.BTree.BTreeScan;
 import db.file.BTree.IndexPredicate;
 import db.query.LogicalFilterNode.*;
+import db.tuple.TDItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 
@@ -129,10 +131,18 @@ public class LogicalPlan
             opIterator = new Filter(filterPredicate, opIterator);
         }
 
-        // Project the result
-        if (fullColumnNames != null) {
-            opIterator = new Project(fullColumnNames.toArray(new FullColumnName[0]), opIterator);
+        if (fullColumnNames == null) {
+            fullColumnNames = new ArrayList<>();
+            Iterator<TDItem> iterator = opIterator.getTupleDesc().iterator();
+            while (iterator.hasNext()) {
+                TDItem tdItem = iterator.next();
+                if (!tdItem.fieldName.equals("PRIMARY")) {
+                    fullColumnNames.add(new FullColumnName(tdItem.tableName, tdItem.fieldName, null));
+                }
+            }
         }
+        // Project the result
+        opIterator = new Project(fullColumnNames.toArray(new FullColumnName[0]), opIterator);
 
         return opIterator;
     }

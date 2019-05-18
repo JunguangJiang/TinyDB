@@ -1,5 +1,6 @@
 package db.tuple;
 
+import db.field.Type;
 import db.query.FullColumnName;
 
 import java.io.Serializable;
@@ -12,38 +13,26 @@ public class TupleDesc implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     private TDItem[] tdItems;
-    private String[] primaryKeys;
-    private int[] primaryKeysIndex;
+    private String primaryKey;
+    private int primaryKeyIndex;
 
     public TupleDesc() {
-        tdItems = new TDItem[0];
-        primaryKeys = new String[0];
-        primaryKeysIndex = new int[0];
+        this(new TDItem[0], null);
     }
 
     /**
      *
      * @param tdItems an array of TDItem
-     * @param primaryKeys an array of primary key String
+     * @param primaryKey primary key String
      */
-    public TupleDesc(TDItem[] tdItems, String[] primaryKeys) {
-        this.tdItems = tdItems.clone();
-        if (primaryKeys != null) {
-            this.primaryKeys = primaryKeys.clone();
-
-            // get the positions of each primary key in the tuple descriptor
-            ArrayList<Integer> primaryKeysIndexList = new ArrayList<>();
-            List<String> primaryKeyList = Arrays.asList(primaryKeys);
-            for(int i=0; i<tdItems.length; i++) {
-                if (primaryKeyList.contains(tdItems[i].fieldName)){
-                    primaryKeysIndexList.add(i);
-                    tdItems[i].isPrimaryKey = true;
-                }
-            }
-            this.primaryKeysIndex = primaryKeysIndexList.stream().mapToInt(i->i).toArray();
+    public TupleDesc(TDItem[] tdItems, String primaryKey) {
+        this.tdItems = tdItems;
+        this.primaryKey = primaryKey;
+        if (primaryKey != null) {
+            primaryKeyIndex = fieldNameToIndex(primaryKey);
+            tdItems[primaryKeyIndex].isPrimaryKey = true;
         } else {
-            this.primaryKeys = new String[0];
-            this.primaryKeysIndex = new int[0];
+            this.primaryKeyIndex = -1;
         }
     }
 
@@ -88,10 +77,10 @@ public class TupleDesc implements Serializable, Cloneable {
     }
 
     /**
-     * @return primaryKeys
+     * @return primaryKey
      */
-    public String[] getPrimaryKeys(){
-        return this.primaryKeys;
+    public String getPrimaryKey(){
+        return this.primaryKey;
     }
 
     /**
@@ -135,15 +124,7 @@ public class TupleDesc implements Serializable, Cloneable {
      * @return
      */
     public int fullColunmnNameToIndex(FullColumnName fullColumnName) {
-        for (int i=0; i<tdItems.length; i++) {
-            System.out.println("tdItem:"+tdItems[i].tableName+" "+tdItems[i].fieldName);
-            System.out.println("fullColumnName:"+fullColumnName.tableName+" "+fullColumnName.attrName);
-            System.out.println(tdItems[i].hasName(fullColumnName.tableName, fullColumnName.attrName));
-            if (tdItems[i].hasName(fullColumnName.tableName, fullColumnName.attrName)) {
-                return i;
-            }
-        }
-        throw new NoSuchElementException(String.format("Table %s attribute %s doesn't exist.", fullColumnName.tableName, fullColumnName.attrName));
+        return fieldNameToIndex(fullColumnName.tableName, fullColumnName.attrName);
     }
 
     /**
@@ -213,7 +194,7 @@ public class TupleDesc implements Serializable, Cloneable {
                     return false;
                 }
             }
-            return Arrays.equals(primaryKeysIndex, tupleDesc.primaryKeysIndex);
+            return primaryKey.equals(tupleDesc.primaryKey);
         }catch (NullPointerException | ClassCastException e){
             return false;
         }
@@ -222,8 +203,8 @@ public class TupleDesc implements Serializable, Cloneable {
     /**
      * @return the positions of each primary key in the tuple descriptor
      */
-    public int[] getPrimaryKeysIndex() {
-        return primaryKeysIndex;
+    public int getPrimaryKeyIndex() {
+        return primaryKeyIndex;
     }
 
     /**
@@ -231,7 +212,7 @@ public class TupleDesc implements Serializable, Cloneable {
      * @return whether attrName is the primary key of the Table
      */
     public boolean isPrimaryKey(String attrName) {
-        return Arrays.asList(this.getPrimaryKeys()).contains(attrName);
+        return !(primaryKey==null) && primaryKey.equals(attrName);
     }
 
     public int hashCode() {
@@ -256,14 +237,17 @@ public class TupleDesc implements Serializable, Cloneable {
             }
         }
         stringBuilder.append(" PRIMARY KEY(");
-        for (int i=0; i<primaryKeys.length; i++) {
-            stringBuilder.append(primaryKeys[i]);
-            if (i < primaryKeys.length - 1) {
-                stringBuilder.append(",");
-            }
-        }
+        stringBuilder.append(primaryKey);
         stringBuilder.append(")");
         return stringBuilder.toString();
+    }
+
+    public String[] fullNames() {
+        String[] strings = new String[this.numFields()];
+        for (int i=0; i<numFields(); i++) {
+            strings[i] = getTDItem(i).fullName();
+        }
+        return strings;
     }
 }
 
