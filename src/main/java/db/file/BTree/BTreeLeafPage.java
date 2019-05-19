@@ -79,21 +79,21 @@ public class BTreeLeafPage extends BTreePage {
 		// Read the parent and sibling pointers
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
-			this.parent = (int)((IntField) f).getValue();
+			this.parent = (Integer)((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}
 
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
-			this.leftSibling = (int)((IntField) f).getValue();
+			this.leftSibling = (Integer)((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}
 
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
-			this.rightSibling = (int)((IntField) f).getValue();
+			this.rightSibling = (Integer)((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}

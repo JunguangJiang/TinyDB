@@ -48,14 +48,14 @@ public class BTreeHeaderPage implements Page {
 		// Read the next and prev pointers
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
-			this.nextPage = (int)((IntField) f).getValue();
+			this.nextPage = (Integer)((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}
 
 		try {
 			Field f = Type.INT_TYPE.parse(dis);
-			this.prevPage = (int)((IntField) f).getValue();
+			this.prevPage = (Integer) ((IntField) f).getValue();
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 		}

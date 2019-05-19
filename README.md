@@ -9,6 +9,7 @@ java -jar build/libs/TinyDB-1.0.jar #运行主程序Main
 java -jar build/libs/TinyDB-1.0.jar Help #查看程序支持的参数
 ```
 其他的gradle命令可以通过gradle tasks查看。
+目前只支持运行java -jar build/libs/TinyDB-1.0.jar Test进行系统测试（具体测试过程说明见开发说明）。
 
 
 
