@@ -3,6 +3,7 @@ package db;
 import db.query.QueryResult;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.*;
 import java.io.*;
 import db.utils.utils;
@@ -13,8 +14,8 @@ import db.utils.utils;
  */
 public class Catalog {
     private HashSet<String> databaseSet;
-    public Database database;// For simplicity, we load a Database in Server rather than a Catalog(should be deprecated later)
-    public String sqlPath;
+    public Database database;// For simplicity, we load a Database in WebServer rather than a Catalog(should be deprecated later)
+    private String sqlPath;
 
     public Catalog() {
         this.sqlPath = "test_data/";

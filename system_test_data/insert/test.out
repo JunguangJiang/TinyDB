@@ -1,5 +1,5 @@
-Query OK, 1 row affected (0.002 sec)
-Database changed (0.0 sec)
+Query OK, 1 row affected (0.001 sec)
+Database changed (0.002 sec)
 Query OK, 0 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.004 sec)
 Query OK, 1 row affected. (0.001 sec)
@@ -32,5 +32,5 @@ Line 24 : Attribute NAME can not be null
 |   S9 |  9 |    null | null |   null |
 +------+----+---------+------+--------+
 8 rows in set (0.003 sec)
-Query OK, 0 row affected. (0.0 sec)
+Query OK, 0 row affected. (0.001 sec)
 Query OK, 0 rows affected (0.0 sec)

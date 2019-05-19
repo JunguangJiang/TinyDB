@@ -1,0 +1,88 @@
++----------+
+| Database |
++----------+
++----------+
+0 rows in set (0.001 sec)
+Query OK, 1 row affected (0.001 sec)
+Query OK, 1 row affected (0.001 sec)
++----------+
+| Database |
++----------+
+|    TEST2 |
++----------+
+|    TEST1 |
++----------+
+2 rows in set (0.001 sec)
+Line 6 : Database doesn't exist
+Line 7 : Database doesn't exist
+Line 10 : Database not set. Please input the sql 'USE DATABASE $NAME' first
+Database changed (0.001 sec)
+Query OK, 0 row affected. (0.001 sec)
+Query OK, 0 row affected. (0.001 sec)
+Database changed (0.005 sec)
+Query OK, 0 row affected. (0.001 sec)
++----------+
+| Database |
++----------+
+|    TEST2 |
++----------+
+|    TEST1 |
++----------+
+2 rows in set (0.001 sec)
++-------+
+| Table |
++-------+
+|    T1 |
++-------+
+1 rows in set (0.001 sec)
+Line 33 : Database doesn't exist
+Database changed (0.011 sec)
+Query OK, 0 row affected. (0.001 sec)
++----------+
+| Database |
++----------+
+|    TEST2 |
++----------+
+|    TEST1 |
++----------+
+2 rows in set (0.0 sec)
+Line 38 : Database doesn't exist
++--------+
+| Table  |
++--------+
+| SCHOOL |
++--------+
+1 rows in set (0.001 sec)
+Line 42 : Table STUDENT doesn't exist.
++----------+
+| Database |
++----------+
+|    TEST2 |
++----------+
+|    TEST1 |
++----------+
+2 rows in set (0.0 sec)
+Line 44 : Database doesn't exist
++--------+
+| Table  |
++--------+
+| SCHOOL |
++--------+
+1 rows in set (0.001 sec)
+Query OK, 0 row affected. (0.001 sec)
++----------+
+| Database |
++----------+
+|    TEST2 |
++----------+
+|    TEST1 |
++----------+
+2 rows in set (0.0 sec)
+Line 49 : Database doesn't exist
++-------+
+| Table |
++-------+
++-------+
+0 rows in set (0.0 sec)
+Query OK, 0 rows affected (0.0 sec)
+Query OK, 0 rows affected (0.0 sec)

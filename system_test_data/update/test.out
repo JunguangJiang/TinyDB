@@ -1,10 +1,10 @@
-Query OK, 1 row affected (0.003 sec)
-Database changed (0.0 sec)
-Query OK, 0 row affected. (0.001 sec)
-Query OK, 1 row affected. (0.003 sec)
-Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected (0.004 sec)
+Database changed (0.005 sec)
+Query OK, 0 row affected. (0.002 sec)
+Query OK, 1 row affected. (0.004 sec)
 Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.0 sec)
 Query OK, 1 row affected. (0.001 sec)
 Query OK, 1 row affected. (0.0 sec)
@@ -32,7 +32,7 @@ Query OK, 1 rows affected. (0.002 sec)
 +------+----+---------+------+--------+
 |   S9 |  9 |    null | null |   null |
 +------+----+---------+------+--------+
-9 rows in set (0.003 sec)
+9 rows in set (0.002 sec)
 Query OK, 1 rows affected. (0.001 sec)
 +----------+----+---------+------+--------+
 | NAME     | ID | CREDITS | GPA  | SCORES |
@@ -55,8 +55,8 @@ Query OK, 1 rows affected. (0.001 sec)
 +----------+----+---------+------+--------+
 | NEW_NAME |  9 |    null | null |   null |
 +----------+----+---------+------+--------+
-9 rows in set (0.004 sec)
-Query OK, 0 rows affected. (0.0 sec)
+9 rows in set (0.002 sec)
+Query OK, 0 rows affected. (0.001 sec)
 +----------+----+---------+------+--------+
 | NAME     | ID | CREDITS | GPA  | SCORES |
 +----------+----+---------+------+--------+
@@ -78,6 +78,6 @@ Query OK, 0 rows affected. (0.0 sec)
 +----------+----+---------+------+--------+
 | NEW_NAME |  9 |    null | null |   null |
 +----------+----+---------+------+--------+
-9 rows in set (0.003 sec)
+9 rows in set (0.002 sec)
 Query OK, 0 row affected. (0.001 sec)
 Query OK, 0 rows affected (0.0 sec)

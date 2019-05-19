@@ -10,8 +10,10 @@ import db.query.Predicate;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
+import org.omg.CORBA.OBJ_ADAPTER;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
@@ -664,6 +666,16 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             return new QueryResult(true, asciiTable +
                     System.lineSeparator() + String.format("%d rows in set", data.length));
         }
+    }
 
+    /**
+     * Visit a parse tree produced by {@link TinyDBParser#shutdownStatement}.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    @Override
+    public Object visitShutdownStatement(TinyDBParser.ShutdownStatementContext ctx) {
+        GlobalManager.getCatalog().persist();
+        throw new RuntimeException("shutdown!!!");
     }
 }

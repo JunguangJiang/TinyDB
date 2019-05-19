@@ -1,120 +1,19 @@
-+----------+
-| Database |
-+----------+
-+----------+
-0 rows in set (0.079 sec)
-Query OK, 1 row affected (0.0 sec)
-Query OK, 1 row affected (0.0 sec)
+Syntax Error: 4:4 missing 'DATABASE' at 'TEST'
+Syntax Error: 6:8 no viable alternative at input 'CREATE  T'
 +----------+
 | Database |
 +----------+
 |    TEST2 |
 +----------+
-|    TEST1 |
-+----------+
-2 rows in set (0.0 sec)
-+-------+
-| Table |
-+-------+
-|       |
-+-------+
-1 rows in set (0.0 sec)
-+-------+
-| Table |
-+-------+
-|       |
-+-------+
-1 rows in set (0.0 sec)
-Line 10 : Database not set. Please input the sql 'USE DATABASE $NAME' first
-Database changed (0.0 sec)
-Query OK, 0 row affected. (0.015 sec)
-Query OK, 0 row affected. (0.0 sec)
-Database changed (0.0 sec)
-Query OK, 0 row affected. (0.0 sec)
-+----------+
-| Database |
-+----------+
-|    TEST2 |
+|     TEST |
 +----------+
 |    TEST1 |
 +----------+
-2 rows in set (0.0 sec)
+3 rows in set (0.154 sec)
 +-------+
 | Table |
 +-------+
-|    T1 |
+|     T |
 +-------+
-1 rows in set (0.0 sec)
-+---------+
-| Table   |
-+---------+
-|  SCHOOL |
-+---------+
-| STUDENT |
-+---------+
-2 rows in set (0.0 sec)
-Database changed (0.016 sec)
-Query OK, 0 row affected. (0.0 sec)
-+----------+
-| Database |
-+----------+
-|    TEST2 |
-+----------+
-|    TEST1 |
-+----------+
-2 rows in set (0.0 sec)
-+-------+
-| Table |
-+-------+
-|    T1 |
-+-------+
-1 rows in set (0.0 sec)
-+--------+
-| Table  |
-+--------+
-| SCHOOL |
-+--------+
-1 rows in set (0.0 sec)
-Line 42 : Table STUDENT doesn't exist.
-+----------+
-| Database |
-+----------+
-|    TEST2 |
-+----------+
-|    TEST1 |
-+----------+
-2 rows in set (0.0 sec)
-+-------+
-| Table |
-+-------+
-|    T1 |
-+-------+
-1 rows in set (0.0 sec)
-+--------+
-| Table  |
-+--------+
-| SCHOOL |
-+--------+
-1 rows in set (0.0 sec)
-Query OK, 0 row affected. (0.0 sec)
-+----------+
-| Database |
-+----------+
-|    TEST2 |
-+----------+
-|    TEST1 |
-+----------+
-2 rows in set (0.0 sec)
-+-------+
-| Table |
-+-------+
-|    T1 |
-+-------+
-1 rows in set (0.0 sec)
-+-------+
-| Table |
-+-------+
-+-------+
-0 rows in set (0.0 sec)
-Query OK, 0 rows affected (0.0 sec)
-Query OK, 0 rows affected (0.0 sec)
+1 rows in set (0.002 sec)
+Database changed (0.033 sec)
