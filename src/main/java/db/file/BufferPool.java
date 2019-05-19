@@ -146,7 +146,6 @@ public class BufferPool {
      */
     public synchronized void discardPage(PageId pid) {
         // TODO
-        // not necessary for lab1
     }
 
     /**

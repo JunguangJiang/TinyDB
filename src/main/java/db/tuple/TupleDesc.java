@@ -123,7 +123,7 @@ public class TupleDesc implements Serializable, Cloneable {
      * @param fullColumnName
      * @return
      */
-    public int fullColunmnNameToIndex(FullColumnName fullColumnName) {
+    public int fullColumnNameToIndex(FullColumnName fullColumnName) {
         return fieldNameToIndex(fullColumnName.tableName, fullColumnName.attrName);
     }
 
@@ -207,14 +207,6 @@ public class TupleDesc implements Serializable, Cloneable {
         return primaryKeyIndex;
     }
 
-    /**
-     * @param attrName
-     * @return whether attrName is the primary key of the Table
-     */
-    public boolean isPrimaryKey(String attrName) {
-        return !(primaryKey==null) && primaryKey.equals(attrName);
-    }
-
     public int hashCode() {
         // If you want to use TupleDesc as keys for HashMap, implement this so
         // that equal objects have equals hashCode() results
@@ -261,7 +253,7 @@ public class TupleDesc implements Serializable, Cloneable {
     public ArrayList<FullColumnName> fullColumnNames() {
         ArrayList<FullColumnName> fullColumnNames = new ArrayList<>();
         for (int i=0; i<numFields(); i++) {
-            if (!tdItems[i].fieldName.equals("PRIMARY KEY")){
+            if (!tdItems[i].fieldName.equals("PRIMARY")){
                 FullColumnName name = new FullColumnName(tdItems[i].tableName, tdItems[i].fieldName, null);
                 fullColumnNames.add(name);
             }

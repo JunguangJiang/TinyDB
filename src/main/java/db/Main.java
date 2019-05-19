@@ -21,7 +21,7 @@ public class Main {
     public static void main(String[] args){
         if (args.length == 0) {
             // An example which reads an sql txt and build a parser tree
-            String path = "data/";
+            String path = "system_test_data/select_join/";
             String inFileName = path+"test.sql";
             String outFileName = path+"test.out";
             Server server = new Server(path);

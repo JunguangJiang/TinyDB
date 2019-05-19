@@ -40,8 +40,7 @@ public class Utility {
      * name + n (name1, name2, etc.).
      */
     public static TupleDesc getTupleDesc(int n, String name) {
-        int PKNo = Math.min(2, n);
-        return new TupleDesc(getTDItems(n, name), getStrings(PKNo, name));
+        return new TupleDesc(getTDItems(n, name), name+"0");
     }
 
 

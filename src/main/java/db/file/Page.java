@@ -15,12 +15,12 @@ public interface Page {
      *
      * @return the id of this page
      */
-    public PageId getId();
+    PageId getId();
 
     /**
      * Set the dirty state of this page as dirtied
      */
-    public void markDirty(boolean dirty);
+    void markDirty(boolean dirty);
 
     /**
      * Generates a byte array representing the contents of this page.
@@ -33,5 +33,5 @@ public interface Page {
      * @return A byte array correspond to the bytes of this page.
      */
 
-    public byte[] getPageData();
+    byte[] getPageData();
 }

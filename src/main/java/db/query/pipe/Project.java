@@ -27,7 +27,7 @@ public class Project extends Operator{
         TupleDesc childTD = child.getTupleDesc();
         this.attributes = new int[fullColumnNames.length];
         for (int i = 0; i< fullColumnNames.length; i++) {
-            this.attributes[i] = childTD.fullColunmnNameToIndex(fullColumnNames[i]);
+            this.attributes[i] = childTD.fullColumnNameToIndex(fullColumnNames[i]);
         }
 
         TDItem[] tdItems = new TDItem[fullColumnNames.length];

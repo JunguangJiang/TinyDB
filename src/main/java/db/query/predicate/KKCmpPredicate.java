@@ -14,8 +14,8 @@ public class KKCmpPredicate extends Predicate {
     private int lhs, rhs;
 
     public KKCmpPredicate(LogicalFilterNode.KKCmpNode kkCmp, TupleDesc tupleDesc) {
-        lhs = tupleDesc.fullColunmnNameToIndex(kkCmp.lhs);
-        rhs = tupleDesc.fullColunmnNameToIndex(kkCmp.rhs);
+        lhs = tupleDesc.fullColumnNameToIndex(kkCmp.lhs);
+        rhs = tupleDesc.fullColumnNameToIndex(kkCmp.rhs);
         op = kkCmp.op;
     }
 

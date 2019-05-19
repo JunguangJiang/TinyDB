@@ -20,7 +20,7 @@ public class KVCmpPredicate extends Predicate implements Serializable {
     private Field valueField;
 
     public KVCmpPredicate(LogicalFilterNode.KVCmpNode cmp, TupleDesc tupleDesc) throws TypeMismatch{
-        keyIdx = tupleDesc.fullColunmnNameToIndex(cmp.fullColumnName);
+        keyIdx = tupleDesc.fullColumnNameToIndex(cmp.fullColumnName);
         valueField = Util.getField(cmp.value, tupleDesc.getTDItem(keyIdx));
         this.op = cmp.op;
     }

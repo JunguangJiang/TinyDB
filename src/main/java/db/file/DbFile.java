@@ -20,7 +20,7 @@ public interface DbFile {
      *
      * @throws IllegalArgumentException if the page does not exist in this file.
      */
-    public Page readPage(PageId id);
+    Page readPage(PageId id);
 
     /**
      * Push the specified page to disk.
@@ -29,7 +29,7 @@ public interface DbFile {
      * @throws IOException if the write fails
      *
      */
-    public void writePage(Page p) throws IOException;
+    void writePage(Page p) throws IOException;
 
     /**
      * Inserts the specified tuple to the file.
@@ -41,7 +41,7 @@ public interface DbFile {
      * @throws IOException if the needed file can't be read/written
      * @throws PrimaryKeyViolation if the tuple violates the primary key constraint
      */
-    public ArrayList<Page> insertTuple(Tuple t) throws IOException, PrimaryKeyViolation, DbException;
+    ArrayList<Page> insertTuple(Tuple t) throws IOException, PrimaryKeyViolation, DbException;
 
     /**
      * Removes the specified tuple from the file
@@ -51,20 +51,20 @@ public interface DbFile {
      * @return An ArrayList contain the pages that were modified
      *   of the file
      */
-    public ArrayList<Page> deleteTuple(Tuple t) throws IOException, DbException;
+    ArrayList<Page> deleteTuple(Tuple t) throws IOException, DbException;
 
     /**
      * @return an iterator over all the tuples stored in this DbFile.
      */
-    public DbFileIterator iterator();
+    DbFileIterator iterator();
 
     /**
      * @return a unique ID used to identify this DbFile in the Database.
      */
-    public int getId();
+    int getId();
 
     /**
      * @return the TupleDesc of the table stored in this DbFile.
      */
-    public TupleDesc getTupleDesc();
+    TupleDesc getTupleDesc();
 }

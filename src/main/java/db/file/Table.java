@@ -60,6 +60,7 @@ public class Table {
      * insert a new Tuple into the Table.
      * must use BufferPool to get Page!
      * must ensure each tuple satisfies the primary key and not null constraint
+     * after insertTuple, autoIncrementNumber will increase by 1
      * @param tuple
      * @return the QueryResult of the insert
      * @see QueryResult
@@ -67,6 +68,7 @@ public class Table {
     public QueryResult insertTuple(Tuple tuple) {
         try {
             GlobalManager.getBufferPool().insertTuple(this.id, tuple);
+            autoIncrementNumber++;
         } catch (IOException | DbException e){
             e.printStackTrace();
         } catch (PrimaryKeyViolation e) {
@@ -80,6 +82,7 @@ public class Table {
      * insert a new Tuple into the Table
      * the Tuple has the form
      *      INSERT attrNames VALUES(values);
+     * after insertTuple, autoIncrementNumber will increase by 1
      * must ensure each tuple satisfies the primary key and not null constraint
      * @param attrNames attribute names. If attrNames is null, then it refers to all
      *                  the attributes of the Tuple
@@ -89,7 +92,7 @@ public class Table {
      */
     public QueryResult insertTuple(String[] attrNames, Object[] values) {
         try {
-            Tuple tuple = createTuple(attrNames, values);
+            Tuple tuple = createTuple(attrNames, values, getTupleDesc(), autoIncrementNumber);
             return insertTuple(tuple);
         } catch (Exception e) {
             return new QueryResult(false, e.getMessage());
@@ -104,13 +107,16 @@ public class Table {
      * @param attrNames attribute names. If attrNames is null, then it refers to all
      *                  the attributes of the Tuple
      * @param values each value might be String, Integer, Long, Float or Double
+     * @param tupleDesc
+     * @param autoIncrementNumber default number for PRIMARY
      * @return the new Tuple
      * @throws Exception
      */
-    private Tuple createTuple(String[] attrNames, Object[] values) throws Exception{
+    public static Tuple createTuple(String[] attrNames, Object[] values,
+                                     TupleDesc tupleDesc, long autoIncrementNumber) throws Exception{
         if (attrNames == null) {
             //attrNames are all the attribute names of the table
-            attrNames = getTupleDesc().getAttrNames();
+            attrNames = tupleDesc.getAttrNames();
         }
         if (attrNames.length != values.length) {
             throw new Exception("The length of attribute must equal to the length of values");
@@ -119,9 +125,8 @@ public class Table {
             for (int i=0; i<attrNames.length; i++) {
                 hashMap.put(attrNames[i], values[i]);
             }
-            hashMap.put("PRIMARY", autoIncrementNumber++); // PRIMARY is an auto increment attribute
+            hashMap.put("PRIMARY", autoIncrementNumber); // PRIMARY is an auto increment attribute
 
-            TupleDesc tupleDesc = getTupleDesc();
             Tuple tuple = new Tuple(tupleDesc);
             // Set each attribute to the corresponding value
             for (int i=0; i<tupleDesc.numFields(); i++) {
@@ -135,6 +140,7 @@ public class Table {
                     }
                 }
             }
+            hashMap.remove("PRIMARY");
             // Ensure that all insert attributes exist.
             if (!hashMap.isEmpty()) {
                 String attribute = hashMap.keySet().toArray(new String[0])[0];

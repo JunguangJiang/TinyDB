@@ -58,6 +58,11 @@ public class TDItem implements Serializable {
         this(type, name, notNull, 0);
     }
 
+    public TDItem(Type type, String name, boolean notNull, int maxLen, String tableName) {
+        this(type, name, notNull, maxLen);
+        this.tableName = tableName;
+    }
+
     /**
      * @return the number of bytes required to store a field of this type.
      */

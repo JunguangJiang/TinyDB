@@ -34,4 +34,19 @@ public class TDItemTest {
         assertEquals(tdItem3, tdItem4);
     }
 
+    @Test
+    public void hasName() {
+        TDItem tdItem = new TDItem(Type.STRING_TYPE, "S", false, 30, "table");
+        assertTrue(tdItem.hasName("S"));
+        assertTrue(tdItem.hasName("table", "S"));
+        assertFalse(tdItem.hasName("W"));
+        assertFalse(tdItem.hasName("nontable", "S"));
+
+        TDItem tdItem2 = new TDItem(Type.STRING_TYPE, "S", false, 30);
+        assertTrue(tdItem2.hasName("S"));
+        assertFalse(tdItem2.hasName("table", "S"));
+
+        TDItem tdItem3 = new TDItem(Type.STRING_TYPE, null, false, 30);
+        assertFalse(tdItem3.hasName("W"));
+    }
 }
