@@ -1,4 +1,4 @@
-package db.query;
+package db.query.pipe;
 
 import db.DbException;
 import db.GlobalManager;

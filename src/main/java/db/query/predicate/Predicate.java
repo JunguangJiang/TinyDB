@@ -1,4 +1,4 @@
-package db.query;
+package db.query.predicate;
 
 import db.field.TypeMismatch;
 import db.tuple.Tuple;
@@ -12,4 +12,11 @@ public abstract class Predicate{
      * @return true if reserving the tuple after the filter
      */
     public abstract boolean filter(Tuple tuple) throws TypeMismatch;
+
+    public static class TruePredicate extends Predicate{
+        @Override
+        public boolean filter(Tuple tuple) throws TypeMismatch {
+            return true;
+        }
+    }
 }

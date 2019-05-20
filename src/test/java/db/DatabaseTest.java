@@ -1,11 +1,8 @@
 package db;
 
 import db.file.Table;
-import db.query.Query;
 import db.query.QueryResult;
 import org.junit.Test;
-
-import javax.xml.bind.annotation.XmlElementDecl;
 
 import static org.junit.Assert.*;
 

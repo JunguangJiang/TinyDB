@@ -3,6 +3,7 @@ package db.file;
 import db.*;
 import db.tuple.Tuple;
 import db.file.heap.HeapFile;
+import db.file.BTree.BTreeFile;
 
 import java.io.*;
 import java.util.*;
@@ -85,7 +86,7 @@ public class BufferPool {
      * @param t the tuple to add
      */
     public void insertTuple(int tableId, Tuple t)
-            throws IOException, PrimaryKeyViolation {
+            throws IOException, PrimaryKeyViolation, DbException {
         DbFile dbFile = GlobalManager.getDatabase().getDbFile(tableId);
         ArrayList<Page> affectedPages = dbFile.insertTuple(t);
         for (Page page : affectedPages) {
@@ -106,10 +107,19 @@ public class BufferPool {
      *
      * @param t the tuple to delete
      */
-    public  void deleteTuple(Tuple t) {
+    public void deleteTuple(Tuple t) {
         int tableId = t.getRecordId().getPageId().getTableId();
         DbFile dbFile = GlobalManager.getDatabase().getDbFile(tableId);
-        ArrayList<Page> pages = ((HeapFile)dbFile).deleteTuple(t);
+        // ArrayList<Page> pages = ((HeapFile)dbFile).deleteTuple(t);
+        ArrayList<Page> pages = null;
+        try {
+            pages = ((BTreeFile)dbFile).deleteTuple(t);
+        }
+        catch (DbException e){
+            e.printStackTrace();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
         for (Page page : pages) {
             page.markDirty(true);
         }
@@ -136,18 +146,23 @@ public class BufferPool {
      */
     public synchronized void discardPage(PageId pid) {
         // TODO
-        // not necessary for lab1
     }
 
     /**
      * Flushes a certain page to disk
+     * If the Table of the page was deleted, then do nothing.
      * @param pid an ID indicating the page to flush
      */
     private synchronized  void flushPage(PageId pid) throws IOException {
         Page page = this.pageHashMap.get(pid);
         int tableId = pid.getTableId();
-        DbFile file = GlobalManager.getDatabase().getDbFile(tableId);
-        file.writePage(page);
+        DbFile file;
+        try {
+            file = GlobalManager.getDatabase().getDbFile(tableId);
+            file.writePage(page);
+        } catch (NullPointerException e){
+            System.out.println("Table "+tableId + " has already been deleted.");
+        }
         page.markDirty(false);
     }
 

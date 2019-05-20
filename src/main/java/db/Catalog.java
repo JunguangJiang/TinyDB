@@ -56,6 +56,9 @@ public class Catalog {
         }
         this.databaseSet.remove(databaseName);
         utils.removeDiretory(new File(String.format("%s/%s", sqlPath, databaseName)));
+        if(this.database != null && this.database.databaseName.equals(databaseName)) {
+            this.database = null;
+        }
         return new QueryResult(true, "Query OK, 0 rows affected");
     }
 
@@ -86,10 +89,7 @@ public class Catalog {
     /**
      * @return The current database
      */
-    public Database getCurrentDatabase() throws NoSuchElementException{
-        if (this.database == null) {
-            throw new NoSuchElementException("Database not set. Please input the sql 'USE DATABASE $NAME' first");
-        }
+    public Database getCurrentDatabase(){
         return this.database;
     }
 

@@ -15,13 +15,12 @@ public class DoubleField extends NumberField{
 
     /**
      * Constructor.
-     *
      * @param i The value of this field.
+     * @param isNull whether the Field is null
      */
     public DoubleField(Double i, boolean isNull) {
         super(i, Type.DOUBLE_TYPE, isNull);
     }
-
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeDouble(value.doubleValue());

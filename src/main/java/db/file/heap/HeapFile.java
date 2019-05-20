@@ -136,7 +136,8 @@ public class HeapFile implements DbFile {
             throws DbException {
         try {
             int tableId = this.getId();
-            for (int i = 0; i < this.numPages(); i++) {
+            int numPages = this.numPages();
+            for (int i = 0; i < numPages; i++) {
                 HeapPageId pageId = new HeapPageId(tableId, i);
                 Page page = GlobalManager.getBufferPool().getPage(pageId);
                 if (((HeapPage)page).getNumEmptySlots() != 0){
@@ -171,7 +172,6 @@ public class HeapFile implements DbFile {
     public DbFileIterator iterator() {
         return new HeapFileIterator(this);
     }
-
 }
 
 

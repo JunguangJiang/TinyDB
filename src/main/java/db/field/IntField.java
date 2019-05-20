@@ -14,8 +14,8 @@ public class IntField extends NumberField {
 
     /**
      * Constructor.
-     *
      * @param i The value of this field.
+     * @param isNull whether the Field is null
      */
     public IntField(int i, boolean isNull) {
         super(i, Type.INT_TYPE, isNull);
@@ -24,7 +24,6 @@ public class IntField extends NumberField {
     public IntField(int i) {
         this(i, false);
     }
-
 
     public void serialize(DataOutputStream dos) throws IOException {
         dos.writeInt(value.intValue());
