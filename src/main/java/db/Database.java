@@ -183,6 +183,9 @@ public class Database {
     public void load(String sqlPath, String databaseName) throws NoSuchElementException{
         this.databaseName = databaseName;
         this.sqlPath = sqlPath;
+        this.nameIdMap.clear();
+        this.idSqlMap.clear();
+        this.idTableMap.clear();
         String root = sqlPath + this.databaseName + "/";
         String databaseScriptFilename = root + String.format("%s.script", databaseName);
         File log = new File(root + "log.txt");

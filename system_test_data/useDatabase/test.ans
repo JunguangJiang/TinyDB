@@ -1,0 +1,33 @@
++----------+
+| Database |
++----------+
++----------+
+0 rows in set (0.156 sec)
+Line 3 : ERROR 1049 (42000): Unknown database 'TEST'
+Query OK, 1 row affected (0.004 sec)
+Query OK, 1 row affected (0.002 sec)
+Query OK, 1 row affected (0.003 sec)
++----------+
+| Database |
++----------+
+|    TEST2 |
++----------+
+|    TEST3 |
++----------+
+|    TEST1 |
++----------+
+3 rows in set (0.001 sec)
+Database changed (0.002 sec)
+Database changed (0.004 sec)
+Query OK, 0 rows affected (0.001 sec)
++----------+
+| Database |
++----------+
+|    TEST3 |
++----------+
+|    TEST1 |
++----------+
+2 rows in set (0.001 sec)
+Line 15 : ERROR 1049 (42000): Unknown database 'TEST2'
+Query OK, 0 rows affected (0.001 sec)
+Query OK, 0 rows affected (0.001 sec)

@@ -20,5 +20,6 @@ log
 .DS_Store
 data.dat
 data.txt
+data/*
 *.out
 

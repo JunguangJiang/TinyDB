@@ -3,6 +3,7 @@ package db;
 import db.query.QueryResult;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.*;
 import java.io.*;
 import db.utils.utils;
@@ -13,8 +14,8 @@ import db.utils.utils;
  */
 public class Catalog {
     private HashSet<String> databaseSet;
-    Database database;// For simplicity, we load a Database in Server rather than a Catalog(should be deprecated later)
-    String sqlPath;
+    public Database database;// For simplicity, we load a Database in WebServer rather than a Catalog(should be deprecated later)
+    private String sqlPath;
 
     public Catalog() {
         this.sqlPath = "test_data/";
@@ -47,6 +48,11 @@ public class Catalog {
     public QueryResult  dropDatabase(String databaseName) {
         if (!this.databaseSet.contains(databaseName)) {
             return new QueryResult(false, "ERROR 1008 (HY000): Can't drop database '" + databaseName + "'; database doesn't exist");
+        }
+        if (this.database != null) {
+            if (this.database.databaseName.equals(databaseName)) {
+                this.database = null;
+            }
         }
         this.databaseSet.remove(databaseName);
         utils.removeDiretory(new File(String.format("%s/%s", sqlPath, databaseName)));
