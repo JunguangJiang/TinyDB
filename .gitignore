@@ -20,5 +20,5 @@ log
 .DS_Store
 data.dat
 data.txt
-
-
+*.script
+*.out
