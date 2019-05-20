@@ -19,11 +19,7 @@ import db.query.predicate.Predicate;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
-import org.omg.CORBA.OBJ_ADAPTER;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import org.antlr.v4.runtime.misc.Interval;
-
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;

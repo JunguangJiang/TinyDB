@@ -22,4 +22,5 @@ data.dat
 data.txt
 data/*
 *.out
+bin/*
 
