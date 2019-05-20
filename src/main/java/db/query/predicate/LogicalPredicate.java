@@ -1,4 +1,4 @@
-package db.query;
+package db.query.predicate;
 
 import db.field.TypeMismatch;
 import db.tuple.Tuple;
@@ -22,26 +22,7 @@ public class LogicalPredicate extends Predicate implements Serializable {
 
     /** Constants used for return codes in Field.compare */
     public enum Op implements Serializable {
-        AND, OR;
-
-        /**
-         * Interface to access operations by integer value for command-line
-         * convenience.
-         *
-         * @param i
-         *            a valid integer Op index
-         */
-        public static Op getOp(int i) {
-            return values()[i];
-        }
-
-        public String toString() {
-            if (this == AND)
-                return "AND";
-            if (this == OR)
-                return "OR";
-            throw new IllegalStateException("impossible to reach here");
-        }
+        AND, OR
     }
 
     /**

@@ -50,10 +50,8 @@ SELECT student.name, credits, gpa, school.name FROM student JOIN school ON stude
 
 SELECT student.name, credits, gpa, school.name FROM student JOIN school ON student.school_name = school.name WHERE student.GPA >= 3.6;
 
-SELECT student.name, credits, gpa, school.name FROM student JOIN school ON student.school_name >= school.name and school.name != "ZJU";
-
 SELECT teacher.name, student.name, school.name FROM student JOIN school ON student.school_name = school.name
-  JOIN teacher ON teacher.school_name = school.name WHERE student.scores > 90.0 and teacher.title = 'professor';
+  JOIN teacher ON teacher.school_name = school.name WHERE student.scores > 90.0 and title = 'professor';
 
 DROP TABLE student;
 DROP TABLE school;

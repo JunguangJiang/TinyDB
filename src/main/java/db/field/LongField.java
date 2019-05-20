@@ -15,8 +15,8 @@ public class LongField extends NumberField{
 
     /**
      * Constructor.
-     *
      * @param i The value of this field.
+     * @param isNull whether the Field is null
      */
     public LongField(long i, boolean isNull) {
         super(i, Type.LONG_TYPE, isNull);

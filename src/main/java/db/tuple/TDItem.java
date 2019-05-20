@@ -58,6 +58,11 @@ public class TDItem implements Serializable {
         this(type, name, notNull, 0);
     }
 
+    public TDItem(Type type, String name, boolean notNull, int maxLen, String tableName) {
+        this(type, name, notNull, maxLen);
+        this.tableName = tableName;
+    }
+
     /**
      * @return the number of bytes required to store a field of this type.
      */
@@ -78,6 +83,17 @@ public class TDItem implements Serializable {
         }
         stringBuilder.append(")");
         return stringBuilder.toString();
+    }
+
+    /**
+     * @return a full name of the Attribute
+     */
+    public String fullName() {
+        if (tableName != null) {
+            return tableName + "." + fieldName;
+        } else {
+            return fieldName;
+        }
     }
 
     /**

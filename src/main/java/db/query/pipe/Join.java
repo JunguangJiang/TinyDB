@@ -1,7 +1,9 @@
-package db.query;
+package db.query.pipe;
 
 import db.DbException;
 import db.field.TypeMismatch;
+import db.query.plan.LogicalFilterNode;
+import db.query.predicate.Predicate;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -15,50 +17,38 @@ public class Join extends Operator{
     private static final long serialVersionUID = 1L;
 
     private OpIterator lhs, rhs;
-    private TupleDesc tupleDesc1, tupleDesc2;
+    private TupleDesc mergedTupleDesc;
     private Predicate predicate;
     private ArrayList<Tuple> tuples = new ArrayList<>();
     private Iterator<Tuple> iterator;
 
     /**
-     * A helper class which wraps predicate and rhs in Join.
-     */
-    public static class JoinPart{
-        public Predicate predicate;
-        public OpIterator rhs;
-        public JoinPart(Predicate predicate, OpIterator rhs) {
-            this.predicate = predicate;
-            this.rhs = rhs;
-        }
-    }
-
-    /**
-     * `lhs` JOIN `rhs` ON `predicate`
+     * Join lhs and rhs with cmp as filter predicate
      * @param lhs
-     * @param predicate
+     * @param cmp if cmp is null, then do no filtering
      * @param rhs
+     * @throws TypeMismatch
      */
-    public Join(OpIterator lhs, Predicate predicate, OpIterator rhs) {
+    public Join(OpIterator lhs, LogicalFilterNode.BaseFilterNode cmp, OpIterator rhs) throws TypeMismatch{
         this.lhs = lhs;
         this.rhs = rhs;
-        this.predicate = predicate;
-        this.tupleDesc1 = lhs.getTupleDesc();
-        this.tupleDesc2 = rhs.getTupleDesc();
-    }
-
-    public Join(OpIterator lhs, JoinPart joinPart) {
-        this(lhs, joinPart.predicate, joinPart.rhs);
+        this.mergedTupleDesc = TupleDesc.merge(lhs.getTupleDesc(), rhs.getTupleDesc());
+        if (cmp == null) {
+            cmp = new LogicalFilterNode.VVCmpNode(true);
+        }
+        this.predicate = cmp.predicate(mergedTupleDesc);
     }
 
     @Override
     public TupleDesc getTupleDesc() {
-        return TupleDesc.merge(this.tupleDesc1, this.tupleDesc2);
+        return mergedTupleDesc;
     }
 
     @Override
     public void open() throws DbException, TypeMismatch {
         this.lhs.open();
         this.rhs.open();
+        // TODO decrease the loop times
         while (lhs.hasNext()) {
             Tuple tuple1 = lhs.next();
             while (rhs.hasNext()) {
@@ -103,7 +93,6 @@ public class Join extends Operator{
      * joined on equality of the first column, then this returns {1,2,3,1,5,6}.
      *
      * @return The next matching tuple.
-     * @see ComparisonPredicate#filter
      */
     @Override
     protected Tuple fetchNext() throws DbException {

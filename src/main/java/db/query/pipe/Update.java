@@ -1,4 +1,4 @@
-package db.query;
+package db.query.pipe;
 
 import db.DbException;
 import db.GlobalManager;
@@ -39,7 +39,7 @@ public class Update extends Operator{
         TupleDesc tupleDesc = child.getTupleDesc();
         for (int i=0; i<updateElements.length; i++){
             this.indexes[i] = tupleDesc.fieldNameToIndex(updateElements[i].attribute);
-            TDItem tdItem = tupleDesc.getField(indexes[i]);
+            TDItem tdItem = tupleDesc.getTDItem(indexes[i]);
             this.fields[i] = Util.getField(updateElements[i].value, tdItem.fieldType,
                     tdItem.maxLen, tdItem.fieldName);
         }

@@ -9,7 +9,6 @@ public class Util {
     /**
      * When the Field is uncertain, get the most likely Field according to the value
      * @param value might be String, Integer, Float, etc.
-     * @return
      */
     public static Field getField(Object value) {
         if (value instanceof Integer) {
@@ -28,14 +27,50 @@ public class Util {
     }
 
     /**
+     * @param type a given Type
+     * @param maxLen
+     * @return a null Field
+     */
+    public static Field getNullField(Type type, int maxLen) {
+        switch (type) {
+            case INT_TYPE:
+                return new IntField(0, true);
+            case LONG_TYPE:
+                return new LongField(0,true);
+            case FLOAT_TYPE:
+                return new FloatField(0.0f, true);
+            case DOUBLE_TYPE:
+                return new DoubleField(0.0,true);
+            case STRING_TYPE:
+                return new StringField("", maxLen, true);
+            default:
+                throw new NotImplementedException();
+        }
+    }
+
+    /**
+     * @param value value of the Field, might be Integer, Float or String
+     * @param tdItem TDItem describing the Field
+     * @return the Field
+     * @throws TypeMismatch when the Type was mismatched
+     */
+    public static Field getField(Object value, TDItem tdItem) throws TypeMismatch {
+        return getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName);
+    }
+
+    /**
      *
      * @param value value of the Field, might be Integer, Float or String
      * @param type Type of the Field, might be INT_TYPE, LONG_TYPE, FLOAT_TYPE, DOUBLE_TYPE, STRING_TYPE
      * @param maxLen max length of the StringField
+     * @param name the name of the Field
      * @return the Field
      * @throws TypeMismatch when the Type was mismatched
      */
     public static Field getField(Object value, Type type, int maxLen, String name) throws TypeMismatch{
+        if (value == null) {
+            return getNullField(type, maxLen);
+        }
         if (value instanceof Long) {
             switch (type) {
                 case INT_TYPE:
@@ -83,6 +118,8 @@ public class Util {
         }
     }
 
+    /**
+     * @see Util#getField(Object, Type, int, String) */
     public static Field getField(Object value, Type type, int maxLen) throws TypeMismatch{
         return getField(value, type, maxLen, "");
     }

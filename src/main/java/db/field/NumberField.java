@@ -1,9 +1,5 @@
 package db.field;
 
-import db.query.ComparisonPredicate;
-
-import java.io.File;
-
 /**
  * Class of Field that stores a single Number.
  * Number might be Int, Long, Float and Double
@@ -17,9 +13,9 @@ public abstract class NumberField implements Field {
 
     /**
      * Constructor.
-     *
      * @param value The value of this field.
      * @param type The type of this field
+     * @param isNull whether the Field is null
      */
     public NumberField(Number value, Type type, boolean isNull) {
         this.value = value;
@@ -56,9 +52,9 @@ public abstract class NumberField implements Field {
      * @see Field#compare
      */
     @Override
-    public boolean compare(ComparisonPredicate.Op op, Field val) {
+    public boolean compare(Op op, Field val) {
         if (this.isNull || val.isNull()) {
-            return op == ComparisonPredicate.Op.NOT_EQUALS;
+            return op == Op.NOT_EQUALS;
         }
         switch (op) {
             case EQUALS:

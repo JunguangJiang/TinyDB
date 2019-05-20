@@ -1,41 +1,38 @@
 package db.tuple;
 
+import db.field.Type;
+import db.query.FullColumnName;
+
 import java.io.Serializable;
 import java.util.*;
 
 /**
  * TupleDesc describes the schema of a tuple.
  */
-public class TupleDesc implements Serializable {
+public class TupleDesc implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     private TDItem[] tdItems;
-    private String[] primaryKeys;
-    private int[] primaryKeysIndex;
+    private String primaryKey;
+    private int primaryKeyIndex;
+
+    public TupleDesc() {
+        this(new TDItem[0], null);
+    }
 
     /**
      *
      * @param tdItems an array of TDItem
-     * @param primaryKeys an array of primary key String
+     * @param primaryKey primary key String
      */
-    public TupleDesc(TDItem[] tdItems, String[] primaryKeys) {
-        this.tdItems = tdItems.clone();
-        if (primaryKeys != null) {
-            this.primaryKeys = primaryKeys.clone();
-
-            // get the positions of each primary key in the tuple descriptor
-            ArrayList<Integer> primaryKeysIndexList = new ArrayList<>();
-            List<String> primaryKeyList = Arrays.asList(primaryKeys);
-            for(int i=0; i<tdItems.length; i++) {
-                if (primaryKeyList.contains(tdItems[i].fieldName)){
-                    primaryKeysIndexList.add(i);
-                    tdItems[i].isPrimaryKey = true;
-                }
-            }
-            this.primaryKeysIndex = primaryKeysIndexList.stream().mapToInt(i->i).toArray();
+    public TupleDesc(TDItem[] tdItems, String primaryKey) {
+        this.tdItems = tdItems;
+        this.primaryKey = primaryKey;
+        if (primaryKey != null) {
+            primaryKeyIndex = fieldNameToIndex(primaryKey);
+            tdItems[primaryKeyIndex].isPrimaryKey = true;
         } else {
-            this.primaryKeys = new String[0];
-            this.primaryKeysIndex = new int[0];
+            this.primaryKeyIndex = -1;
         }
     }
 
@@ -47,7 +44,6 @@ public class TupleDesc implements Serializable {
     public Iterator<TDItem> iterator() {
         return Arrays.asList(tdItems).iterator();
     }
-
 
     /**
      * @return the number of fields in this TupleDesc
@@ -65,7 +61,7 @@ public class TupleDesc implements Serializable {
      * @throws NoSuchElementException
      *             if i is not a valid field reference.
      */
-    public TDItem getField(int i) throws NoSuchElementException {
+    public TDItem getTDItem(int i) throws NoSuchElementException {
         if (i < 0 || i >= tdItems.length) {
             throw new NoSuchElementException("index " + i);
         }
@@ -75,9 +71,16 @@ public class TupleDesc implements Serializable {
     public String[] getAttrNames() {
         String[] attrNames = new String[numFields()];
         for (int i=0; i<numFields(); i++) {
-            attrNames[i] = getField(i).fieldName;
+            attrNames[i] = getTDItem(i).fieldName;
         }
         return attrNames;
+    }
+
+    /**
+     * @return primaryKey
+     */
+    public String getPrimaryKey(){
+        return this.primaryKey;
     }
 
     /**
@@ -95,13 +98,13 @@ public class TupleDesc implements Serializable {
                 return i;
             }
         }
-        throw new NoSuchElementException(String.format("Attribute %s doesn't exist.", name));
+        throw new NoSuchElementException(String.format("FullColumnName %s doesn't exist.", name));
     }
 
     /**
      *  Find the index of the field with a given tableName and attrName.
      * @param tableName name of the Table
-     * @param attrName name of the Attribute
+     * @param attrName name of the FullColumnName
      * @return the index of the field that is first to have the given tableName and attrName.
      * @throws NoSuchElementException
      *          if no field with a matching name is found
@@ -113,6 +116,15 @@ public class TupleDesc implements Serializable {
             }
         }
         throw new NoSuchElementException(String.format("Table %s attribute %s doesn't exist.", tableName, attrName));
+    }
+
+    /**
+     * Find the index of the Field with a given FullColumnName
+     * @param fullColumnName
+     * @return
+     */
+    public int fullColumnNameToIndex(FullColumnName fullColumnName) {
+        return fieldNameToIndex(fullColumnName.tableName, fullColumnName.attrName);
     }
 
     /**
@@ -151,10 +163,10 @@ public class TupleDesc implements Serializable {
         int numFields = td1.numFields() + td2.numFields();
         TDItem[] tdItems = new TDItem[numFields];
         for (int i=0; i<td1.numFields(); i++) {
-            tdItems[i] = td1.getField(i);
+            tdItems[i] = td1.getTDItem(i);
         }
         for (int i=0, j=td1.numFields(); i<td2.numFields(); i++, j++) {
-            tdItems[j] = td2.getField(i);
+            tdItems[j] = td2.getTDItem(i);
         }
         return new TupleDesc(tdItems, null);
     }
@@ -178,11 +190,11 @@ public class TupleDesc implements Serializable {
                 return false;
             }
             for(int i=0; i<this.numFields(); i++){
-                if(!getField(i).equals(tupleDesc.getField(i))){
+                if(!getTDItem(i).equals(tupleDesc.getTDItem(i))){
                     return false;
                 }
             }
-            return Arrays.equals(primaryKeysIndex, tupleDesc.primaryKeysIndex);
+            return primaryKey.equals(tupleDesc.primaryKey);
         }catch (NullPointerException | ClassCastException e){
             return false;
         }
@@ -191,8 +203,8 @@ public class TupleDesc implements Serializable {
     /**
      * @return the positions of each primary key in the tuple descriptor
      */
-    public int[] getPrimaryKeysIndex() {
-        return primaryKeysIndex;
+    public int getPrimaryKeyIndex() {
+        return primaryKeyIndex;
     }
 
     public int hashCode() {
@@ -217,16 +229,36 @@ public class TupleDesc implements Serializable {
             }
         }
         stringBuilder.append(" PRIMARY KEY(");
-        for (int i=0; i<primaryKeys.length; i++) {
-            stringBuilder.append(primaryKeys[i]);
-            if (i < primaryKeys.length - 1) {
-                stringBuilder.append(",");
-            }
-        }
+        stringBuilder.append(primaryKey);
         stringBuilder.append(")");
         return stringBuilder.toString();
     }
 
+    /**
+     * Full names of all the Attribute in the TupleDesc
+     * @return
+     */
+    public String[] fullNames() {
+        String[] strings = new String[this.numFields()];
+        for (int i=0; i<numFields(); i++) {
+            strings[i] = getTDItem(i).fullName();
+        }
+        return strings;
+    }
 
+    /**
+     * @return FullColumnNames of the TupleDesc
+     *          will remove PRIMARY column automatically
+     */
+    public ArrayList<FullColumnName> fullColumnNames() {
+        ArrayList<FullColumnName> fullColumnNames = new ArrayList<>();
+        for (int i=0; i<numFields(); i++) {
+            if (!tdItems[i].fieldName.equals("PRIMARY")){
+                FullColumnName name = new FullColumnName(tdItems[i].tableName, tdItems[i].fieldName, null);
+                fullColumnNames.add(name);
+            }
+        }
+        return fullColumnNames;
+    }
 }
 

@@ -1,7 +1,4 @@
 package db.field;
-
-import db.query.ComparisonPredicate;
-
 import java.io.*;
 
 /**
@@ -27,6 +24,7 @@ public class StringField implements Field {
      *            The value of this field.
      * @param maxLen
      *            The maximum size of this string
+     * @param isNull whether the Field is null
      */
     public StringField(String s, int maxLen, boolean isNull) {
         this.maxLen = maxLen;
@@ -90,9 +88,9 @@ public class StringField implements Field {
      *
      * @see Field#compare
      */
-    public boolean compare(ComparisonPredicate.Op op, Field val) {
+    public boolean compare(Op op, Field val) {
         if (this.isNull || val.isNull()) {
-            return op == ComparisonPredicate.Op.NOT_EQUALS;
+            return op == Op.NOT_EQUALS;
         }
 
         StringField iVal = (StringField) val;

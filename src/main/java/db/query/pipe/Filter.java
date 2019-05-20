@@ -1,7 +1,8 @@
-package db.query;
+package db.query.pipe;
 
 import db.DbException;
 import db.field.TypeMismatch;
+import db.query.predicate.Predicate;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
