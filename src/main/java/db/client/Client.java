@@ -63,26 +63,33 @@ public class Client {
             try {
                 Statement st = conn.createStatement();
                 String sql = readSql(reader);
-                if (sql.toUpperCase().equals("EXIT;")) {
+                if (sql.toUpperCase().equals("EXIT;"))
                     break;
+                if (checkImportSequence(sql)) {
+                    sql = handleImportSequence(sql);
+                    countTime(st, sql);
                 }
-                if (checkImportSequence(sql))
-                    try {
-                        sql = handleImportSequence(sql);
-                    } catch (NoSuchElementException e) {
-                        continue;
-                    }
-                long startTime = System.currentTimeMillis();
                 ResultSet rs = st.executeQuery(sql);
-                long endTime = System.currentTimeMillis();
                 System.out.println(rs.getString(0));
-                System.out.println(String.format("Total execute time: %.3f sec.", (endTime - startTime) / 1000.0));
                 st.close();
             } catch (SQLException e) {
                 System.out.println("Server is closed!");
                 break;
-            }
+            } catch (NoSuchElementException e) { /* NOTHING TO DO*/ }
         }
+    }
+
+    /**
+     * count time of the import sequence
+     * @param st: the statement
+     * @param sql: the sql to be send
+     */
+    private static void countTime(Statement st, String sql) throws SQLException {
+        long startTime = System.currentTimeMillis();
+        ResultSet rs = st.executeQuery(sql);
+        long endTime = System.currentTimeMillis();
+        System.out.println(rs.getString(0));
+        System.out.println(String.format("Total execute time: %.3f sec.", (endTime - startTime) / 1000.0));
     }
 
     /**

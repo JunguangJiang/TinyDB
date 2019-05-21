@@ -116,8 +116,9 @@ public class Catalog {
         String scriptFilename = utils.getFilePath(this.sqlPath, databaseName, databaseName + ".script");
         try {
             String content = utils.readFile(scriptFilename).split("\n", 2)[0];
-            return GlobalManager.getDatabase().getTablesNameAndIncrementNumber(content).getKey();
+            return Database.getTablesNameAndIncrementNumber(content).getKey();
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("File " + scriptFilename + " not exist");
             throw new NoSuchElementException("Database doesn't exist");
         }

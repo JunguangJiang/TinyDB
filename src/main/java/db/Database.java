@@ -155,7 +155,7 @@ public class Database {
         return results;
     }
 
-    public Pair<String[], String[]> getTablesNameAndIncrementNumber(String content) {
+    public static Pair<String[], String[]> getTablesNameAndIncrementNumber(String content) {
         String[] tablesMessage = content.split("\t");
         String[] ret1 = new String[tablesMessage.length];
         String[] ret2 = new String[tablesMessage.length];
@@ -210,6 +210,7 @@ public class Database {
         try {
             parseDatabaseScript(utils.readFile(databaseScriptFilename), log);
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("File " + databaseScriptFilename + " not exist");
             throw new NoSuchElementException();
         } finally {
