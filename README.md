@@ -10,6 +10,9 @@ java -jar build/libs/TinyDB-1.0.jar Help #查看程序支持的参数
 ```
 其他的gradle命令可以通过gradle tasks查看。
 目前只支持运行java -jar build/libs/TinyDB-1.0.jar Test进行系统测试（具体测试过程说明见开发说明）。
+- 客户端运行方式，只支持在命令行下运行（不支持在IDEA里面run），在TinyDB目录下输入(服务器端口号写在代码里面就是9528)
+java -cp .\build\libs\TinyDB-1.0.jar db.Main Client jdbc:TinyDB://host:9528
+
 
 
 

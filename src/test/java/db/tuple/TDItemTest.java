@@ -1,4 +1,4 @@
-package db;
+package db.tuple;
 
 import db.field.Type;
 import db.tuple.TDItem;

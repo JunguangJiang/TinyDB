@@ -1,5 +1,6 @@
-package db;
+package db.tuple;
 
+import db.Utility;
 import db.field.IntField;
 import db.file.RecordId;
 import db.file.heap.HeapPageId;
