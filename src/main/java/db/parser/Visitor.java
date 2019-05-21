@@ -1,6 +1,7 @@
 package db.parser;
 
 import com.github.freva.asciitable.AsciiTable;
+import db.Database;
 import db.DbException;
 import db.GlobalManager;
 import db.field.Op;
@@ -73,7 +74,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         QueryResult queryResult;
         try {
             queryResult = (QueryResult) super.visitSqlStatement(ctx);
-        } catch (NoSuchElementException | ClassCastException e) {
+        } catch (Exception e) {
             queryResult = new QueryResult(false, e.getMessage());
         }
         long endTime = System.currentTimeMillis();
@@ -713,8 +714,12 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     public Object visitShowStatement(TinyDBParser.ShowStatementContext ctx) {
         if (ctx.TABLE() != null) {
             // SHOW TABLE table
-            Table table = (Table)visit(ctx.table());
+            Database database = GlobalManager.getDatabase();
+            if (database == null) {
+                return new QueryResult(false,"Database not set. Please input the sql 'USE DATABASE $NAME' first");
+            }
             String tableName = ctx.table().getText();
+            Table table = database.getTable(tableName);
             if (table == null) {
                 throw new NoSuchElementException("Table " + tableName + " doesn't exist.");
             } else {
@@ -751,6 +756,8 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     @Override
     public Object visitShutdownStatement(TinyDBParser.ShutdownStatementContext ctx) {
         GlobalManager.getCatalog().persist();
-        throw new RuntimeException("shutdown!!!");
+        output.print("shutdown!!!");
+        System.exit(0);
+        return null;
     }
 }
