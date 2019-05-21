@@ -20,7 +20,7 @@ log
 .DS_Store
 data.dat
 data.txt
-data/*
+*.script
 *.out
+data/*
 bin/*
-
