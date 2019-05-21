@@ -143,6 +143,11 @@ public class Server {
     }
 
     public static void main(String[] args) {
+        Runtime.getRuntime().addShutdownHook(new Thread(()->{
+            System.out.println("persist");
+            GlobalManager.getCatalog().persist();
+        }));
+
         openServer(args[0]);
         while (true) {
             try {
