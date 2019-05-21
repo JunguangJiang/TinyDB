@@ -1,6 +1,5 @@
 package db;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import db.file.DbFile;
 import db.file.Table;
 import db.parser.TinyDBOutput;
@@ -12,6 +11,7 @@ import db.tuple.TupleDesc;
 import java.io.*;
 import java.util.*;
 import db.utils.utils;
+import javafx.util.Pair;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 /**
@@ -62,7 +62,7 @@ public class Database {
         if (getTable(tableName) != null) {
             return new QueryResult(false, "Table " + tableName + " already exists.");
         } else {
-            File file = new File(String.format("%s%s/%s.db", sqlPath, databaseName, tableName));
+            File file = new File(utils.getFilePath(sqlPath, databaseName, String.format("%s.db", tableName)));
             if (!isLog) {
                 try {
                     if (!file.createNewFile())
@@ -155,20 +155,38 @@ public class Database {
         return results;
     }
 
+    public Pair<String[], String[]> getTablesNameAndIncrementNumber(String content) {
+        String[] tablesMessage = content.split("\t");
+        String[] ret1 = new String[tablesMessage.length];
+        String[] ret2 = new String[tablesMessage.length];
+        for (int i = 0; i < tablesMessage.length; ++i) {
+            String[] items = tablesMessage[i].split(" ", 2);
+            ret1[i] = items[0];
+            ret2[i] = items[1];
+        }
+        return new Pair<>(ret1, ret2);
+    }
+
     /**
      * parseDatabaseScript: run the create table sql sentence on the DatabaseScript
      * @param content: the record on the DatabaseScript
      */
     private void parseDatabaseScript(String content, File outFile) {
         try {
-            content = content.split("\n", 2)[1];
+            String[] items = content.split("\n", 2);
+            Pair<String[], String[]> rets = getTablesNameAndIncrementNumber(items[0]);
             BufferedWriter log = new BufferedWriter(new FileWriter(outFile));
             TinyDBOutput out = new TinyDBOutput(log);
-            TinyDBParser parser = utils.createParser(content, out);
+            TinyDBParser parser = utils.createParser(items[1], out);
             ParseTree tree = parser.root();
             Visitor visitor = new Visitor(out, true);
             visitor.visit(tree);
             log.close();
+            String[] names = rets.getKey();
+            String[] incrementNumbers = rets.getValue();
+            for (int i = 0; i < names.length; ++i) {
+                idTableMap.get(nameIdMap.get(names[i])).autoIncrementNumber = Long.parseLong(incrementNumbers[i]);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -186,8 +204,8 @@ public class Database {
         this.nameIdMap.clear();
         this.idSqlMap.clear();
         this.idTableMap.clear();
-        String root = sqlPath + this.databaseName + "/";
-        String databaseScriptFilename = root + String.format("%s.script", databaseName);
+        String root = utils.getFilePath(sqlPath, this.databaseName);
+        String databaseScriptFilename = utils.getFilePath(root, String.format("%s.script", databaseName));
         File log = new File(root + "log.txt");
         try {
             parseDatabaseScript(utils.readFile(databaseScriptFilename), log);
@@ -213,7 +231,7 @@ public class Database {
                 first = false;
             else
                 sbTableNames.append("\t");
-            sbTableNames.append(name);
+            sbTableNames.append(name + ' ' + idTableMap.get(nameIdMap.get(name)).autoIncrementNumber);
             sbSql.append(idSqlMap.get(nameIdMap.get(name)));
             sbSql.append(";\n");
         }
@@ -240,11 +258,11 @@ public class Database {
      * persist: write the tables of the database back to the file
      */
     public void persist() {
-        String root = this.sqlPath + this.databaseName + "/";
+        String root = utils.getFilePath(this.sqlPath, this.databaseName);
         if (!newDatabaseDirectory(root)) {
             return;
         }
-        String databaseScriptFilename = root + String.format("%s.script", databaseName);
+        String databaseScriptFilename = utils.getFilePath(root, String.format("%s.script", databaseName));
         try {
             File f = new File(databaseScriptFilename);
             OutputStream fop = new FileOutputStream(f);

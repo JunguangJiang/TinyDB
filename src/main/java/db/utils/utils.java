@@ -12,6 +12,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 public class utils {
@@ -48,13 +50,13 @@ public class utils {
         return parser;
     }
 
-    public static boolean removeDiretory(File dir) {
+    public static boolean removeDirectory(File dir) {
         File[] files = dir.listFiles();
         if (files == null)
             return true;
         for (File file: files) {
             if(file.isDirectory()) {
-                if (!removeDiretory(file))
+                if (!removeDirectory(file))
                     return false;
             }else {
                 if (!file.delete())
@@ -62,5 +64,14 @@ public class utils {
             }
         }
         return dir.delete();
+    }
+
+    public static String getFilePath(String ...filePath) {
+        assert filePath.length > 1;
+        Path p1 = Paths.get(filePath[0]);
+        for (int i = 1; i < filePath.length; i++) {
+            p1 = p1.resolve(filePath[i]);
+        }
+        return p1.toString();
     }
 }

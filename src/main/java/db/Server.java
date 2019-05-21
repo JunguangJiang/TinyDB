@@ -24,9 +24,9 @@ public class Server {
      * @param sqlPath the sql path where catalog and all the databases are stored in
      */
      Server(String sqlPath) {
-         if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
-            sqlPath += '/';
-         }
+//         if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
+//            sqlPath += '/';
+//         }
          Server.sqlPath = sqlPath;
         if (!open()) {
             System.out.println("Can not load " + sqlPath);
@@ -102,7 +102,8 @@ public class Server {
             this.process(sql, out);
             return utils.readFile(output_filename);
         } catch (RuntimeException e) {
-            if (e.getMessage().equals("shutdown!!!"))
+            e.printStackTrace();
+            if (e.getMessage() != null && e.getMessage().equals("shutdown!!!"))
                 throw new SQLException(e.getMessage());
             return "500 Internal Error";
         } catch (Exception e) {
