@@ -20,3 +20,19 @@ java -jar build/libs/TinyDB-1.0.jar Help #查看程序支持的参数
 ```bash
 'Main-Class': 'db.SqlTest'
 ```
+
+
+### 待修复bug
+- sql语句
+```sql
+create table T1(
+A int,
+B int0
+);
+```
+抛出异常的地方
+```
+Exception in thread "main" sun.reflect.generics.reflectiveObjects.NotImplementedException
+	at db.field.Type.getType(Type.java:125)
+```
+可以把异常往外抛，统一给服务端外层解决
