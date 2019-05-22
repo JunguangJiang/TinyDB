@@ -760,11 +760,6 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitShutdownStatement(TinyDBParser.ShutdownStatementContext ctx) {
-        GlobalManager.getCatalog().persist();
-        Database database = GlobalManager.getDatabase();
-        if(database != null) {
-            database.persist();
-        }
         output.print("shutdown the server");
         System.exit(0);
         return null;
