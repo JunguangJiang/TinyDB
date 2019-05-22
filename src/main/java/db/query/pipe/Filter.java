@@ -2,6 +2,7 @@ package db.query.pipe;
 
 import db.DbException;
 import db.field.TypeMismatch;
+import db.file.PrimaryKeyViolation;
 import db.query.predicate.Predicate;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -59,7 +60,7 @@ public class Filter extends Operator{
      *         more tuples
      */
     @Override
-    protected Tuple fetchNext() throws DbException, TypeMismatch {
+    protected Tuple fetchNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
         while (child.hasNext()) {
             Tuple tuple = child.next();
             if (this.predicate.filter(tuple)) {

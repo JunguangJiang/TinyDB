@@ -4,6 +4,8 @@ import db.field.*;
 import db.file.RecordId;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -120,5 +122,11 @@ public class Tuple implements Serializable {
             tuple.setField(i, tuple2.getField(j));
         }
         return tuple;
+    }
+
+    public void serialize(DataOutputStream dos) throws IOException{
+        for (Field field: fields) {
+            field.serialize(dos);
+        }
     }
 }

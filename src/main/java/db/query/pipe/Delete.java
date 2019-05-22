@@ -3,6 +3,7 @@ package db.query.pipe;
 import db.DbException;
 import db.GlobalManager;
 import db.field.*;
+import db.file.PrimaryKeyViolation;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -54,7 +55,7 @@ public class Delete extends Operator{
      * @return A 1-field tuple containing the number of deleted records.
      */
     @Override
-    protected Tuple fetchNext() throws DbException, TypeMismatch {
+    protected Tuple fetchNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
         int count = 0;
         if (fetched) {
            return null;

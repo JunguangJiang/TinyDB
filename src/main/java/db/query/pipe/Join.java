@@ -2,6 +2,7 @@ package db.query.pipe;
 
 import db.DbException;
 import db.field.TypeMismatch;
+import db.file.PrimaryKeyViolation;
 import db.query.plan.LogicalFilterNode;
 import db.query.predicate.Predicate;
 import db.tuple.Tuple;
@@ -48,19 +49,19 @@ public class Join extends Operator{
     public void open() throws DbException, TypeMismatch {
         this.lhs.open();
         this.rhs.open();
-        // TODO decrease the loop times
-        while (lhs.hasNext()) {
-            Tuple tuple1 = lhs.next();
-            while (rhs.hasNext()) {
-                Tuple tuple2 = rhs.next();
-                Tuple mergedTuple = Tuple.merge(tuple1, tuple2);
-                if (predicate.filter(mergedTuple)) {
-                    tuples.add(mergedTuple);
-                }
-            }
-            rhs.rewind();
-        }
-        iterator = tuples.iterator();
+//        // TODO decrease the loop times
+//        while (lhs.hasNext()) {
+//            Tuple tuple1 = lhs.next();
+//            while (rhs.hasNext()) {
+//                Tuple tuple2 = rhs.next();
+//                Tuple mergedTuple = Tuple.merge(tuple1, tuple2);
+//                if (predicate.filter(mergedTuple)) {
+//                    tuples.add(mergedTuple);
+//                }
+//            }
+//            rhs.rewind();
+//        }
+//        iterator = tuples.iterator();
         super.open();
     }
 
@@ -95,12 +96,26 @@ public class Join extends Operator{
      * @return The next matching tuple.
      */
     @Override
-    protected Tuple fetchNext() throws DbException {
-        if (iterator != null && iterator.hasNext()) {
-            return iterator.next();
-        } else {
-            return null;
+    protected Tuple fetchNext() throws DbException, PrimaryKeyViolation, TypeMismatch {
+        // TODO decrease the loop times
+        while (lhs.hasNext()) {
+            Tuple tuple1 = lhs.next();
+            while (rhs.hasNext()) {
+                Tuple tuple2 = rhs.next();
+                Tuple mergedTuple = Tuple.merge(tuple1, tuple2);
+                if (predicate.filter(mergedTuple)) {
+                    return mergedTuple;
+                }
+            }
+            rhs.rewind();
         }
+        return null;
+
+//        if (iterator != null && iterator.hasNext()) {
+//            return iterator.next();
+//        } else {
+//            return null;
+//        }
     }
 
     @Override

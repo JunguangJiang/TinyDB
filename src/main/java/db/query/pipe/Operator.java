@@ -2,6 +2,7 @@ package db.query.pipe;
 
 import db.DbException;
 import db.field.TypeMismatch;
+import db.file.PrimaryKeyViolation;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -17,7 +18,7 @@ public abstract class Operator implements OpIterator{
     private Tuple next = null;
     private boolean open = false;
 
-    public boolean hasNext() throws DbException, TypeMismatch {
+    public boolean hasNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
         if (!this.open)
             throw new IllegalStateException("Operator not yet open");
 
@@ -27,7 +28,7 @@ public abstract class Operator implements OpIterator{
     }
 
     public Tuple next() throws DbException,
-            NoSuchElementException, TypeMismatch {
+            NoSuchElementException, TypeMismatch, PrimaryKeyViolation {
         if (next == null) {
             next = fetchNext();
             if (next == null)
@@ -47,7 +48,7 @@ public abstract class Operator implements OpIterator{
      * @return the next Tuple in the iterator, or null if the iteration is
      *         finished.
      */
-    protected abstract Tuple fetchNext() throws DbException, TypeMismatch;
+    protected abstract Tuple fetchNext() throws DbException, TypeMismatch, PrimaryKeyViolation;
 
     /**
      * Closes this iterator. If overridden by a subclass, they should call

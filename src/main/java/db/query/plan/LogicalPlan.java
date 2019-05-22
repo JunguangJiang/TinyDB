@@ -1,12 +1,9 @@
 package db.query.plan;
+import db.GlobalManager;
 import db.field.TypeMismatch;
-import db.query.pipe.BTreeScan;
+import db.query.pipe.*;
 import db.file.BTree.IndexPredicate;
 import db.query.*;
-import db.query.pipe.Filter;
-import db.query.pipe.Join;
-import db.query.pipe.OpIterator;
-import db.query.pipe.Project;
 import db.query.plan.LogicalFilterNode.*;
 import db.query.predicate.Predicate;
 
@@ -78,11 +75,33 @@ public class LogicalPlan
      * @return
      * @throws TypeMismatch
      */
-    private OpIterator getBTreeScan(LogicalScanNode scanNode, AndNode andNode) throws TypeMismatch{
+    private OpIterator getOptimizedBTreeScan(LogicalScanNode scanNode, AndNode andNode) throws TypeMismatch{
         IndexPredicate indexPredicate = andNode.extractIndexPredicate(scanNode);
         BTreeScan scan = new BTreeScan(scanNode.tableName, scanNode.tableAlias, indexPredicate);
         Predicate predicate = andNode.extractKVPredicate(scanNode).predicate(scanNode.tupleDesc);
         return new Filter(predicate, scan);
+    }
+
+    /**
+     * Get a Scan OpIterator from scanNode
+     * Scan might be BTreeScan or SeqScan, depending on GlobalManager
+     * @param scanNode
+     * @param andNode
+     * @param optimized
+     * @return
+     * @throws TypeMismatch
+     */
+    private OpIterator getScan(LogicalScanNode scanNode, AndNode andNode, boolean optimized)
+            throws TypeMismatch {
+        if (GlobalManager.isBTree()) {
+            if (optimized) {
+                return getOptimizedBTreeScan(scanNode,andNode);
+            } else {
+                return new BTreeScan(scanNode.tableName, scanNode.tableAlias,null);
+            }
+        } else {
+            return new SeqScan(GlobalManager.getDatabase().getTable(scanNode.tableName));
+        }
     }
 
     /** Convert this LogicalPlan into a physicalPlan represented by a {@link OpIterator}.
@@ -92,20 +111,21 @@ public class LogicalPlan
     public OpIterator physicalPlan() throws TypeMismatch {
         OpIterator scans[]= new OpIterator[this.joinNodes.size()];
 
+        LogicalFilterNode.AndNode andNode=null;
+        boolean optimized=false;
         if (or != null && or.size() == 1) {
             // If there are only "AND", we first use BTreeIndexSearch,
             // then we Filter each Table separately.
-            LogicalFilterNode.AndNode andNode = or.get(0);
-            for (int i=0; i<joinNodes.size(); i++) {
-                scans[i] = getBTreeScan(joinNodes.get(i).scanNode,andNode);
-            }
-        } else {
-            // If there are "OR", we do no optimization
-            // If there are no where clause, we cannot do optimization
-            for (int i = 0; i < joinNodes.size(); i++) {
-                LogicalScanNode scanNode = joinNodes.get(i).scanNode;
-                scans[i] = new BTreeScan(scanNode.tableName, scanNode.tableAlias,null);
-            }
+            andNode = or.get(0);
+            optimized = true;
+        }
+        // If there are "OR", we do no optimization
+        // If there are no where clause, we cannot do optimization
+
+        // Scan
+        for (int i = 0; i < joinNodes.size(); i++) {
+            LogicalScanNode scanNode = joinNodes.get(i).scanNode;
+            scans[i] = getScan(scanNode, andNode, optimized);
         }
 
         // Join (no optimization here)

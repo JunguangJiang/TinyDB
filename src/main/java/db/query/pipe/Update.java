@@ -5,9 +5,12 @@ import db.GlobalManager;
 import db.field.Field;
 import db.field.TypeMismatch;
 import db.field.Util;
+import db.file.PrimaryKeyViolation;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
+
+import java.io.IOException;
 
 /**
  * Update is an operator that implements updating.
@@ -68,12 +71,12 @@ public class Update extends Operator{
     }
 
     @Override
-    protected Tuple fetchNext() throws DbException, TypeMismatch {
+    protected Tuple fetchNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
         int count = 0;
         while (child.hasNext()) {
             count++;
             Tuple tuple = child.next();
-            // TODO make a new tuple, delete the old tuple and insert the new tuple
+            //make a new tuple, delete the old tuple and insert the new tuple
             int tableid = tuple.getRecordId().getPageId().getTableId();
             GlobalManager.getBufferPool().deleteTuple(tuple);
 
@@ -82,7 +85,7 @@ public class Update extends Operator{
             }
             try {
                 GlobalManager.getBufferPool().insertTuple(tableid, tuple);
-            } catch (Exception e) {
+            } catch (DbException | IOException e) {
                 e.printStackTrace();
             }
         }

@@ -5,14 +5,12 @@ import db.field.Field;
 import db.file.BufferPool;
 import db.file.Page;
 import db.file.RecordId;
+import db.file.Util;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * Each instance of HeapPage stores data for one page of HeapFiles and
@@ -53,9 +51,11 @@ public class HeapPage implements Page {
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
 
         byte[] header_buffer = new byte[getHeaderSize()];
-        for (int i=0; i<header_buffer.length; i++)
-            header_buffer[i] = dis.readByte();
+        if(dis.read(header_buffer,0, header_buffer.length) < header_buffer.length) {
+            throw new IOException("the bytes of header is less than required");
+        }
         header = BitSet.valueOf(header_buffer);
+        System.out.println("HeapPage"+header.toString());
 
         tuples = new Tuple[numSlots];
         try{
@@ -99,7 +99,8 @@ public class HeapPage implements Page {
         // if associated bit is not set, read forward to the next tuple, and
         // return null.
         if (!isSlotUsed(slotId)) {
-            for (int i=0; i<td.getSize(); i++) {
+            int size = td.getSize();
+            for (int i=0; i<size; i++) {
                 try {
                     dis.readByte();
                 } catch (IOException e) {
@@ -142,55 +143,26 @@ public class HeapPage implements Page {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(len);
         DataOutputStream dos = new DataOutputStream(baos);
 
-        // create the header of the page
-        byte[] headBuffer = this.header.toByteArray();
-        for (int i=0; i<headBuffer.length; i++) {
-            try {
-                dos.writeByte(headBuffer[i]);
-            } catch (IOException e) {
-                // this really shouldn't happen
-                e.printStackTrace();
-            }
-        }
+        try {
+            // create the header of the page
+            byte[] headBuffer = this.header.toByteArray();
+            dos.write(headBuffer, 0, headBuffer.length);
+            Util.writeBytes(dos, 0,getHeaderSize()-headBuffer.length);
 
-        // create the tuples
-        for (int i=0; i<tuples.length; i++) {
-
-            // empty slot
-            if (!isSlotUsed(i)) {
-                for (int j=0; j<td.getSize(); j++) {
-                    try {
-                        dos.writeByte(0);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-                continue;
-            }
-
-            // non-empty slot
-            for (int j=0; j<td.numFields(); j++) {
-                Field f = tuples[i].getField(j);
-                try {
-                    f.serialize(dos);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
+            // create the tuples
+            int tupleSize = td.getSize();
+            for (int i=0; i<tuples.length; i++) {
+                // empty slot
+                if (!isSlotUsed(i)) {
+                    Util.writeBytes(dos, 0, tupleSize);
+                } else {// non-empty slot
+                    tuples[i].serialize(dos);
                 }
             }
-        }
 
-        // padding
-        int zerolen = BufferPool.getPageSize() - (headBuffer.length + td.getSize() * tuples.length); //- numSlots * td.getSize();
-        byte[] zeroes = new byte[zerolen];
-        try {
-            dos.write(zeroes, 0, zerolen);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
+            // padding
+            int zerolen = BufferPool.getPageSize() - (headBuffer.length + td.getSize() * tuples.length); //- numSlots * td.getSize();
+            Util.writeBytes(dos,0, zerolen);
             dos.flush();
         } catch (IOException e) {
             e.printStackTrace();
