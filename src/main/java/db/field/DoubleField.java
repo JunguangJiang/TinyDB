@@ -41,4 +41,9 @@ public class DoubleField extends NumberField{
     public boolean less_than(Field val) {
         return (double)getValue() < (double)val.getValue();
     }
+
+    @Override
+    public Field clone() {
+        return new DoubleField((double)value, isNull);
+    }
 }

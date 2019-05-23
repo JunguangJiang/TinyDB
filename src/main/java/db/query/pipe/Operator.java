@@ -64,7 +64,7 @@ public abstract class Operator implements OpIterator{
      * Opens the iterator. This must be called before any of the other methods.
      * @throws DbException when there are problems opening/accessing the database.
      */
-    public void open() throws DbException, TypeMismatch {
+    public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
         this.open = true;
     }
 

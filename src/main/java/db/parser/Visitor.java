@@ -619,14 +619,14 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
                 attrNameToTable.put(attrName, scanNode.tableName);
             }
 
-            if (or != null && GlobalManager.isBTree()) {
+            if (or != null) {
                 or.disambiguateName(attrNameToTable);
                 IndexPredicate indexPredicate = null;
-                if (or.size() == 1) {
+                if (GlobalManager.isBTree() && or.size() == 1) {
                     indexPredicate = or.get(0).extractIndexPredicate(scanNode);
                 }
-                Predicate predicate = or.predicate(scanNode.tupleDesc);
                 opIterator = getScan(scanNode.tableName, indexPredicate);
+                Predicate predicate = or.predicate(scanNode.tupleDesc);
                 opIterator = new Filter(predicate, opIterator);
             } else {
                 opIterator = getScan(scanNode.tableName,null);

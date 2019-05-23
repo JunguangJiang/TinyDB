@@ -22,7 +22,7 @@ public interface OpIterator extends Serializable{
      * Opens the iterator. This must be called before any of the other methods.
      * @throws DbException when there are problems opening/accessing the database.
      */
-    void open() throws DbException, TypeMismatch;
+    void open() throws DbException, TypeMismatch, PrimaryKeyViolation;
 
     /** Returns true if the iterator has more tuples.
      * @return true if the iterator has more tuples.

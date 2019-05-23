@@ -35,7 +35,7 @@ public class Filter extends Operator{
     }
 
     @Override
-    public void open() throws DbException, TypeMismatch {
+    public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
         child.open();
         super.open();
     }

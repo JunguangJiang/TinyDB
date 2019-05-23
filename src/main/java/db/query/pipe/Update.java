@@ -34,17 +34,24 @@ public class Update extends Operator{
     private OpIterator child;
     private int indexes[]; //index of the attributes that needs updating
     private Field fields[]; //the corresponding updating fields
+    private boolean changePrimaryKey;
+    private Object primaryKeyValue;
 
     public Update(OpIterator child, UpdateElement[] updateElements) throws TypeMismatch{
         this.child = child;
         this.indexes = new int[updateElements.length];
         this.fields = new Field[updateElements.length];
         TupleDesc tupleDesc = child.getTupleDesc();
+        changePrimaryKey = false;
         for (int i=0; i<updateElements.length; i++){
             this.indexes[i] = tupleDesc.fieldNameToIndex(updateElements[i].attribute);
             TDItem tdItem = tupleDesc.getTDItem(indexes[i]);
             this.fields[i] = Util.getField(updateElements[i].value, tdItem.fieldType,
                     tdItem.maxLen, tdItem.fieldName);
+            if (tdItem.isPrimaryKey) {
+                changePrimaryKey = true;
+                primaryKeyValue = updateElements[i].value;
+            }
         }
     }
 
@@ -54,7 +61,7 @@ public class Update extends Operator{
     }
 
     @Override
-    public void open() throws DbException, TypeMismatch {
+    public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
         child.open();
         super.open();
     }
@@ -70,23 +77,48 @@ public class Update extends Operator{
         child.rewind();
     }
 
+    private boolean hasMoreThanOneChild() throws DbException, TypeMismatch, PrimaryKeyViolation{
+        int count=0;
+        while(child.hasNext()) {
+            child.next();
+            count++;
+            if (count > 1) {
+                break;
+            }
+        }
+        child.rewind();
+        System.out.println("count="+count);
+        return count > 1;
+    }
+
     @Override
     protected Tuple fetchNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
+        if (changePrimaryKey && hasMoreThanOneChild() ) {
+            throw new PrimaryKeyViolation(child.getTupleDesc().getPrimaryKey(), primaryKeyValue);
+        }
         int count = 0;
         while (child.hasNext()) {
             count++;
-            Tuple tuple = child.next();
+            Tuple oldTuple = child.next();
+            Tuple newTuple = oldTuple.clone();
             //make a new tuple, delete the old tuple and insert the new tuple
-            int tableid = tuple.getRecordId().getPageId().getTableId();
-            GlobalManager.getBufferPool().deleteTuple(tuple);
+            int tableid = oldTuple.getRecordId().getPageId().getTableId();
+            GlobalManager.getBufferPool().deleteTuple(oldTuple);
 
             for (int i=0; i<indexes.length; i++){
-                tuple.setField(indexes[i], fields[i]);
+                newTuple.setField(indexes[i], fields[i]);
             }
             try {
-                GlobalManager.getBufferPool().insertTuple(tableid, tuple);
+                GlobalManager.getBufferPool().insertTuple(tableid, newTuple);
             } catch (DbException | IOException e) {
                 e.printStackTrace();
+            } catch (PrimaryKeyViolation e) {
+                try {
+                    GlobalManager.getBufferPool().insertTuple(tableid, oldTuple);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                throw e;
             }
         }
         return Util.getCountTuple(count, "update counts");

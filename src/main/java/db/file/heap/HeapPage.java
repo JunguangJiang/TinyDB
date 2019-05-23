@@ -55,7 +55,6 @@ public class HeapPage implements Page {
             throw new IOException("the bytes of header is less than required");
         }
         header = BitSet.valueOf(header_buffer);
-        System.out.println("HeapPage"+header.toString());
 
         tuples = new Tuple[numSlots];
         try{

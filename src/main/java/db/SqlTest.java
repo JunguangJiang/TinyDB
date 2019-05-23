@@ -23,7 +23,9 @@ public class SqlTest {
         try{
             Server server = new Server(path);
             server.process(sqlFile, outFile);
-            return compare(ansFile, outFile);
+            boolean result = compare(ansFile, outFile);
+            server.close();
+            return result;
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -123,7 +123,11 @@ public class StringField implements Field {
      * @return the Type for this Field
      */
     public Type getType() {
-
         return Type.STRING_TYPE;
+    }
+
+    @Override
+    public Field clone() {
+        return new StringField(value, maxLen, isNull);
     }
 }
