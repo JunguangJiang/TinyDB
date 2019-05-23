@@ -7,6 +7,7 @@ import db.GlobalManager;
 import db.field.Op;
 import db.field.Type;
 import db.field.TypeMismatch;
+import db.file.NotNullViolation;
 import db.file.PrimaryKeyViolation;
 import db.query.pipe.*;
 import db.file.BTree.IndexPredicate;
@@ -637,7 +638,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             } else {
                 try {
                     opIterator = new Update(opIterator, updateElements);
-                } catch (NoSuchElementException e) {
+                } catch (NoSuchElementException | NotNullViolation e) {
                     return new QueryResult(false, e.getMessage());
                 }
             }

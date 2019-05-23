@@ -5,6 +5,7 @@ import db.GlobalManager;
 import db.field.Field;
 import db.field.TypeMismatch;
 import db.field.Util;
+import db.file.NotNullViolation;
 import db.file.PrimaryKeyViolation;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
@@ -37,7 +38,7 @@ public class Update extends Operator{
     private boolean changePrimaryKey;
     private Object primaryKeyValue;
 
-    public Update(OpIterator child, UpdateElement[] updateElements) throws TypeMismatch{
+    public Update(OpIterator child, UpdateElement[] updateElements) throws TypeMismatch, NotNullViolation {
         this.child = child;
         this.indexes = new int[updateElements.length];
         this.fields = new Field[updateElements.length];
@@ -48,6 +49,7 @@ public class Update extends Operator{
             TDItem tdItem = tupleDesc.getTDItem(indexes[i]);
             this.fields[i] = Util.getField(updateElements[i].value, tdItem.fieldType,
                     tdItem.maxLen, tdItem.fieldName);
+            db.file.Util.checkNotNullConstraint(tdItem,updateElements[i].value);
             if (tdItem.isPrimaryKey) {
                 changePrimaryKey = true;
                 primaryKeyValue = updateElements[i].value;
@@ -87,7 +89,6 @@ public class Update extends Operator{
             }
         }
         child.rewind();
-        System.out.println("count="+count);
         return count > 1;
     }
 

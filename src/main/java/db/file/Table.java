@@ -134,13 +134,8 @@ public class Table {
             for (int i=0; i<tupleDesc.numFields(); i++) {
                 TDItem tdItem = tupleDesc.getTDItem(i);
                 Object value = hashMap.remove(tdItem.fieldName);
-                if (value != null) {
-                    tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName));
-                } else {
-                    if (tdItem.notNull || tdItem.isPrimaryKey) {
-                        throw new Exception("FullColumnName " + tdItem.fieldName + " can not be null");
-                    }
-                }
+                db.file.Util.checkNotNullConstraint(tdItem,value);
+                tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName));
             }
             hashMap.remove("PRIMARY");
             // Ensure that all insert attributes exist.

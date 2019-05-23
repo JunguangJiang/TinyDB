@@ -4,10 +4,6 @@ package db.file;
  * Exception when violating the primary key constraint
  */
 public class PrimaryKeyViolation extends Exception{
-    private static final long serialVersionUID = 1L;
-    private String primaryKeyName;
-    private Object duplicateValue;
-
     /**
      *
      * @param primaryKeyName the name of the primary key
