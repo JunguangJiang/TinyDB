@@ -12,14 +12,11 @@ import java.util.Arrays;
  */
 public class Main {
     public static void main(String[] args){
+        String helpInfo = "Test : run the system test\n" +
+                "WebServer [path] : start a server which has the root in `path` (default is `.`)\n" +
+                "Client : start a client\n";
         if (args.length == 0) {
-            // An example which reads an sql txt and build a parser tree
-            String path = "system_test_data/select_join/";
-            String inFileName = path+"test.sql";
-            String outFileName = path+"test.out";
-            Server server = new Server(path);
-            server.process(new File(inFileName), new File(outFileName));
-            server.close();
+              System.out.println(helpInfo);
         } else {
             String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
             switch (args[0]) {
@@ -33,11 +30,7 @@ public class Main {
                     SqlTest.main(newArgs);
                     break;
                 case "Help":
-                    System.out.println(
-                            "Test : run the system test\n" +
-                            "WebServer [path] : start a server which has the root in `path` (default is `.`)\n" +
-                            "Client : start a client\n"
-                    );
+                    System.out.println(helpInfo);
                 default:
                     break;
             }

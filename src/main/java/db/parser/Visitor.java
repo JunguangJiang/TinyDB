@@ -7,14 +7,11 @@ import db.GlobalManager;
 import db.field.Op;
 import db.field.Type;
 import db.field.TypeMismatch;
-import db.query.pipe.BTreeScan;
+import db.file.PrimaryKeyViolation;
+import db.query.pipe.*;
 import db.file.BTree.IndexPredicate;
 import db.file.Table;
 import db.query.*;
-import db.query.pipe.Delete;
-import db.query.pipe.Filter;
-import db.query.pipe.OpIterator;
-import db.query.pipe.Update;
 import db.query.plan.*;
 import db.query.predicate.Predicate;
 import db.tuple.TDItem;
@@ -594,6 +591,14 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         return new LogicalJoinNode(cmp, (LogicalScanNode)visit(ctx.table()));
     }
 
+    private OpIterator getScan(String tableName, IndexPredicate indexPredicate) {
+        if (GlobalManager.isBTree()) {
+            return new BTreeScan(tableName, indexPredicate);
+        } else {
+            return new SeqScan(GlobalManager.getDatabase().getTable(tableName));
+        }
+    }
+
     /**
      *
      * @param tableName
@@ -617,14 +622,14 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             if (or != null) {
                 or.disambiguateName(attrNameToTable);
                 IndexPredicate indexPredicate = null;
-                if (or.size() == 1) {
+                if (GlobalManager.isBTree() && or.size() == 1) {
                     indexPredicate = or.get(0).extractIndexPredicate(scanNode);
                 }
+                opIterator = getScan(scanNode.tableName, indexPredicate);
                 Predicate predicate = or.predicate(scanNode.tupleDesc);
-                opIterator = new BTreeScan(scanNode.tableName, indexPredicate);
                 opIterator = new Filter(predicate, opIterator);
             } else {
-                opIterator = new BTreeScan(scanNode.tableName, null);
+                opIterator = getScan(scanNode.tableName,null);
             }
 
             if (isDelete) {
@@ -643,8 +648,8 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         } catch (DbException e){
             e.printStackTrace();
             return new QueryResult(false, e.toString());
-        } catch (TypeMismatch e) {
-            return new QueryResult(false, e.toString());
+        } catch (TypeMismatch | PrimaryKeyViolation e) {
+            return new QueryResult(false, e.getMessage());
         }
 
     }
@@ -755,8 +760,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitShutdownStatement(TinyDBParser.ShutdownStatementContext ctx) {
-        GlobalManager.getCatalog().persist();
-        output.print("shutdown!!!");
+        output.print("shutdown the server");
         System.exit(0);
         return null;
     }

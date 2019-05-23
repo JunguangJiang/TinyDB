@@ -45,4 +45,9 @@ public class FloatField extends NumberField{
     public boolean less_than(Field val) {
         return (float) getValue() < (float) val.getValue();
     }
+
+    @Override
+    public Field clone() {
+        return new FloatField((float)value, isNull);
+    }
 }

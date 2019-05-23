@@ -35,8 +35,11 @@ public class Table {
      */
     public Table(Integer id, String name, TupleDesc tupleDesc, File file) {
         this.id = id;
-        // this.dbFile = new HeapFile(id, file, tupleDesc);
-        this.dbFile = new BTreeFile(id, file, tupleDesc);
+        if (GlobalManager.isBTree()) {
+            this.dbFile = new BTreeFile(id, file, tupleDesc);
+        } else {
+            this.dbFile = new HeapFile(id, file, tupleDesc);
+        }
         this.name = name;
         this.file = file;
     }
@@ -72,8 +75,7 @@ public class Table {
         } catch (IOException | DbException e){
             e.printStackTrace();
         } catch (PrimaryKeyViolation e) {
-            return new QueryResult(false,
-                    "Violation of PRIMARY KEY constraint."+e.toString());
+            return new QueryResult(false, e.getMessage());
         }
         return new QueryResult(true, "Query OK, 1 row affected.");
     }

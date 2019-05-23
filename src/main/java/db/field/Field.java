@@ -39,4 +39,5 @@ public interface Field extends Serializable{
     String toString();
     boolean isNull();
     Object getValue();
+    Field clone();
 }

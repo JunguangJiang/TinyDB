@@ -5,11 +5,16 @@ package db.file;
  */
 public class PrimaryKeyViolation extends Exception{
     private static final long serialVersionUID = 1L;
+    private String primaryKeyName;
+    private Object duplicateValue;
 
     /**
-     * @param s the duplicate key/value information
+     *
+     * @param primaryKeyName the name of the primary key
+     * @param duplicateValue the duplicated value
      */
-    public PrimaryKeyViolation(String s) {
-        super(s);
+    public PrimaryKeyViolation(String primaryKeyName, Object duplicateValue) {
+        super("Duplicate value '" + duplicateValue +
+                "' for key "+ primaryKeyName);
     }
 }

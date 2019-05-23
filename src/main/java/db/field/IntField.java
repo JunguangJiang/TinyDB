@@ -44,4 +44,9 @@ public class IntField extends NumberField {
     public boolean less_than(Field val) {
         return (int) getValue() < (int) val.getValue();
     }
+
+    @Override
+    public Field clone() {
+        return new IntField((int)value, isNull);
+    }
 }

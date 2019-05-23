@@ -79,4 +79,9 @@ public abstract class NumberField implements Field {
     public Type getType() {
         return type;
     }
+
+    @Override
+    public Field clone() {
+        return null;
+    }
 }

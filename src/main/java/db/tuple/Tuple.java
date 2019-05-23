@@ -4,7 +4,10 @@ import db.field.*;
 import db.file.RecordId;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Tuple maintains information about the contents of a tuple. Tuples have a
@@ -119,6 +122,27 @@ public class Tuple implements Serializable {
         for(int j = 0; j < tupleDesc2.numFields(); j++, i++) {
             tuple.setField(i, tuple2.getField(j));
         }
+        return tuple;
+    }
+
+    public void serialize(DataOutputStream dos) throws IOException{
+        for (Field field: fields) {
+            field.serialize(dos);
+        }
+    }
+
+    /**
+     * Only deep copy Field now
+     * @return
+     * @throws CloneNotSupportedException
+     */
+    @Override
+    public Tuple clone(){
+        Tuple tuple = new Tuple(tupleDesc);
+        for (int i=0; i<fields.length; i++) {
+            tuple.setField(i, fields[i].clone());
+        }
+        tuple.setRecordId(recordId);
         return tuple;
     }
 }

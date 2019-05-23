@@ -73,7 +73,7 @@ public class TableTest {
         assertTrue(queryResult.succeeded());
 
         Object[] full_values = {
-                33, "myname", 3.3
+                33, "myname2", 3.3
         };
         queryResult = table.insertTuple(null, full_values);
         assertTrue(queryResult.succeeded());

@@ -2,6 +2,7 @@ package db.client;
 
 import jline.console.ConsoleReader;
 import jline.console.completer.*;
+import jline.console.history.FileHistory;
 import jline.console.history.History;
 import java.io.*;
 import java.sql.*;
@@ -137,7 +138,7 @@ public class Client {
         reader.addCompleter(getCompleter(_S("show", "shutdown;"), _S("database", "databases;", "table"), _S()));
         reader.addCompleter(getCompleter(_S("import"), _S()));
         reader.addCompleter(getCompleter(_S("insert into"), _S(), _S("values();"), _S()));
-        reader.addCompleter(getCompleter(_S("select"), _S(), _S("from"), _S(), _S("where"), _S()));
+        reader.addCompleter(getCompleter(_S("select"), _S(), _S("from"), _S(), _S("where")));
         reader.addCompleter(getCompleter(_S("delete from"), _S()));
         reader.addCompleter(getCompleter(_S("use database"), _S()));
         reader.addCompleter(getCompleter(_S("update"), _S(), _S("set"), _S()));
@@ -148,6 +149,7 @@ public class Client {
         try {
             Connection conn = connectServer(args);
             ConsoleReader reader = new ConsoleReader();
+            reader.setExpandEvents(false);
             completeHelper(reader);
             sendAndReceiveMessage(conn, reader);
             conn.close();
@@ -187,8 +189,13 @@ public class Client {
     private static String readSql(ConsoleReader reader) {
         try {
             StringBuilder sb = new StringBuilder();
+//            final FileHistory history = setupHistory(reader);
+//            if (history != null) {
+//                reader.setHistory(history);
+//            }
             while (true) {
-                String line = reader.readLine(sb.length() == 0 ? " > " : "-> ");
+
+                String line = reader.readLine(sb.length() == 0 ? " TinyDB> " : "      -> ");
                 int i = line.length() - 1;
                 while (i >= 0 && line.charAt(i) == ' ')
                     --i;

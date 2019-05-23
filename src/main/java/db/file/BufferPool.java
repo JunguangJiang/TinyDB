@@ -2,9 +2,6 @@ package db.file;
 
 import db.*;
 import db.tuple.Tuple;
-import db.file.heap.HeapFile;
-import db.file.BTree.BTreeFile;
-
 import java.io.*;
 import java.util.*;
 
@@ -110,18 +107,15 @@ public class BufferPool {
     public void deleteTuple(Tuple t) {
         int tableId = t.getRecordId().getPageId().getTableId();
         DbFile dbFile = GlobalManager.getDatabase().getDbFile(tableId);
-        // ArrayList<Page> pages = ((HeapFile)dbFile).deleteTuple(t);
-        ArrayList<Page> pages = null;
+        ArrayList<Page> pages;
         try {
-            pages = ((BTreeFile)dbFile).deleteTuple(t);
+            pages = dbFile.deleteTuple(t);
+            for (Page page : pages) {
+                page.markDirty(true);
+            }
         }
-        catch (DbException e){
+        catch (DbException | IOException e){
             e.printStackTrace();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        for (Page page : pages) {
-            page.markDirty(true);
         }
     }
 

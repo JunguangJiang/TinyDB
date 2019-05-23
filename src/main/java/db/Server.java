@@ -15,10 +15,9 @@ import java.util.List;
 import db.utils.utils;
 
 public class Server {
-    static private String sqlPath;
-    static private ServerSocket serverSocket;
-    static private Server db_server = null;
-    private static List<Socket> clientSocketList = new ArrayList<>();
+    private String sqlPath;
+    private ServerSocket serverSocket;
+    private List<Socket> clientSocketList;
     /**
      *
      * @param sqlPath the sql path where catalog and all the databases are stored in
@@ -27,32 +26,54 @@ public class Server {
 //         if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
 //            sqlPath += '/';
 //         }
-         Server.sqlPath = sqlPath;
-        if (!open()) {
-            System.out.println("Can not load " + sqlPath);
-            System.exit(-1);
-        }
-    }
+//         Server.sqlPath = sqlPath;
+//        if (!open()) {
+//            System.out.println("Can not load " + sqlPath);
+//            System.exit(-1);
+//        }
+//    }
+         if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
+            sqlPath += '/';
+         }
+         this.sqlPath = sqlPath;
+         GlobalManager.getCatalog().load(sqlPath);
 
-    /**
-     * Open the Server:
-     *      load the Catalog into the memory (call GlobalManager.getCatalog().open(sqlPath))
-     *      load the default Database
-     * @return whether the loading is successful
-     */
-    public boolean open() {
-        GlobalManager.getCatalog().load(sqlPath);
-        return true;
+         try {
+             serverSocket = new ServerSocket(9528);
+         } catch (IOException e) {
+             System.out.println("Server open failed!");
+         }
+         clientSocketList = new ArrayList<>();
     }
 
     /**
      * Close the Server:
+     *      close the socket connection
      *      write the Catalog back to the disk (call GlobalManager.getCatalog().close())
      *      write the current Database to the disk
      *      flush the BufferPool
      */
     public void close() {
+        try {
+            for (Socket clientSocket: clientSocketList) {
+                if (!clientSocket.isClosed())
+                    clientSocket.close();
+            }
+            serverSocket.close();
+        } catch (IOException e) {
+            System.out.println("Fail to close socket!!!");
+        }
+
         GlobalManager.getCatalog().persist();
+        Database database = GlobalManager.getDatabase();
+        if (database != null) {
+            GlobalManager.getDatabase().persist();
+        }
+        try {
+            GlobalManager.getBufferPool().flushAllPages();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -94,7 +115,7 @@ public class Server {
      * process sql command and return result
      * @param sql: sql command
      */
-    private String process(String sql) throws SQLException {
+    private String process(String sql) {
         String output_filename = sqlPath + "Client.out";
         File output = new File(output_filename);
         try (BufferedWriter outputBufferedWriter = new BufferedWriter(new FileWriter(output))){
@@ -102,9 +123,9 @@ public class Server {
             this.process(sql, out);
             return utils.readFile(output_filename);
         } catch (RuntimeException e) {
-            e.printStackTrace();
-            if (e.getMessage() != null && e.getMessage().equals("shutdown!!!"))
-                throw new SQLException(e.getMessage());
+//            e.printStackTrace();
+//            if (e.getMessage() != null && e.getMessage().equals("shutdown!!!"))
+//                throw new SQLException(e.getMessage());
             return "500 Internal Error";
         } catch (Exception e) {
             System.out.println("Read data files failed!");
@@ -129,33 +150,19 @@ public class Server {
         visitor.visit(tree);
     }
 
-    /**
-     * new a server to handle commands and create a serverSocket to listen
-     * @param arg: the directory to save data files
-     */
-    private static void openServer(String arg) {
-        sqlPath = arg;
-        db_server = new Server(sqlPath);
-        try {
-            serverSocket = new ServerSocket(9528);
-        } catch (IOException e) {
-            System.out.println("Server open failed!");
-        }
-    }
-
     public static void main(String[] args) {
+        Server server = new Server(args[0]);
         Runtime.getRuntime().addShutdownHook(new Thread(()->{
-            System.out.println("persist");
-            GlobalManager.getCatalog().persist();
+            System.out.println("persist before shutdown");
+            server.close();
         }));
 
-        openServer(args[0]);
         while (true) {
             try {
-                System.out.println("Listening: " + serverSocket.getLocalPort() + "...");
-                Socket socket = serverSocket.accept();
-                clientSocketList.add(socket);
-                new SocketThread(socket).start();
+                System.out.println("Listening: " + server.serverSocket.getLocalPort() + "...");
+                Socket socket = server.serverSocket.accept();
+                server.clientSocketList.add(socket);
+                new SocketThread(socket, server).start();
             } catch (SocketTimeoutException s) {
                 System.out.println("Socket timed out!");
                 break;
@@ -172,25 +179,10 @@ public class Server {
     static class SocketThread extends Thread {
 
         private Socket socket;
-        private SocketThread(Socket socket) {
+        private Server server;
+        private SocketThread(Socket socket, Server server) {
             this.socket = socket;
-        }
-
-        /**
-         * closeServer: close all client sockets, listen socket and server
-         */
-        private void closeServer() {
-            try {
-                for (Socket clientSocket: clientSocketList) {
-                    if (!clientSocket.isClosed())
-                        clientSocket.close();
-                }
-                serverSocket.close();
-                db_server.close();
-                System.out.println("Successfully shut down the Server.");
-            } catch (IOException e1) {
-                System.out.println("Fail to shut down the Server!!!");
-            }
+            this.server = server;
         }
 
         /**
@@ -204,10 +196,7 @@ public class Server {
                     DataInputStream in = new DataInputStream(socket.getInputStream());
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
                     String sql = in.readUTF();
-                    out.writeUTF(db_server.process(sql));
-                } catch (SQLException e) {
-                    closeServer();
-                    break;
+                    out.writeUTF(server.process(sql));
                 } catch (IOException e) {
                     break;
                 }

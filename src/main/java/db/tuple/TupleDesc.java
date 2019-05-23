@@ -15,6 +15,7 @@ public class TupleDesc implements Serializable, Cloneable {
     private TDItem[] tdItems;
     private String primaryKey;
     private int primaryKeyIndex;
+    private int byteSize = -1;
 
     public TupleDesc() {
         this(new TDItem[0], null);
@@ -142,11 +143,13 @@ public class TupleDesc implements Serializable, Cloneable {
      *         Note that tuples from a given TupleDesc are of a fixed size.
      */
     public int getSize() {
-        int size = 0;
-        for (TDItem tdItem : tdItems){
-            size += tdItem.getBytes();
+        if (byteSize < 0) {
+            byteSize = 0;
+            for (TDItem tdItem : tdItems){
+                byteSize += tdItem.getBytes();
+            }
         }
-        return size;
+        return byteSize;
     }
 
     /**

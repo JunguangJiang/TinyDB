@@ -2,6 +2,7 @@ package db.query.pipe;
 
 import db.DbException;
 import db.field.TypeMismatch;
+import db.file.PrimaryKeyViolation;
 import db.query.plan.LogicalFilterNode;
 import db.query.predicate.Predicate;
 import db.tuple.Tuple;
@@ -21,7 +22,7 @@ public class Join extends Operator{
     private Predicate predicate;
     private ArrayList<Tuple> tuples = new ArrayList<>();
     private Iterator<Tuple> iterator;
-
+    
     /**
      * Join lhs and rhs with cmp as filter predicate
      * @param lhs
@@ -45,7 +46,7 @@ public class Join extends Operator{
     }
 
     @Override
-    public void open() throws DbException, TypeMismatch {
+    public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
         this.lhs.open();
         this.rhs.open();
         // TODO decrease the loop times
@@ -95,7 +96,7 @@ public class Join extends Operator{
      * @return The next matching tuple.
      */
     @Override
-    protected Tuple fetchNext() throws DbException {
+    protected Tuple fetchNext() throws DbException, PrimaryKeyViolation, TypeMismatch {
         if (iterator != null && iterator.hasNext()) {
             return iterator.next();
         } else {

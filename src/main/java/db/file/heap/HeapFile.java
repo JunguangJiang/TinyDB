@@ -1,6 +1,8 @@
 package db.file.heap;
 
 import db.*;
+import db.field.Field;
+import db.field.Op;
 import db.file.*;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -9,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * HeapFile is an implementation of a DbFile that stores a collection of tuples
@@ -103,14 +106,37 @@ public class HeapFile implements DbFile {
     }
 
     /**
+     * Check Whether a Tuple violates the primary key constraint
+     * @param t
+     * @throws DbException
+     * @throws PrimaryKeyViolation if the primary key constraint is violated
+     */
+    public void checkPrimaryKeyViolated(Tuple t) throws DbException, PrimaryKeyViolation{
+        int tableId = this.getId();
+        int numPages = this.numPages();
+        int primaryKeyIdx = t.getTupleDesc().getPrimaryKeyIndex();
+        Field pkField = t.getField(primaryKeyIdx);
+        for (int i = 0; i < numPages; i++) {
+            HeapPageId pageId = new HeapPageId(tableId, i);
+            Page page = GlobalManager.getBufferPool().getPage(pageId);
+            Iterator<Tuple> iterator = ((HeapPage)page).iterator();
+            while (iterator.hasNext()) {
+                Tuple tuple = iterator.next();
+                if (tuple.getField(primaryKeyIdx).compare(Op.EQUALS, pkField)){
+                    throw new PrimaryKeyViolation(t.getTupleDesc().getPrimaryKey(), pkField.getValue());
+                }
+            }
+        }
+    }
+
+    /**
      * @see DbFile#insertTuple(Tuple)
      */
     public ArrayList<Page> insertTuple(Tuple t)
             throws IOException, PrimaryKeyViolation {
-        // TODO Check whether the Tuple satisfies the Primary Key and NotNull constraint
-        //  and throw Exception if necessary
         ArrayList<Page> affectedPages = new ArrayList<>();
         try {
+            this.checkPrimaryKeyViolated(t); //Check whether the Tuple satisfies the Primary Key
             HeapPage heapPage = (HeapPage)this.getEmptyPage();
             if (heapPage == null) {
                 HeapPageId heapPageId = new HeapPageId(this.getId(), this.numPages());

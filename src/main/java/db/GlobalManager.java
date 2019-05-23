@@ -1,6 +1,7 @@
 package db;
 
 import db.file.BufferPool;
+import sun.util.resources.is.CalendarData_is;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -18,10 +19,12 @@ public class GlobalManager {
     private static AtomicReference<GlobalManager> _instance = new AtomicReference<>(new GlobalManager());
     private final Catalog _catalog;
     private final BufferPool _bufferpool;
+    private final boolean isBTree;
 
     private GlobalManager() {
         _catalog = new Catalog();
         _bufferpool = new BufferPool(BufferPool.DEFAULT_PAGES);
+        isBTree = false;
     }
 
     /** Return the buffer pool of the static GlobalManager instance */
@@ -38,4 +41,6 @@ public class GlobalManager {
     public static Database getDatabase() {
         return getCatalog().getCurrentDatabase();
     }
+
+    public static boolean isBTree() {return _instance.get().isBTree;}
 }

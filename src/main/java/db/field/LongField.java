@@ -46,4 +46,9 @@ public class LongField extends NumberField{
     public boolean less_than(Field val) {
         return (long)getValue() < (long)val.getValue();
     }
+
+    @Override
+    public Field clone() {
+        return new LongField((long)value, isNull);
+    }
 }
