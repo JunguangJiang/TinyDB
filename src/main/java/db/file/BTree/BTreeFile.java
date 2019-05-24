@@ -510,6 +510,9 @@ public class BTreeFile implements DbFile {
 	public ArrayList<Page> insertTuple(Tuple t)
 			throws DbException, IOException, PrimaryKeyViolation {
 		HashMap<PageId, Page> dirtypages = new HashMap<PageId, Page>();
+        // check tupleDesc equation
+        if (!t.getTupleDesc().equals(td))
+            throw new DbException("type mismatch, in insertTuple");
 
 		// get a read lock on the root pointer page and use it to locate the root page
 		BTreeRootPtrPage rootPtr = getRootPtrPage(dirtypages);
@@ -524,6 +527,17 @@ public class BTreeFile implements DbFile {
 		// find and lock the left-most leaf page corresponding to the key field,
 		// and split the leaf page if there are no more slots available
 		BTreeLeafPage leafPage = findLeafPage(dirtypages, rootId, t.getField(keyField));
+
+        // check primaryKey constraint
+		Iterator<Tuple> it = leafPage.iterator();
+		int primaryKeyIndex = td.getPrimaryKeyIndex();
+		while(it.hasNext()){
+		    Tuple tuple = it.next();
+		    if(tuple.getField(primaryKeyIndex).equals(t.getField(primaryKeyIndex))){
+		        throw new PrimaryKeyViolation(td.getPrimaryKey(), tuple.getField(primaryKeyIndex));
+            }
+        }
+
 		if(leafPage.getNumEmptySlots() == 0) {
 			leafPage = splitLeafPage(dirtypages, leafPage, t.getField(keyField));
 		}
