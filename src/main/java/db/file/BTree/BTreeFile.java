@@ -1086,7 +1086,7 @@ public class BTreeFile implements DbFile {
 	/**
 	 * Method to encapsulate the process of creating a new page.  It reuses old pages if possible,
 	 * and creates a new page if none are available.  It wipes the page on disk and in the cache and 
-	 * returns a clean copy locked with read-write permission
+	 * returns a clean copy
 	 *
 	 * @param dirtypages - the list of dirty pages which should be updated with all new dirty pages
 	 * @param pgcateg - the BTreePageId category of the new page.  Either LEAF, INTERNAL, or HEADER
