@@ -20,7 +20,7 @@ public class BTreeRootPtrPage implements Page {
 	private BTreePageId pid;
 	private DataInputStream dis;
 
-	private int root; 
+	private int root;
 	private int rootCategory;
 	private int header;
 

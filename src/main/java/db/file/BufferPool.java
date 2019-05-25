@@ -140,7 +140,8 @@ public class BufferPool {
      are removed from the cache so they can be reused safely
      */
     public synchronized void discardPage(PageId pid) {
-        // TODO
+        pageHashMap.remove(pid);
+        recentlyUsed.remove(pid);
     }
 
     /**
@@ -175,13 +176,16 @@ public class BufferPool {
                 evictedPageId = pageId;
             }
         }
-        try {
-            flushPage(evictedPageId);
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        if(pageHashMap.get(evictedPageId).isDirty()){
+            try {
+                flushPage(evictedPageId);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        pageHashMap.remove(evictedPageId);
-        recentlyUsed.remove(evictedPageId);
+
+        discardPage(evictedPageId);
     }
 
     /**

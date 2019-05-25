@@ -81,7 +81,10 @@ public class BTreeFile implements DbFile {
 		BufferedInputStream bis = null;
 
 		try {
-			bis = new BufferedInputStream(new FileInputStream(f));
+            if(f.length() == 0) {
+                initEmptyFile(f);
+            }
+            bis = new BufferedInputStream(new FileInputStream(f));
 			if(id.pgcateg() == BTreePageId.ROOT_PTR) {
 				byte pageBuf[] = new byte[BTreeRootPtrPage.getPageSize()];
 				int retval = bis.read(pageBuf, 0, BTreeRootPtrPage.getPageSize());
@@ -511,6 +514,9 @@ public class BTreeFile implements DbFile {
 	public ArrayList<Page> insertTuple(Tuple t)
 			throws DbException, IOException, PrimaryKeyViolation {
 		HashMap<PageId, Page> dirtypages = new HashMap<PageId, Page>();
+        // check tupleDesc equation
+        if (!t.getTupleDesc().equals(td))
+            throw new DbException("type mismatch, in insertTuple");
 
 		// get a read lock on the root pointer page and use it to locate the root page
 		BTreeRootPtrPage rootPtr = getRootPtrPage(dirtypages);
@@ -525,6 +531,17 @@ public class BTreeFile implements DbFile {
 		// find and lock the left-most leaf page corresponding to the key field,
 		// and split the leaf page if there are no more slots available
 		BTreeLeafPage leafPage = findLeafPage(dirtypages, rootId, t.getField(keyField));
+
+        // check primaryKey constraint
+		Iterator<Tuple> it = leafPage.iterator();
+		int primaryKeyIndex = td.getPrimaryKeyIndex();
+		while(it.hasNext()){
+		    Tuple tuple = it.next();
+		    if(tuple.getField(primaryKeyIndex).equals(t.getField(primaryKeyIndex))){
+		        throw new PrimaryKeyViolation(td.getPrimaryKey(), tuple.getField(primaryKeyIndex));
+            }
+        }
+
 		if(leafPage.getNumEmptySlots() == 0) {
 			leafPage = splitLeafPage(dirtypages, leafPage, t.getField(keyField));
 		}
@@ -987,6 +1004,7 @@ public class BTreeFile implements DbFile {
 		BTreeLeafPage page = (BTreeLeafPage) getPage(dirtypages, pageId);
 		page.deleteTuple(t);
 
+
 		// if the page is below minimum occupancy, get some tuples from its siblings
 		// or merge with one of the siblings
 		int maxEmptySlots = page.getMaxTuples() - page.getMaxTuples()/2; // ceiling
@@ -1087,7 +1105,7 @@ public class BTreeFile implements DbFile {
 	/**
 	 * Method to encapsulate the process of creating a new page.  It reuses old pages if possible,
 	 * and creates a new page if none are available.  It wipes the page on disk and in the cache and 
-	 * returns a clean copy locked with read-write permission
+	 * returns a clean copy
 	 *
 	 * @param dirtypages - the list of dirty pages which should be updated with all new dirty pages
 	 * @param pgcateg - the BTreePageId category of the new page.  Either LEAF, INTERNAL, or HEADER
@@ -1201,6 +1219,23 @@ public class BTreeFile implements DbFile {
 	public DbFileIterator iterator() {
 		return new BTreeFileIterator(this);
 	}
+
+
+    /**
+     * Make an empty BTreeRootPtrPage and empty BTreeLeafPage as a root page for an empty file.
+     */
+	private void initEmptyFile(File f) throws IOException{
+        // create the root pointer page and the root page
+        BufferedOutputStream bw = new BufferedOutputStream(
+                new FileOutputStream(f, true));
+        byte[] emptyRootPtrData = BTreeRootPtrPage.createEmptyPageData();
+        byte[] emptyLeafData = BTreeLeafPage.createEmptyPageData();
+        emptyRootPtrData[3] = 1;
+        emptyRootPtrData[4] = BTreePageId.LEAF;
+        bw.write(emptyRootPtrData);
+        bw.write(emptyLeafData);
+        bw.close();
+    }
 
 }
 

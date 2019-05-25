@@ -318,7 +318,7 @@ public class BTreeLeafPage extends BTreePage {
 	 */
 	public void insertTuple(Tuple t) throws DbException {
 		if (!t.getTupleDesc().equals(td))
-			throw new DbException("type mismatch, in addTuple");
+			throw new DbException("type mismatch, in insertTuple");
 
 		// find the first empty slot 
 		int emptySlot = -1;
@@ -514,11 +514,11 @@ public class BTreeLeafPage extends BTreePage {
 
 		try {
 			if(!isSlotUsed(i)) {
-				Debug.log(1, "BTreeLeafPage.getTuple: slot %d in %d:%d is not used", i, pid.getTableId(), pid.getPageNumber());
+				// Debug.log(1, "BTreeLeafPage.getTuple: slot %d in %d:%d is not used", i, pid.getTableId(), pid.getPageNumber());
 				return null;
 			}
 
-			Debug.log(1, "BTreeLeafPage.getTuple: returning tuple %d", i);
+			// Debug.log(1, "BTreeLeafPage.getTuple: returning tuple %d", i);
 			return tuples[i];
 
 		} catch (ArrayIndexOutOfBoundsException e) {

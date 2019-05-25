@@ -23,6 +23,11 @@ public interface Page {
     void markDirty(boolean dirty);
 
     /**
+     * return the dirty state of this page as dirtied
+     */
+    boolean isDirty();
+
+    /**
      * Generates a byte array representing the contents of this page.
      * Used to serialize this page to disk.
      * <p>
