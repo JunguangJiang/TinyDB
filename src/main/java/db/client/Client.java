@@ -2,6 +2,7 @@ package db.client;
 
 import jline.console.ConsoleReader;
 import jline.console.completer.*;
+import jline.console.history.FileHistory;
 import jline.console.history.History;
 import java.io.*;
 import java.sql.*;
@@ -63,26 +64,33 @@ public class Client {
             try {
                 Statement st = conn.createStatement();
                 String sql = readSql(reader);
-                if (sql.toUpperCase().equals("EXIT;")) {
+                if (sql.toUpperCase().equals("EXIT;"))
                     break;
+                if (checkImportSequence(sql)) {
+                    sql = handleImportSequence(sql);
+                    countTime(st, sql);
                 }
-                if (checkImportSequence(sql))
-                    try {
-                        sql = handleImportSequence(sql);
-                    } catch (NoSuchElementException e) {
-                        continue;
-                    }
-                long startTime = System.currentTimeMillis();
                 ResultSet rs = st.executeQuery(sql);
-                long endTime = System.currentTimeMillis();
                 System.out.println(rs.getString(0));
-                System.out.println(String.format("Total execute time: %.3f sec.", (endTime - startTime) / 1000.0));
                 st.close();
             } catch (SQLException e) {
                 System.out.println("Server is closed!");
                 break;
-            }
+            } catch (NoSuchElementException e) { /* NOTHING TO DO*/ }
         }
+    }
+
+    /**
+     * count time of the import sequence
+     * @param st: the statement
+     * @param sql: the sql to be send
+     */
+    private static void countTime(Statement st, String sql) throws SQLException {
+        long startTime = System.currentTimeMillis();
+        ResultSet rs = st.executeQuery(sql);
+        long endTime = System.currentTimeMillis();
+        System.out.println(rs.getString(0));
+        System.out.println(String.format("Total execute time: %.3f sec.", (endTime - startTime) / 1000.0));
     }
 
     /**
@@ -130,7 +138,7 @@ public class Client {
         reader.addCompleter(getCompleter(_S("show", "shutdown;"), _S("database", "databases;", "table"), _S()));
         reader.addCompleter(getCompleter(_S("import"), _S()));
         reader.addCompleter(getCompleter(_S("insert into"), _S(), _S("values();"), _S()));
-        reader.addCompleter(getCompleter(_S("select"), _S(), _S("from"), _S(), _S("where"), _S()));
+        reader.addCompleter(getCompleter(_S("select"), _S(), _S("from"), _S(), _S("where")));
         reader.addCompleter(getCompleter(_S("delete from"), _S()));
         reader.addCompleter(getCompleter(_S("use database"), _S()));
         reader.addCompleter(getCompleter(_S("update"), _S(), _S("set"), _S()));
@@ -141,6 +149,7 @@ public class Client {
         try {
             Connection conn = connectServer(args);
             ConsoleReader reader = new ConsoleReader();
+            reader.setExpandEvents(false);
             completeHelper(reader);
             sendAndReceiveMessage(conn, reader);
             conn.close();
@@ -180,8 +189,13 @@ public class Client {
     private static String readSql(ConsoleReader reader) {
         try {
             StringBuilder sb = new StringBuilder();
+//            final FileHistory history = setupHistory(reader);
+//            if (history != null) {
+//                reader.setHistory(history);
+//            }
             while (true) {
-                String line = reader.readLine(sb.length() == 0 ? " > " : "-> ");
+
+                String line = reader.readLine(sb.length() == 0 ? " TinyDB> " : "      -> ");
                 int i = line.length() - 1;
                 while (i >= 0 && line.charAt(i) == ' ')
                     --i;

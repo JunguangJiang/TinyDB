@@ -24,3 +24,4 @@ data.txt
 *.out
 data/*
 bin/*
+test_data/

@@ -3,7 +3,6 @@ package db;
 import db.query.QueryResult;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.*;
 import java.io.*;
 import db.utils.utils;
@@ -20,7 +19,7 @@ public class Catalog {
     public Catalog() {
         this.sqlPath = "test_data/";
         // TODO temp
-        utils.removeDiretory(new File(this.sqlPath));
+        utils.removeDirectory(new File(this.sqlPath));
         this.databaseSet = new HashSet<>();
         this.database = null;
     }
@@ -55,7 +54,7 @@ public class Catalog {
             }
         }
         this.databaseSet.remove(databaseName);
-        utils.removeDiretory(new File(String.format("%s/%s", sqlPath, databaseName)));
+        utils.removeDirectory(new File(utils.getFilePath(sqlPath, databaseName)));
         if(this.database != null && this.database.databaseName.equals(databaseName)) {
             this.database = null;
         }
@@ -114,12 +113,13 @@ public class Catalog {
     public String[] getTableNames(String databaseName) throws NoSuchElementException {
         if (this.database != null && databaseName.equals(this.database.databaseName))
             return GlobalManager.getDatabase().getTableNames();
-        String scriptFilename = String.format("%s/%s/%s.script", this.sqlPath, databaseName, databaseName);
+        String scriptFilename = utils.getFilePath(this.sqlPath, databaseName, databaseName + ".script");
         try {
             String content = utils.readFile(scriptFilename).split("\n", 2)[0];
-            return content.split("\t");
+            return Database.getTablesNameAndIncrementNumber(content).getKey();
         } catch (Exception e) {
-            System.out.println("File" + scriptFilename + " not exist");
+            e.printStackTrace();
+            System.out.println("File " + scriptFilename + " not exist");
             throw new NoSuchElementException("Database doesn't exist");
         }
     }
@@ -142,7 +142,7 @@ public class Catalog {
      */
     public void load(String sqlPath) {
         this.sqlPath = sqlPath;
-        String catalogFileName = sqlPath + "catalog.script";
+        String catalogFileName = utils.getFilePath(this.sqlPath, "catalog.script");
         try {
             parseCatalogFile(utils.readFile(catalogFileName));
         }
@@ -156,7 +156,7 @@ public class Catalog {
      * write names of all the databases back to file
      */
     public void persist() {
-        String catalogFilename = this.sqlPath + "catalog.script";
+        String catalogFilename = utils.getFilePath(this.sqlPath, "catalog.script");
         try {
             if (this.database != null)
                 this.database.persist();
