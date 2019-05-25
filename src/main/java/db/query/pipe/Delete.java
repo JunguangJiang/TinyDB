@@ -2,8 +2,10 @@ package db.query.pipe;
 
 import db.DbException;
 import db.GlobalManager;
+import db.error.SQLError;
+import db.error.TypeMismatch;
 import db.field.*;
-import db.file.PrimaryKeyViolation;
+import db.error.PrimaryKeyViolation;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -32,7 +34,7 @@ public class Delete extends Operator{
     }
 
     @Override
-    public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
+    public void open() throws DbException, SQLError {
         child.open();
         super.open();
     }
@@ -55,7 +57,7 @@ public class Delete extends Operator{
      * @return A 1-field tuple containing the number of deleted records.
      */
     @Override
-    protected Tuple fetchNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
+    protected Tuple fetchNext() throws DbException, SQLError {
         int count = 0;
         if (fetched) {
            return null;
@@ -68,15 +70,5 @@ public class Delete extends Operator{
             }
             return Util.getCountTuple(count, "delete count");
         }
-    }
-
-    @Override
-    public OpIterator[] getChildren() {
-        return new OpIterator[]{child};
-    }
-
-    @Override
-    public void setChildren(OpIterator[] children) {
-        child = children[0];
     }
 }

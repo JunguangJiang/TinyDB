@@ -1,6 +1,7 @@
 package db.query.plan;
 import db.GlobalManager;
-import db.field.TypeMismatch;
+import db.error.SQLError;
+import db.error.TypeMismatch;
 import db.query.pipe.*;
 import db.file.BTree.IndexPredicate;
 import db.query.*;
@@ -108,7 +109,7 @@ public class LogicalPlan
      * Attempts to find the optimal plan to order the joins in the plan.
      *  @return A OpIterator representing this plan.
      */
-    public OpIterator physicalPlan() throws TypeMismatch {
+    public OpIterator physicalPlan() throws SQLError {
         OpIterator scans[]= new OpIterator[this.joinNodes.size()];
 
         LogicalFilterNode.AndNode andNode=null;

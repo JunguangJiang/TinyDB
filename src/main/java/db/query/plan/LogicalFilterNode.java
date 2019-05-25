@@ -1,7 +1,7 @@
 package db.query.plan;
 
 import db.field.Op;
-import db.field.TypeMismatch;
+import db.error.TypeMismatch;
 import db.field.Util;
 import db.file.BTree.IndexPredicate;
 import db.query.FullColumnName;

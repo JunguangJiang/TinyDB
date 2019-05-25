@@ -1,8 +1,9 @@
 package db.query.pipe;
 
 import db.DbException;
-import db.field.TypeMismatch;
-import db.file.PrimaryKeyViolation;
+import db.error.SQLError;
+import db.error.TypeMismatch;
+import db.error.PrimaryKeyViolation;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -18,7 +19,7 @@ public abstract class Operator implements OpIterator{
     private Tuple next = null;
     private boolean open = false;
 
-    public boolean hasNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
+    public boolean hasNext() throws DbException, SQLError {
         if (!this.open)
             throw new IllegalStateException("Operator not yet open");
 
@@ -28,7 +29,7 @@ public abstract class Operator implements OpIterator{
     }
 
     public Tuple next() throws DbException,
-            NoSuchElementException, TypeMismatch, PrimaryKeyViolation {
+            NoSuchElementException, SQLError {
         if (next == null) {
             next = fetchNext();
             if (next == null)
@@ -48,7 +49,7 @@ public abstract class Operator implements OpIterator{
      * @return the next Tuple in the iterator, or null if the iteration is
      *         finished.
      */
-    protected abstract Tuple fetchNext() throws DbException, TypeMismatch, PrimaryKeyViolation;
+    protected abstract Tuple fetchNext() throws DbException, SQLError;
 
     /**
      * Closes this iterator. If overridden by a subclass, they should call
@@ -64,26 +65,9 @@ public abstract class Operator implements OpIterator{
      * Opens the iterator. This must be called before any of the other methods.
      * @throws DbException when there are problems opening/accessing the database.
      */
-    public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
+    public void open() throws DbException, SQLError{
         this.open = true;
     }
-
-    /**
-     * @return return the children DbIterators of this operator. If there is
-     *         only one child, return an array of only one element. For join
-     *         operators, the order of the children is not important. But they
-     *         should be consistent among multiple calls.
-     * */
-    public abstract OpIterator[] getChildren();
-
-    /**
-     * Set the children(child) of this operator. If the operator has only one
-     * child, children[0] should be used.
-     * @param children
-     *            the DbIterators which are to be set as the children(child) of
-     *            this operator
-     * */
-    public abstract void setChildren(OpIterator[] children);
 
     /**
      * @return return the TupleDesc of the output tuples of this operator

@@ -1,9 +1,9 @@
-package db.file;
+package db.error;
 
 /**
  * Exception when violating the primary key constraint
  */
-public class PrimaryKeyViolation extends Exception{
+public class PrimaryKeyViolation extends SQLError{
     /**
      *
      * @param primaryKeyName the name of the primary key

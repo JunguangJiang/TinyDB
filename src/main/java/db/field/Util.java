@@ -1,5 +1,6 @@
 package db.field;
 
+import db.error.TypeMismatch;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;

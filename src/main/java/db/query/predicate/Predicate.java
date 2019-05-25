@@ -1,6 +1,6 @@
 package db.query.predicate;
 
-import db.field.TypeMismatch;
+import db.error.TypeMismatch;
 import db.tuple.Tuple;
 
 /**

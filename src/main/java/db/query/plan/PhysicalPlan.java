@@ -2,8 +2,9 @@ package db.query.plan;
 
 import com.github.freva.asciitable.AsciiTable;
 import db.DbException;
-import db.field.TypeMismatch;
-import db.file.PrimaryKeyViolation;
+import db.error.SQLError;
+import db.error.TypeMismatch;
+import db.error.PrimaryKeyViolation;
 import db.query.QueryResult;
 import db.query.pipe.OpIterator;
 import db.tuple.Tuple;
@@ -46,7 +47,7 @@ public class PhysicalPlan {
         } catch (DbException e){
             e.printStackTrace();
             return new QueryResult(false, e.toString());
-        } catch (TypeMismatch | PrimaryKeyViolation e) {
+        } catch (SQLError e) {
             return new QueryResult(false, e.getMessage());
         } finally {
             this.root.close();

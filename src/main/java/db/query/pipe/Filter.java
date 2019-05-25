@@ -1,8 +1,9 @@
 package db.query.pipe;
 
 import db.DbException;
-import db.field.TypeMismatch;
-import db.file.PrimaryKeyViolation;
+import db.error.SQLError;
+import db.error.TypeMismatch;
+import db.error.PrimaryKeyViolation;
 import db.query.predicate.Predicate;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -35,7 +36,7 @@ public class Filter extends Operator{
     }
 
     @Override
-    public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
+    public void open() throws DbException, SQLError {
         child.open();
         super.open();
     }
@@ -60,7 +61,7 @@ public class Filter extends Operator{
      *         more tuples
      */
     @Override
-    protected Tuple fetchNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
+    protected Tuple fetchNext() throws DbException, SQLError{
         while (child.hasNext()) {
             Tuple tuple = child.next();
             if (this.predicate.filter(tuple)) {
@@ -68,15 +69,5 @@ public class Filter extends Operator{
             }
         }
         return null;
-    }
-
-    @Override
-    public OpIterator[] getChildren() {
-        return new OpIterator[]{child};
-    }
-
-    @Override
-    public void setChildren(OpIterator[] children) {
-        child = children[0];
     }
 }

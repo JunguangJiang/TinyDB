@@ -1,5 +1,6 @@
 package db.file;
 
+import db.error.NotNullViolation;
 import db.tuple.TDItem;
 
 import java.io.DataOutputStream;
@@ -25,7 +26,7 @@ public class Util {
      * @param value
      * @throws Exception if the constraint is not satisfied
      */
-    public static void checkNotNullConstraint(TDItem tdItem, Object value) throws NotNullViolation{
+    public static void checkNotNullConstraint(TDItem tdItem, Object value) throws NotNullViolation {
         if (tdItem.notNull || tdItem.isPrimaryKey) {
             if (value == null) {
                 throw new NotNullViolation(tdItem.fieldName);

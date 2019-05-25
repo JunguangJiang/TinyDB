@@ -1,6 +1,6 @@
-package db.file;
+package db.error;
 
-public class NotNullViolation extends Exception{
+public class NotNullViolation extends SQLError{
     /**
      *
      * @param attrName the name of the attribute that cannot be null

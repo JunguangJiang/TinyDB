@@ -16,7 +16,7 @@ INSERT INTO student values("s4", 4, 50, 4.0, 98.1);
 INSERT INTO student values("s5", 5, 33, 3.55, 91.4);
 INSERT INTO student values("s6", 6, 35, 3.55, 92.0);
 INSERT INTO student values("s7", 7, 35, 3.53, 91.0);
-INSERT INTO student values('s8', 8, 35.3, 3.63, 94.3);
+INSERT INTO student values('s8', 8, 35, 3.63, 94.3);
 INSERT INTO student(name, ID) values("s9", 9);
 
 -- not null test --
@@ -24,8 +24,11 @@ INSERT INTO student(name) values("s10");
 INSERT INTO student(ID, credits) VALUES("s11", 33);
 
 -- unique test
--- INSERT INTO student(ID, name) VALUES(8, "s8");
+INSERT INTO student(ID, name) VALUES(8, "s8");
 SELECT name, id, credits, gpa, scores from student;
+
+-- type mismatch test
+INSERT INTO student values('s10', 19, 35.5, 3.63, 94.3);
 
 DROP TABLE student;
 DROP DATABASE dbName;

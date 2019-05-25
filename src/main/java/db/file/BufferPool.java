@@ -1,6 +1,7 @@
 package db.file;
 
 import db.*;
+import db.error.PrimaryKeyViolation;
 import db.tuple.Tuple;
 import java.io.*;
 import java.util.*;

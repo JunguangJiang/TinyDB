@@ -2,17 +2,22 @@ package db.file;
 
 import db.DbException;
 import db.GlobalManager;
+import db.error.NotNullViolation;
+import db.error.PrimaryKeyViolation;
+import db.error.SQLError;
 import db.file.BTree.BTreeFile;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
-import db.field.TypeMismatch;
+import db.error.TypeMismatch;
 import db.field.Util;
 import db.file.heap.HeapFile;
 import db.query.QueryResult;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -96,7 +101,7 @@ public class Table {
         try {
             Tuple tuple = createTuple(attrNames, values, getTupleDesc(), autoIncrementNumber);
             return insertTuple(tuple);
-        } catch (Exception e) {
+        } catch (SQLError e) {
             return new QueryResult(false, e.getMessage());
         }
 
@@ -115,13 +120,15 @@ public class Table {
      * @throws Exception
      */
     public static Tuple createTuple(String[] attrNames, Object[] values,
-                                     TupleDesc tupleDesc, long autoIncrementNumber) throws Exception{
+                                     TupleDesc tupleDesc, long autoIncrementNumber) throws SQLError, NotNullViolation, TypeMismatch{
         if (attrNames == null) {
             //attrNames are all the attribute names of the table
-            attrNames = tupleDesc.getAttrNames();
+            ArrayList<String> attrNameList = new ArrayList<>(Arrays.asList(tupleDesc.getAttrNames()));
+            attrNameList.remove("PRIMARY");
+            attrNames = attrNameList.toArray(new String[0]);
         }
         if (attrNames.length != values.length) {
-            throw new Exception("The length of attribute must equal to the length of values");
+            throw new SQLError("The length of attribute must equal to the length of values");
         } else {
             HashMap<String, Object> hashMap = new HashMap<>(); // map attrName to value
             for (int i=0; i<attrNames.length; i++) {
@@ -141,9 +148,8 @@ public class Table {
             // Ensure that all insert attributes exist.
             if (!hashMap.isEmpty()) {
                 String attribute = hashMap.keySet().toArray(new String[0])[0];
-                throw new Exception("FullColumnName " + attribute +" doesn't exist.");
+                throw new SQLError("FullColumnName " + attribute +" doesn't exist.");
             }
-
             return tuple;
         }
     }

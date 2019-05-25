@@ -1,8 +1,9 @@
 package db.query.pipe;
 
 import db.DbException;
-import db.field.TypeMismatch;
-import db.file.PrimaryKeyViolation;
+import db.error.SQLError;
+import db.error.TypeMismatch;
+import db.error.PrimaryKeyViolation;
 import db.query.plan.LogicalFilterNode;
 import db.query.predicate.Predicate;
 import db.tuple.Tuple;
@@ -30,7 +31,7 @@ public class Join extends Operator{
      * @param rhs
      * @throws TypeMismatch
      */
-    public Join(OpIterator lhs, LogicalFilterNode.BaseFilterNode cmp, OpIterator rhs) throws TypeMismatch{
+    public Join(OpIterator lhs, LogicalFilterNode.BaseFilterNode cmp, OpIterator rhs) throws SQLError{
         this.lhs = lhs;
         this.rhs = rhs;
         this.mergedTupleDesc = TupleDesc.merge(lhs.getTupleDesc(), rhs.getTupleDesc());
@@ -46,7 +47,7 @@ public class Join extends Operator{
     }
 
     @Override
-    public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
+    public void open() throws DbException, SQLError {
         this.lhs.open();
         this.rhs.open();
         // TODO decrease the loop times
@@ -74,7 +75,7 @@ public class Join extends Operator{
     }
 
     @Override
-    public void rewind() throws DbException {
+    public void rewind() {
         iterator = tuples.iterator();
     }
 
@@ -96,25 +97,11 @@ public class Join extends Operator{
      * @return The next matching tuple.
      */
     @Override
-    protected Tuple fetchNext() throws DbException, PrimaryKeyViolation, TypeMismatch {
+    protected Tuple fetchNext() {
         if (iterator != null && iterator.hasNext()) {
             return iterator.next();
         } else {
             return null;
         }
-    }
-
-    @Override
-    public OpIterator[] getChildren() {
-        return new OpIterator[] {
-                lhs,
-                rhs
-        };
-    }
-
-    @Override
-    public void setChildren(OpIterator[] children) {
-        this.lhs = children[0];
-        this.rhs = children[1];
     }
 }

@@ -1,10 +1,9 @@
 package db.query.plan;
 
 import db.GlobalManager;
-import db.Utility;
 import db.field.Op;
 import db.field.Type;
-import db.field.TypeMismatch;
+import db.error.TypeMismatch;
 import db.file.BTree.IndexPredicate;
 import db.query.FullColumnName;
 import db.query.QueryResult;

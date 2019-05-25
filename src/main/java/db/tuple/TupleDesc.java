@@ -69,6 +69,10 @@ public class TupleDesc implements Serializable, Cloneable {
         return tdItems[i];
     }
 
+    /**
+     * get all the attribute names
+     * @return
+     */
     public String[] getAttrNames() {
         String[] attrNames = new String[numFields()];
         for (int i=0; i<numFields(); i++) {

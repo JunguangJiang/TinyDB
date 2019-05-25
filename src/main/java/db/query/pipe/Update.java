@@ -2,11 +2,12 @@ package db.query.pipe;
 
 import db.DbException;
 import db.GlobalManager;
+import db.error.SQLError;
 import db.field.Field;
-import db.field.TypeMismatch;
+import db.error.TypeMismatch;
 import db.field.Util;
-import db.file.NotNullViolation;
-import db.file.PrimaryKeyViolation;
+import db.error.NotNullViolation;
+import db.error.PrimaryKeyViolation;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -38,7 +39,7 @@ public class Update extends Operator{
     private boolean changePrimaryKey;
     private Object primaryKeyValue;
 
-    public Update(OpIterator child, UpdateElement[] updateElements) throws TypeMismatch, NotNullViolation {
+    public Update(OpIterator child, UpdateElement[] updateElements) throws SQLError {
         this.child = child;
         this.indexes = new int[updateElements.length];
         this.fields = new Field[updateElements.length];
@@ -63,7 +64,7 @@ public class Update extends Operator{
     }
 
     @Override
-    public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
+    public void open() throws DbException, SQLError{
         child.open();
         super.open();
     }
@@ -79,7 +80,7 @@ public class Update extends Operator{
         child.rewind();
     }
 
-    private boolean hasMoreThanOneChild() throws DbException, TypeMismatch, PrimaryKeyViolation{
+    private boolean hasMoreThanOneChild() throws DbException, SQLError{
         int count=0;
         while(child.hasNext()) {
             child.next();
@@ -93,7 +94,7 @@ public class Update extends Operator{
     }
 
     @Override
-    protected Tuple fetchNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
+    protected Tuple fetchNext() throws DbException, SQLError {
         if (changePrimaryKey && hasMoreThanOneChild() ) {
             throw new PrimaryKeyViolation(child.getTupleDesc().getPrimaryKey(), primaryKeyValue);
         }
@@ -123,15 +124,5 @@ public class Update extends Operator{
             }
         }
         return Util.getCountTuple(count, "update counts");
-    }
-
-    @Override
-    public OpIterator[] getChildren() {
-        return new OpIterator[]{child};
-    }
-
-    @Override
-    public void setChildren(OpIterator[] children) {
-        child = children[0];
     }
 }

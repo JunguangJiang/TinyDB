@@ -1,8 +1,9 @@
 package db.query.pipe;
 
 import db.DbException;
-import db.field.TypeMismatch;
-import db.file.PrimaryKeyViolation;
+import db.error.SQLError;
+import db.error.TypeMismatch;
+import db.error.PrimaryKeyViolation;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -22,13 +23,13 @@ public interface OpIterator extends Serializable{
      * Opens the iterator. This must be called before any of the other methods.
      * @throws DbException when there are problems opening/accessing the database.
      */
-    void open() throws DbException, TypeMismatch, PrimaryKeyViolation;
+    void open() throws DbException, SQLError;
 
     /** Returns true if the iterator has more tuples.
      * @return true if the iterator has more tuples.
      * @throws IllegalStateException If the iterator has not been opened
      */
-    boolean hasNext() throws DbException, TypeMismatch, PrimaryKeyViolation;
+    boolean hasNext() throws DbException, SQLError;
 
     /**
      * Returns the next tuple from the operator (typically implementing by reading
@@ -38,7 +39,7 @@ public interface OpIterator extends Serializable{
      * @throws NoSuchElementException if there are no more tuples.
      * @throws IllegalStateException If the iterator has not been opened
      */
-    Tuple next() throws DbException, NoSuchElementException, TypeMismatch, PrimaryKeyViolation;
+    Tuple next() throws DbException, NoSuchElementException, SQLError;
 
     /**
      * Resets the iterator to the start.

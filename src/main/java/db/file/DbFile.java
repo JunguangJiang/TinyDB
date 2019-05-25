@@ -1,6 +1,7 @@
 package db.file;
 
 import db.DbException;
+import db.error.PrimaryKeyViolation;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 

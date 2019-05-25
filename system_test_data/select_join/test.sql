@@ -46,9 +46,8 @@ INSERT INTO teacher VALUES ("t3", 3, "professor", "PKU");
 INSERT INTO teacher VALUES ("t4", 4, "lecturer", "ZJU");
 
 
-SELECT student.name, credits, gpa, school.name FROM student JOIN school ON student.school_name = school.name;
-
-SELECT student.name, credits, gpa, school.name FROM student JOIN school ON student.school_name = school.name WHERE student.GPA >= 3.6;
+SELECT student.name, credits, gpa, school.name FROM student JOIN school ON school_name = school.name;
+SELECT student.name, credits, gpa, school.name FROM student JOIN school ON school_name = school.name WHERE student.GPA >= 3.6;
 
 SELECT teacher.name, student.name, school.name FROM student JOIN school ON student.school_name = school.name
   JOIN teacher ON teacher.school_name = school.name WHERE student.scores > 90.0 and title = 'professor';

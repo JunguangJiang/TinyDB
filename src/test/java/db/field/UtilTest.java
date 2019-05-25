@@ -1,5 +1,6 @@
 package db.field;
 
+import db.error.TypeMismatch;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

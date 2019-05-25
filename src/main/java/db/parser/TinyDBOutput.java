@@ -32,14 +32,6 @@ public class TinyDBOutput extends BaseErrorListener {
     }
 
     /**
-     * Print a semantic error to the buffer
-     * @param semanticError
-     */
-    public void print(SemanticError semanticError) {
-        buffer.add(semanticError.toString());
-    }
-
-    /**
      * Print a string msg to the buffer
      * @param msg
      */

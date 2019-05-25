@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import db.*;
+import db.error.PrimaryKeyViolation;
 import db.field.Field;
 import db.field.Op;
 import db.file.*;

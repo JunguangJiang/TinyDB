@@ -1,8 +1,16 @@
 package db;
 
 import db.field.Type;
+import db.error.TypeMismatch;
+import db.error.PrimaryKeyViolation;
+import db.query.pipe.OpIterator;
 import db.tuple.TDItem;
+import db.tuple.Tuple;
 import db.tuple.TupleDesc;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /** Helper methods used for testing and implementing random features. */
 public class Utility {
@@ -44,4 +52,38 @@ public class Utility {
     }
 
 
+    public static OpIterator getOpIterator(ArrayList<Tuple> tuples) {
+        OpIterator opIterator = new OpIterator() {
+            private Iterator<Tuple> iterator;
+            @Override
+            public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
+                iterator = tuples.iterator();
+            }
+
+            @Override
+            public boolean hasNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public Tuple next() throws DbException, NoSuchElementException, TypeMismatch, PrimaryKeyViolation {
+                return iterator.next();
+            }
+
+            @Override
+            public void rewind() throws DbException {
+                iterator = tuples.iterator();
+            }
+
+            @Override
+            public TupleDesc getTupleDesc() {
+                return tuples.get(0).getTupleDesc();
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        return opIterator;
+    }
 }

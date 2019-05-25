@@ -2,7 +2,7 @@ package db.query.predicate;
 
 import db.field.Field;
 import db.field.Op;
-import db.field.TypeMismatch;
+import db.error.TypeMismatch;
 import db.field.Util;
 import db.query.plan.LogicalFilterNode;
 import db.tuple.Tuple;

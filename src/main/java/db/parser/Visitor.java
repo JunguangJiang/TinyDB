@@ -4,11 +4,12 @@ import com.github.freva.asciitable.AsciiTable;
 import db.Database;
 import db.DbException;
 import db.GlobalManager;
+import db.error.SQLError;
 import db.field.Op;
 import db.field.Type;
-import db.field.TypeMismatch;
-import db.file.NotNullViolation;
-import db.file.PrimaryKeyViolation;
+import db.error.TypeMismatch;
+import db.error.NotNullViolation;
+import db.error.PrimaryKeyViolation;
 import db.query.pipe.*;
 import db.file.BTree.IndexPredicate;
 import db.file.Table;
@@ -498,7 +499,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             }
 
             return physicalPlan.execute(header);
-        } catch (NullPointerException | TypeMismatch | NoSuchElementException e) {
+        } catch (SQLError | NoSuchElementException e) {
             return new QueryResult(false, e.getMessage());
         }
     }
@@ -649,7 +650,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         } catch (DbException e){
             e.printStackTrace();
             return new QueryResult(false, e.toString());
-        } catch (TypeMismatch | PrimaryKeyViolation e) {
+        } catch (SQLError e) {
             return new QueryResult(false, e.getMessage());
         }
 

@@ -1,6 +1,7 @@
 package db.file.heap;
 
 import db.*;
+import db.error.PrimaryKeyViolation;
 import db.field.Field;
 import db.field.Op;
 import db.file.*;
