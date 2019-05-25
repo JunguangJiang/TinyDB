@@ -80,7 +80,10 @@ public class BTreeFile implements DbFile {
 		BufferedInputStream bis = null;
 
 		try {
-			bis = new BufferedInputStream(new FileInputStream(f));
+            if(f.length() == 0) {
+                initEmptyFile(f);
+            }
+            bis = new BufferedInputStream(new FileInputStream(f));
 			if(id.pgcateg() == BTreePageId.ROOT_PTR) {
 				byte pageBuf[] = new byte[BTreeRootPtrPage.getPageSize()];
 				int retval = bis.read(pageBuf, 0, BTreeRootPtrPage.getPageSize());
@@ -1000,6 +1003,7 @@ public class BTreeFile implements DbFile {
 		BTreeLeafPage page = (BTreeLeafPage) getPage(dirtypages, pageId);
 		page.deleteTuple(t);
 
+
 		// if the page is below minimum occupancy, get some tuples from its siblings
 		// or merge with one of the siblings
 		int maxEmptySlots = page.getMaxTuples() - page.getMaxTuples()/2; // ceiling
@@ -1214,6 +1218,23 @@ public class BTreeFile implements DbFile {
 	public DbFileIterator iterator() {
 		return new BTreeFileIterator(this);
 	}
+
+
+    /**
+     * Make an empty BTreeRootPtrPage and empty BTreeLeafPage as a root page for an empty file.
+     */
+	private void initEmptyFile(File f) throws IOException{
+        // create the root pointer page and the root page
+        BufferedOutputStream bw = new BufferedOutputStream(
+                new FileOutputStream(f, true));
+        byte[] emptyRootPtrData = BTreeRootPtrPage.createEmptyPageData();
+        byte[] emptyLeafData = BTreeLeafPage.createEmptyPageData();
+        emptyRootPtrData[3] = 1;
+        emptyRootPtrData[4] = BTreePageId.LEAF;
+        bw.write(emptyRootPtrData);
+        bw.write(emptyLeafData);
+        bw.close();
+    }
 
 }
 
