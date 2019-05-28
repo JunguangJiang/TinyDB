@@ -16,13 +16,11 @@ Query OK, 1 row affected (0.0 sec)
 +-------+
 | Table |
 +-------+
-|       |
 +-------+
-1 rows in set (0.0 sec)
+0 rows in set (0.0 sec)
 +-------+
 | Table |
 +-------+
-|       |
 +-------+
 1 rows in set (0.0 sec)
 Line 10 : Database not set. Please input the sql 'USE DATABASE $NAME' first
@@ -48,9 +46,9 @@ Query OK, 0 row affected. (0.0 sec)
 +---------+
 | Table   |
 +---------+
-|  SCHOOL |
-+---------+
 | STUDENT |
++---------+
+|  SCHOOL |
 +---------+
 2 rows in set (0.0 sec)
 Database changed (0.016 sec)

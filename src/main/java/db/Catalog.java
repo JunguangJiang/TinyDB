@@ -115,8 +115,10 @@ public class Catalog {
             return GlobalManager.getDatabase().getTableNames();
         String scriptFilename = utils.getFilePath(this.sqlPath, databaseName, databaseName + ".script");
         try {
-            String content = utils.readFile(scriptFilename).split("\n", 2)[0];
-            return Database.getTablesNameAndIncrementNumber(content).getKey();
+            String[] lines = utils.readFile(scriptFilename).split(System.lineSeparator());
+            assert lines.length > 0;
+            Integer n = Integer.valueOf(lines[0]);
+            return Arrays.copyOfRange(lines,1, 1+n);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("File " + scriptFilename + " not exist");

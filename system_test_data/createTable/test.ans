@@ -2,10 +2,10 @@
 | Database |
 +----------+
 +----------+
-0 rows in set (0.078 sec)
+0 rows in set (0.0 sec)
 Line 3 : Database not set. Please input the sql 'USE DATABASE $NAME' first
+Query OK, 1 row affected (0.001 sec)
 Query OK, 1 row affected (0.0 sec)
-Query OK, 1 row affected (0.016 sec)
 +----------+
 | Database |
 +----------+
@@ -14,7 +14,7 @@ Query OK, 1 row affected (0.016 sec)
 |    TEST1 |
 +----------+
 2 rows in set (0.0 sec)
-Database changed (0.0 sec)
+Database changed (0.001 sec)
 Query OK, 0 row affected. (0.0 sec)
 Query OK, 0 row affected. (0.0 sec)
 +----------+
@@ -24,7 +24,7 @@ Query OK, 0 row affected. (0.0 sec)
 +----------+
 |    TEST1 |
 +----------+
-2 rows in set (0.0 sec)
+2 rows in set (0.001 sec)
 +---------+
 | Table   |
 +---------+
@@ -33,7 +33,7 @@ Query OK, 0 row affected. (0.0 sec)
 | STUDENT |
 +---------+
 2 rows in set (0.0 sec)
-Database changed (0.0 sec)
+Database changed (0.001 sec)
 Query OK, 0 row affected. (0.0 sec)
 +----------+
 | Database |
@@ -48,14 +48,14 @@ Query OK, 0 row affected. (0.0 sec)
 +-------+
 |    T1 |
 +-------+
-1 rows in set (0.0 sec)
+1 rows in set (0.001 sec)
 +---------+
 | Table   |
 +---------+
-|  SCHOOL |
-+---------+
 | STUDENT |
 +---------+
-2 rows in set (0.015 sec)
+|  SCHOOL |
++---------+
+2 rows in set (0.0 sec)
 Query OK, 0 rows affected (0.0 sec)
-Query OK, 0 rows affected (0.0 sec)
+Query OK, 0 rows affected (0.001 sec)

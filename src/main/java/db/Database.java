@@ -159,8 +159,11 @@ public class Database {
         String[] tablesMessage = content.split("\t");
         String[] ret1 = new String[tablesMessage.length];
         String[] ret2 = new String[tablesMessage.length];
+        System.out.println("tableMessage"+tablesMessage.length);
+        System.out.println(tablesMessage.toString());
         for (int i = 0; i < tablesMessage.length; ++i) {
             String[] items = tablesMessage[i].split(" ", 2);
+            System.out.println(items.length);
             ret1[i] = items[0];
             ret2[i] = items[1];
         }
@@ -173,19 +176,25 @@ public class Database {
      */
     private void parseDatabaseScript(String content, File outFile) {
         try {
-            String[] items = content.split("\n", 2);
-            Pair<String[], String[]> rets = getTablesNameAndIncrementNumber(items[0]);
+            String[] lines = content.split(System.lineSeparator());
+            assert lines.length > 0;
+            Integer n = Integer.valueOf(lines[0]); // the number of tables
+            StringBuilder sqlString = new StringBuilder();
+            for(int i=1+2*n; i<lines.length; i++) {
+                sqlString.append(lines[i]);
+            }
             BufferedWriter log = new BufferedWriter(new FileWriter(outFile));
             TinyDBOutput out = new TinyDBOutput(log);
-            TinyDBParser parser = utils.createParser(items[1], out);
+            TinyDBParser parser = utils.createParser(sqlString.toString(), out);
             ParseTree tree = parser.root();
             Visitor visitor = new Visitor(out, true);
             visitor.visit(tree);
             log.close();
-            String[] names = rets.getKey();
-            String[] incrementNumbers = rets.getValue();
+            String[] names = Arrays.copyOfRange(lines,1,n+1);
+            String[] incrementNumbers = Arrays.copyOfRange(lines, n+1, 2*n+1);
             for (int i = 0; i < names.length; ++i) {
-                idTableMap.get(nameIdMap.get(names[i])).autoIncrementNumber = Long.parseLong(incrementNumbers[i]);
+                Table table = idTableMap.get(nameIdMap.get(names[i]));
+                table.autoIncrementNumber = Long.parseLong(incrementNumbers[i]);
             }
         }
         catch (Exception e) {
@@ -220,24 +229,27 @@ public class Database {
     }
 
     /**
-     * @param iterator: the iterator of tablesName
+     * get the meta info of all the tables
+     * @return
      */
-    private String getTablesMessage(Iterator<String> iterator) {
-        boolean first = true;
-        StringBuilder sbSql = new StringBuilder();
-        StringBuilder sbTableNames = new StringBuilder();
-        while (iterator.hasNext()) {
-            String name = iterator.next();
-            if (first)
-                first = false;
-            else
-                sbTableNames.append("\t");
-            sbTableNames.append(name + ' ' + idTableMap.get(nameIdMap.get(name)).autoIncrementNumber);
-            sbSql.append(idSqlMap.get(nameIdMap.get(name)));
-            sbSql.append(";\n");
+    private String getTablesMeta() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(idTableMap.size());
+        stringBuilder.append(System.lineSeparator());
+        for (Integer id: idTableMap.keySet()) {
+            stringBuilder.append(getTable(id).getName());
+            stringBuilder.append(System.lineSeparator());
         }
-        sbTableNames.append("\n");
-        return sbTableNames.toString() + sbSql.toString();
+        for (Integer id: idTableMap.keySet()) {
+            stringBuilder.append(getTable(id).autoIncrementNumber);
+            stringBuilder.append(System.lineSeparator());
+        }
+        for (Integer id: idTableMap.keySet()) {
+            stringBuilder.append(idSqlMap.get(id));
+            stringBuilder.append(";");
+            stringBuilder.append(System.lineSeparator());
+        }
+        return stringBuilder.toString();
     }
 
     /**
@@ -268,8 +280,7 @@ public class Database {
             File f = new File(databaseScriptFilename);
             OutputStream fop = new FileOutputStream(f);
             OutputStreamWriter writer = new OutputStreamWriter(fop, "UTF-8");
-            Set<String> tableNames = nameIdMap.keySet();
-            writer.append(getTablesMessage(tableNames.iterator()));
+            writer.append(getTablesMeta());
             writer.close();
             fop.close();
         }
