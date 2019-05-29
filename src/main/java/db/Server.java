@@ -22,7 +22,7 @@ public class Server {
      *
      * @param sqlPath the sql path where catalog and all the databases are stored in
      */
-     Server(String sqlPath) {
+    Server(String sqlPath) {
 //         if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
 //            sqlPath += '/';
 //         }
@@ -32,18 +32,18 @@ public class Server {
 //            System.exit(-1);
 //        }
 //    }
-         if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
+        if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
             sqlPath += '/';
-         }
-         this.sqlPath = sqlPath;
-         GlobalManager.getCatalog().load(sqlPath);
+        }
+        this.sqlPath = sqlPath;
+        GlobalManager.getCatalog().load(sqlPath);
 
-         try {
-             serverSocket = new ServerSocket(9528);
-         } catch (IOException e) {
-             System.out.println("Server open failed!");
-         }
-         clientSocketList = new ArrayList<>();
+        try {
+            serverSocket = new ServerSocket(9528);
+        } catch (IOException e) {
+            System.out.println("Server open failed!");
+        }
+        clientSocketList = new ArrayList<>();
     }
 
     /**
@@ -195,9 +195,24 @@ public class Server {
                 try {
                     DataInputStream in = new DataInputStream(socket.getInputStream());
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
                     String sql = in.readUTF();
-                    out.writeUTF(server.process(sql));
+
+                    String result = server.process(sql);
+                    int bufferSize = 60000;
+                    int i =0;
+                    int sum = 0;
+
+                    while(i < result.length()){
+                        int endIdx = java.lang.Math.min(result.length(), i + bufferSize);
+                        String jsosPart = result.substring(i,endIdx);
+                        out.writeUTF(jsosPart);
+                        sum += jsosPart.length();
+                        i += bufferSize;
+                    }
+                    assert sum == result.length();
                 } catch (IOException e) {
+                    e.printStackTrace();
                     break;
                 }
             }
