@@ -14,10 +14,12 @@ import java.util.ArrayList;
 public class TinyDBOutput extends BaseErrorListener {
     private ArrayList<String> buffer;
     private BufferedWriter out;
+    public boolean hasSyntaxError;
 
     public TinyDBOutput(BufferedWriter out) {
         buffer = new ArrayList<>();
         this.out = out;
+        hasSyntaxError = false;
     }
 
     /**
@@ -29,6 +31,7 @@ public class TinyDBOutput extends BaseErrorListener {
                             String msg, RecognitionException e) {
         String exception = "Syntax Error: " + line + ":" + charPositionInLine + " " + msg;
         buffer.add(exception);
+        hasSyntaxError = true;
     }
 
     /**

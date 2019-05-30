@@ -89,10 +89,10 @@ public class StringField implements Field {
      * @see Field#compare
      */
     public boolean compare(Op op, Field val) {
-        if (this.isNull || val.isNull()) {
-            return op == Op.NOT_EQUALS;
+        Boolean result = Util.checkNullCompare(this,op,val);
+        if (result != null) {
+            return result;
         }
-
         StringField iVal = (StringField) val;
         int cmpVal = value.compareTo(iVal.value);
 

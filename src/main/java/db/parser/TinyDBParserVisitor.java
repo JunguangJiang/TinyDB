@@ -195,6 +195,13 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitVvCmpExpressionPredicate(TinyDBParser.VvCmpExpressionPredicateContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code isCmpExpressionPredicate}
+	 * labeled alternative in {@link TinyDBParser#comparisonExpressionPredicate}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIsCmpExpressionPredicate(TinyDBParser.IsCmpExpressionPredicateContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#dataType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

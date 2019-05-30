@@ -113,6 +113,7 @@ comparisonExpressionPredicate
     | fullColumnName comparisonOperator constant                    #kvCmpExpressionPredicate
     | fullColumnName comparisonOperator fullColumnName              #kkCmpExpressionPredicate
     | constant comparisonOperator constant                          #vvCmpExpressionPredicate
+    | fullColumnName IS (NOT)? NULL_LITERAL                         #isCmpExpressionPredicate
     ;
 
 dataType

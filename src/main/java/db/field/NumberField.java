@@ -53,8 +53,9 @@ public abstract class NumberField implements Field {
      */
     @Override
     public boolean compare(Op op, Field val) {
-        if (this.isNull || val.isNull()) {
-            return op == Op.NOT_EQUALS;
+        Boolean result = Util.checkNullCompare(this,op,val);
+        if (result != null) {
+            return result;
         }
         switch (op) {
             case EQUALS:

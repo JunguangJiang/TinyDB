@@ -4,6 +4,7 @@ import db.error.TypeMismatch;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
+import javafx.util.Pair;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Util {
@@ -140,5 +141,22 @@ public class Util {
         Field field = new IntField(count, false);
         tuple.setField(0, field);
         return tuple;
+    }
+
+    public static Boolean checkNullCompare(Field lhs, Op op, Field rhs) {
+        switch (op) {
+            case IS:
+                assert rhs.isNull();
+                return lhs.isNull();
+            case IS_NOT:
+                assert rhs.isNull();
+                return !lhs.isNull();
+            default:
+                if (lhs.isNull() || rhs.isNull()) {
+                    return false;
+                } else{
+                    return null;
+                }
+        }
     }
 }
