@@ -148,20 +148,23 @@ public class Server {
     }
 
     private static String getPath(String[] args) {
-        if (args.length != 0) {
-            return args[0];
-        }
-        System.out.println("Please input the working path: ");
         String path = "";
+        if (args.length != 0) {
+            path = args[0];
+        }
         try {
             ConsoleReader reader = new ConsoleReader();
-            while (true) {
+            if (path.equals("")) {
+                System.out.println("Please input the working path: ");
                 path = reader.readLine();
+            }
+            while (true) {
                 if (testPath(path)) {
                     System.out.println("Opening the Server now...");
                     return path;
                 } else {
                     System.out.println("Error directory, please input again:");
+                    path = reader.readLine();
                 }
             }
         } catch (IOException e) {

@@ -13,8 +13,8 @@ import java.util.Arrays;
 public class Main {
     public static void main(String[] args){
         String helpInfo = "Test : run the system test\n" +
-                "WebServer [path] : start a server which has the root in `path` (default is `.`)\n" +
-                "Client : start a client\n";
+                "Server [path] : start a server which has the root in `path` (default is `.`)\n" +
+                "Client [url]: start a client\n";
         if (args.length == 0) {
               System.out.println(helpInfo);
         } else {
