@@ -28,28 +28,59 @@ public class Client {
     /**
      * to check whether the SQL is the the import command
      * @param sql: the sql to check
-     * @return  true means it is the import command
+     * @return  if is import sequence, then 1; if is import sequence but error filename, then -1;otherwise 0
      */
-    private static boolean checkImportSequence(String sql) {
+    private static int checkImportSequence(String sql) {
         String upperCaseSQL = sql.toUpperCase();
-        return upperCaseSQL.startsWith("IMPORT");
+
+        if (upperCaseSQL.startsWith("IMPORT")) {
+            String[] msg = sql.split(" ", 2);
+            if (msg.length != 2) {
+                System.out.println("Error input, please input the correct filename!");
+                return -1; // import but error input
+            }
+            return 1; // import && correct input
+        }
+        return 0; // otherwise
     }
+
+//    private static void handleImportSequence(Statement st, String filename, ) {
+//
+//    }
 
     /**
      * to handle the import command
      * @param sql: the "import file.txt" Sql
      */
-    private static String handleImportSequence(String sql) throws NoSuchElementException {
-        String[] msg = sql.split(" ", 2);
-        if (msg.length != 2) {
-            System.out.println("Error input, please input the correct filename!");
-            throw new NoSuchElementException();
-        }
+    private static void handleImportSequence(Statement st, String sql) throws NoSuchElementException {
+        String msg = sql.split(" ", 2)[1];
         try {
-            String filename = msg[1].substring(0, msg[1].length() - 1);
-            return utils.readFile(filename);
+            String filename = msg.substring(0, msg.length() - 1);
+            FileInputStream fip = new FileInputStream(new File(filename));
+            InputStreamReader reader = new InputStreamReader(fip, "UTF-8");
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            while (reader.ready()) {
+                int c = reader.read();
+                sb.append((char) c);
+                if (c == ';')
+                    i++;
+                if (i == 100) {
+                    ResultSet rs = st.executeQuery(sb.toString());
+                    System.out.println(rs.getString(0));
+                    sb.delete(0, sb.length());
+                    i = 0;
+                }
+            }
+            if (sb.length() > 0) {
+                ResultSet rs = st.executeQuery(sb.toString());
+                System.out.println(rs.getString(0));
+            }
+            reader.close();
+            fip.close();
         } catch (Exception e) {
-            System.out.println("Read file " + msg[1] + " fail!");
+            e.printStackTrace();
+            System.out.println("Read file " + msg + " fail!");
             throw new NoSuchElementException();
         }
     }
@@ -66,31 +97,27 @@ public class Client {
                 String sql = readSql(reader);
                 if (sql.toUpperCase().equals("EXIT;"))
                     break;
-                if (checkImportSequence(sql)) {
-                    sql = handleImportSequence(sql);
-                    countTime(st, sql);
+                switch (checkImportSequence(sql)) {
+                    case 0:
+                        ResultSet rs = st.executeQuery(sql);
+//                        System.out.println("--------------------------------------");
+                        System.out.println(rs.getString(0));
+//                        System.out.println("--------------------------------------");
+                        break;
+                    case 1:
+                        long startTime = System.currentTimeMillis();
+                        handleImportSequence(st, sql);
+                        long endTime = System.currentTimeMillis();
+                        System.out.println(String.format("Total execute time: %.3f sec.", (endTime - startTime) / 1000.0));
+                        break;
+                    case -1:
                 }
-                ResultSet rs = st.executeQuery(sql);
-                System.out.println(rs.getString(0));
                 st.close();
             } catch (SQLException e) {
                 System.out.println("Server is closed!");
                 break;
-            } catch (NoSuchElementException e) { /* NOTHING TO DO*/ }
+            } catch (NoSuchElementException e) { /* Nothing to do */ }
         }
-    }
-
-    /**
-     * count time of the import sequence
-     * @param st: the statement
-     * @param sql: the sql to be send
-     */
-    private static void countTime(Statement st, String sql) throws SQLException {
-        long startTime = System.currentTimeMillis();
-        ResultSet rs = st.executeQuery(sql);
-        long endTime = System.currentTimeMillis();
-        System.out.println(rs.getString(0));
-        System.out.println(String.format("Total execute time: %.3f sec.", (endTime - startTime) / 1000.0));
     }
 
     /**
@@ -170,12 +197,22 @@ public class Client {
      */
     private static String handleTerminalHistory (ConsoleReader reader, StringBuilder sb) {
         History history = reader.getHistory();
-        history.remove(history.size() - 1);
-        while (history.size() > 0) {
-            CharSequence sequence = history.get(history.size() - 1);
-            if (sequence.length() > 0 && sequence.charAt(sequence.length() - 1) == ';')
-                break;
-            history.remove(history.size() - 1);
+        if (history.size() > 1)
+            history.removeLast();
+        try {
+            while (history.size() > 1) {
+                int curIndex = history.index();
+                history.moveToEnd();
+                int offset = history.index() - history.size();
+                history.moveTo(curIndex);
+                CharSequence sequence = history.get(history.size() - 1 + offset);
+                if (sequence.length() > 0 && sequence.charAt(sequence.length() - 1) == ';')
+                    break;
+                history.removeLast();
+            }
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println(history.size());
+            throw e;
         }
         history.add(sb.toString());
         return sb.toString();
@@ -194,7 +231,6 @@ public class Client {
 //                reader.setHistory(history);
 //            }
             while (true) {
-
                 String line = reader.readLine(sb.length() == 0 ? " TinyDB> " : "      -> ");
                 int i = line.length() - 1;
                 while (i >= 0 && line.charAt(i) == ' ')
@@ -256,3 +292,4 @@ public class Client {
 }
 
 // java -cp .\build\libs\TinyDB-1.0.jar db.Main Client jdbc:TinyDB://127.0.0.1:9528
+//  import ./data/SQL.txt;
