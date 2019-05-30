@@ -495,9 +495,9 @@ public class BTreeFile implements DbFile {
 		else {
 			Page p = GlobalManager.getBufferPool().getPage(pid);
 			// TODO whether to put it in dirtypages
-			/*if(perm == Permissions.READ_WRITE) {
-				dirtypages.put(pid, p);
-			}*/
+			//if(perm == Permissions.READ_WRITE) {
+			dirtypages.put(pid, p);
+			//}
 			return p;
 		}
 	}

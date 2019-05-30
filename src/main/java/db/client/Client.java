@@ -48,6 +48,14 @@ public class Client {
 //
 //    }
 
+    private static long getRunTime(Statement st, String sql) throws SQLException{
+        long startTime = System.currentTimeMillis();
+        ResultSet rs = st.executeQuery(sql);
+        long endTime = System.currentTimeMillis();
+        System.out.println(rs.getString(0));
+        return (endTime - startTime);
+    }
+
     /**
      * to handle the import command
      * @param sql: the "import file.txt" Sql
@@ -55,27 +63,26 @@ public class Client {
     private static void handleImportSequence(Statement st, String sql) throws NoSuchElementException {
         String msg = sql.split(" ", 2)[1];
         try {
-            String filename = msg.substring(0, msg.length() - 1);
-            FileInputStream fip = new FileInputStream(new File(filename));
+            FileInputStream fip = new FileInputStream(new File(msg.substring(0, msg.length() - 1)));
             InputStreamReader reader = new InputStreamReader(fip, "UTF-8");
             StringBuilder sb = new StringBuilder();
             int i = 0;
+            long runTime = 0;
             while (reader.ready()) {
                 int c = reader.read();
                 sb.append((char) c);
                 if (c == ';')
                     i++;
                 if (i == 100) {
-                    ResultSet rs = st.executeQuery(sb.toString());
-                    System.out.println(rs.getString(0));
+                    runTime += getRunTime(st, sb.toString());
                     sb.delete(0, sb.length());
                     i = 0;
                 }
             }
             if (sb.length() > 0) {
-                ResultSet rs = st.executeQuery(sb.toString());
-                System.out.println(rs.getString(0));
+                runTime += getRunTime(st, sb.toString());
             }
+            System.out.println(String.format("Total execute time: %.3f sec.", runTime / 1000.0));
             reader.close();
             fip.close();
         } catch (Exception e) {
@@ -100,9 +107,7 @@ public class Client {
                 switch (checkImportSequence(sql)) {
                     case 0:
                         ResultSet rs = st.executeQuery(sql);
-//                        System.out.println("--------------------------------------");
                         System.out.println(rs.getString(0));
-//                        System.out.println("--------------------------------------");
                         break;
                     case 1:
                         long startTime = System.currentTimeMillis();
