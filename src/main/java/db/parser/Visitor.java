@@ -7,12 +7,8 @@ import db.GlobalManager;
 import db.error.SQLError;
 import db.field.Op;
 import db.field.Type;
-import db.error.TypeMismatch;
 import db.error.NotNullViolation;
-import db.error.PrimaryKeyViolation;
-import db.field.Util;
 import db.query.pipe.*;
-import db.file.BTree.IndexPredicate;
 import db.file.Table;
 import db.query.*;
 import db.query.plan.*;
@@ -77,6 +73,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         try {
             queryResult = (QueryResult) super.visitSqlStatement(ctx);
         } catch (Exception e) {
+            e.printStackTrace();
             queryResult = new QueryResult(false, e.getMessage());
         }
         long endTime = System.currentTimeMillis();
@@ -277,9 +274,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         }
         Object[] values = (Object[]) visit(ctx.constants());
         try {
-            Table table = GlobalManager.getDatabase().getTable(ctx.tableName().getText());
+            Table table = Util.getTable(ctx.tableName().getText(),null);
             return table.insertTuple(attrNames, values);
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | SQLError e) {
             return new QueryResult(false, e.getMessage());
         }
     }
@@ -572,7 +569,11 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         if (ctx.alias != null) {
             alias = ctx.alias.getText();
         }
-        return new LogicalScanNode(ctx.originalName.getText(), alias);
+        try {
+            return new LogicalScanNode(ctx.originalName.getText(), alias);
+        } catch (SQLError sqlError){
+            throw new RuntimeException(sqlError.getMessage());
+        }
     }
 
     /**
@@ -610,14 +611,6 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         return new LogicalJoinNode(cmp, (LogicalScanNode)visit(ctx.table()));
     }
 
-    private OpIterator getScan(String tableName, IndexPredicate indexPredicate) {
-        if (GlobalManager.isBTree()) {
-            return new BTreeScan(tableName, indexPredicate);
-        } else {
-            return new SeqScan(GlobalManager.getDatabase().getTable(tableName));
-        }
-    }
-
     /**
      *
      * @param tableName
@@ -628,27 +621,30 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     public Object visitUpdateOrDeleteStatement(String tableName, LogicalFilterNode.OrNode or,
                                                boolean isDelete, Update.UpdateElement[] updateElements) {
-        LogicalScanNode scanNode = new LogicalScanNode(tableName);
-
-        OpIterator opIterator;
         try {
+            LogicalScanNode scanNode = new LogicalScanNode(tableName);
+
+            OpIterator opIterator;
+
             HashMap<String, String> attrNameToTable = new HashMap<>();
             String[] attrNames = scanNode.tupleDesc.getAttrNames();
             for(String attrName: attrNames) {
                 attrNameToTable.put(attrName, scanNode.tableName);
             }
 
-            if (or != null) {
+            if (or != null){
+                LogicalFilterNode.AndNode andNode = null;
+                boolean optimized = false;
                 or.disambiguateName(attrNameToTable);
-                IndexPredicate indexPredicate = null;
-                if (GlobalManager.isBTree() && or.size() == 1) {
-                    indexPredicate = or.get(0).extractIndexPredicate(scanNode);
+                if(or.size() == 1) {
+                    andNode = or.get(0);
+                    optimized = true;
                 }
-                opIterator = getScan(scanNode.tableName, indexPredicate);
+                opIterator = Util.getScan(scanNode,andNode,optimized);
                 Predicate predicate = or.predicate(scanNode.tupleDesc);
                 opIterator = new Filter(predicate, opIterator);
             } else {
-                opIterator = getScan(scanNode.tableName,null);
+                opIterator = Util.getScan(scanNode,null,false);
             }
 
             if (isDelete) {

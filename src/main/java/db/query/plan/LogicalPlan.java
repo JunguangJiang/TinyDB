@@ -1,11 +1,7 @@
 package db.query.plan;
-import db.GlobalManager;
 import db.error.SQLError;
-import db.error.TypeMismatch;
 import db.query.pipe.*;
-import db.file.BTree.IndexPredicate;
 import db.query.*;
-import db.query.plan.LogicalFilterNode.*;
 import db.query.predicate.Predicate;
 
 import java.util.ArrayList;
@@ -67,44 +63,6 @@ public class LogicalPlan
         }
     }
 
-    /**
-     * Get a Filter OpIterator from scanNode and andNode.
-     *  will do BTreeScan based on scanNode and IndexPredicate extracted from andNode
-     *  and then do Filter based on the KVCmpPredicate extracted from andNode.
-     * @param scanNode
-     * @param andNode
-     * @return
-     * @throws TypeMismatch
-     */
-    private OpIterator getOptimizedBTreeScan(LogicalScanNode scanNode, AndNode andNode) throws TypeMismatch{
-        IndexPredicate indexPredicate = andNode.extractIndexPredicate(scanNode);
-        BTreeScan scan = new BTreeScan(scanNode.tableName, scanNode.tableAlias, indexPredicate);
-        Predicate predicate = andNode.extractKVPredicate(scanNode).predicate(scanNode.tupleDesc);
-        return new Filter(predicate, scan);
-    }
-
-    /**
-     * Get a Scan OpIterator from scanNode
-     * Scan might be BTreeScan or SeqScan, depending on GlobalManager
-     * @param scanNode
-     * @param andNode
-     * @param optimized
-     * @return
-     * @throws TypeMismatch
-     */
-    private OpIterator getScan(LogicalScanNode scanNode, AndNode andNode, boolean optimized)
-            throws TypeMismatch {
-        if (GlobalManager.isBTree()) {
-            if (optimized) {
-                return getOptimizedBTreeScan(scanNode,andNode);
-            } else {
-                return new BTreeScan(scanNode.tableName, scanNode.tableAlias,null);
-            }
-        } else {
-            return new SeqScan(GlobalManager.getDatabase().getTable(scanNode.tableName));
-        }
-    }
-
     /** Convert this LogicalPlan into a physicalPlan represented by a {@link OpIterator}.
      * Attempts to find the optimal plan to order the joins in the plan.
      *  @return A OpIterator representing this plan.
@@ -126,7 +84,7 @@ public class LogicalPlan
         // Scan
         for (int i = 0; i < joinNodes.size(); i++) {
             LogicalScanNode scanNode = joinNodes.get(i).scanNode;
-            scans[i] = getScan(scanNode, andNode, optimized);
+            scans[i] = Util.getScan(scanNode, andNode, optimized);
         }
 
         // Join (no optimization here)

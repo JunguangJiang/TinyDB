@@ -1,6 +1,7 @@
 package db.query.plan;
 
 import db.GlobalManager;
+import db.error.SQLError;
 import db.field.Type;
 import db.query.QueryResult;
 import db.tuple.TDItem;
@@ -50,9 +51,13 @@ public class LogicalJoinNodeTest {
     @Test
     public void getAttrToTable() {
         ArrayList<LogicalJoinNode> joinNodes = new ArrayList<>();
-        joinNodes.add(new LogicalJoinNode(new VVCmpNode(false), new LogicalScanNode("table1",null)));
-        joinNodes.add(new LogicalJoinNode(new VVCmpNode(false),new LogicalScanNode("table2", null)));
-        joinNodes.add(new LogicalJoinNode(new VVCmpNode(false), new LogicalScanNode("table3",null)));
+        try {
+            joinNodes.add(new LogicalJoinNode(new VVCmpNode(false), new LogicalScanNode("table1",null)));
+            joinNodes.add(new LogicalJoinNode(new VVCmpNode(false),new LogicalScanNode("table2", null)));
+            joinNodes.add(new LogicalJoinNode(new VVCmpNode(false), new LogicalScanNode("table3",null)));
+        }catch (SQLError e){
+            fail();
+        }
 
         HashMap<String, String> attrToTable = LogicalJoinNode.getAttrToTable(joinNodes);
         assertNull(attrToTable.get("attr1"), null);
@@ -64,8 +69,12 @@ public class LogicalJoinNodeTest {
     @Test
     public void getAttrToTable2() {
         ArrayList<LogicalJoinNode> joinNodes = new ArrayList<>();
-        joinNodes.add(new LogicalJoinNode(new VVCmpNode(false), new LogicalScanNode("table1",null)));
-        joinNodes.add(new LogicalJoinNode(new VVCmpNode(false),new LogicalScanNode("table2", null)));
+        try {
+            joinNodes.add(new LogicalJoinNode(new VVCmpNode(false), new LogicalScanNode("table1",null)));
+            joinNodes.add(new LogicalJoinNode(new VVCmpNode(false),new LogicalScanNode("table2", null)));
+        } catch (SQLError e){
+            fail();
+        }
 
         HashMap<String, String> attrToTable = LogicalJoinNode.getAttrToTable(joinNodes);
         assertEquals(attrToTable.get("attr1"), "table1");
