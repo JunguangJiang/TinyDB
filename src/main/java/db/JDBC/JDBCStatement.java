@@ -1,9 +1,6 @@
 package db.JDBC;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.sql.*;
 
@@ -21,9 +18,34 @@ public class JDBCStatement implements Statement {
             OutputStream outToServer = conn.getOutputStream();
             DataOutputStream out = new DataOutputStream(outToServer);
             out.writeUTF(sql);
+
             InputStream inFromServer = conn.getInputStream();
-            DataInputStream in = new DataInputStream(inFromServer);
-            return new JDBCResultSet(in.readUTF());
+//            DataInputStream in = new DataInputStream(inFromServer);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inFromServer));
+
+            StringBuilder sb = new StringBuilder();
+            String firstLine = reader.readLine().substring(2);
+            sb.append(firstLine);
+            sb.append("\r\n");
+            while (reader.ready()) {
+                sb.append(reader.readLine());
+                sb.append("\r\n");
+            }
+
+//            String temp;
+//            while (true){
+//                temp = in.readUTF();
+//                if (temp.endsWith("\r\n\r\n")) {
+//                    temp = temp.substring(0, temp.length() - 4);
+//                    sb.append(temp);
+//                    break;
+//                }
+//                sb.append(temp);
+//            }
+
+            String rs = sb.toString();
+//            String rs = in.readUTF();
+            return new JDBCResultSet(rs);
         }
         catch (Exception e) {
 //            e.printStackTrace();
