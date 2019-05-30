@@ -221,6 +221,13 @@ public class TinyDBParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitIsCmpExpressionPredicate(TinyDBParser.IsCmpExpressionPredicateContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitDataType(TinyDBParser.DataTypeContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

@@ -10,6 +10,7 @@ import db.field.Type;
 import db.error.TypeMismatch;
 import db.error.NotNullViolation;
 import db.error.PrimaryKeyViolation;
+import db.field.Util;
 import db.query.pipe.*;
 import db.file.BTree.IndexPredicate;
 import db.file.Table;
@@ -52,7 +53,9 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitRoot(TinyDBParser.RootContext ctx) {
-        super.visitRoot(ctx);
+        if (!this.output.hasSyntaxError) {
+            super.visitRoot(ctx);
+        }
         output.flush();
         return null;
     }
@@ -411,6 +414,20 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
                 (Op)visit(ctx.comparisonOperator()),
                 visit(ctx.constant(1))
         );
+    }
+
+    /**
+     * fullColumnName IS (NOT)? NULL_LITERAL
+     * @param ctx
+     * @return
+     */
+    @Override
+    public Object visitIsCmpExpressionPredicate(TinyDBParser.IsCmpExpressionPredicateContext ctx) {
+        Op op = Op.IS;
+        if (ctx.NOT() != null) {
+            op = Op.IS_NOT;
+        }
+        return new LogicalFilterNode.KVCmpNode((FullColumnName)visit(ctx.fullColumnName()), op, null);
     }
 
     /**
