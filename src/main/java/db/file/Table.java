@@ -37,13 +37,16 @@ public class Table {
      * @param name the name of the Table
      * @param tupleDesc the tuple descriptor of the Table
      * @param file the disk File that the Table is stored in
+     * @param isBTree whether the table should build on BTree
+     * @param hasPrimaryKeyConstraint whether the Table has primary key constraint
      */
-    public Table(Integer id, String name, TupleDesc tupleDesc, File file) {
+    public Table(Integer id, String name, TupleDesc tupleDesc, File file,
+                 boolean isBTree, boolean hasPrimaryKeyConstraint) {
         this.id = id;
-        if (GlobalManager.isBTree()) {
+        if (isBTree) {
             this.dbFile = new BTreeFile(id, file, tupleDesc);
         } else {
-            this.dbFile = new HeapFile(id, file, tupleDesc);
+            this.dbFile = new HeapFile(id, file, tupleDesc, hasPrimaryKeyConstraint);
         }
         this.name = name;
         this.file = file;

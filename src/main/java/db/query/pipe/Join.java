@@ -1,9 +1,13 @@
 package db.query.pipe;
 
 import db.DbException;
+import db.GlobalManager;
 import db.error.SQLError;
 import db.error.TypeMismatch;
 import db.error.PrimaryKeyViolation;
+import db.file.DbFileIterator;
+import db.file.Table;
+import db.query.QueryResult;
 import db.query.plan.LogicalFilterNode;
 import db.query.predicate.Predicate;
 import db.tuple.Tuple;
@@ -21,9 +25,8 @@ public class Join extends Operator{
     private OpIterator lhs, rhs;
     private TupleDesc mergedTupleDesc;
     private Predicate predicate;
-    private ArrayList<Tuple> tuples = new ArrayList<>();
-    private Iterator<Tuple> iterator;
-    
+    private DbFileIterator iterator;
+
     /**
      * Join lhs and rhs with cmp as filter predicate
      * @param lhs
@@ -51,19 +54,30 @@ public class Join extends Operator{
         this.lhs.open();
         this.rhs.open();
         // TODO decrease the loop times
+        String lTableName = this.lhs.getTupleDesc().getTableName();
+        String rTableName = this.rhs.getTupleDesc().getTableName();
+        String tableName = "JOIN:" + lTableName + ":" + rTableName;
+        mergedTupleDesc.setTableName(tableName);
+        QueryResult queryResult = GlobalManager.getDatabase().createTable(tableName, mergedTupleDesc,
+                false, false);
+        if (!queryResult.succeeded()) {
+            throw new SQLError("Can not join " + lTableName + " with " + rTableName);
+        }
+        Table table = GlobalManager.getDatabase().getTable(tableName);
         while (lhs.hasNext()) {
             Tuple tuple1 = lhs.next();
             while (rhs.hasNext()) {
                 Tuple tuple2 = rhs.next();
-                Tuple mergedTuple = Tuple.merge(tuple1, tuple2);
+                Tuple mergedTuple = Tuple.merge(tuple1, tuple2, mergedTupleDesc);
                 if (predicate.filter(mergedTuple)) {
-                    tuples.add(mergedTuple);
+                    table.insertTuple(mergedTuple);
                 }
             }
             rhs.rewind();
         }
-        iterator = tuples.iterator();
         super.open();
+        iterator = table.iterator();
+        iterator.open();
     }
 
     @Override
@@ -71,12 +85,14 @@ public class Join extends Operator{
         lhs.close();
         rhs.close();
         super.close();
+        iterator.close();
         iterator = null;
+        GlobalManager.getDatabase().dropTable(mergedTupleDesc.getTableName());
     }
 
     @Override
     public void rewind() {
-        iterator = tuples.iterator();
+        iterator =  GlobalManager.getDatabase().getTable(mergedTupleDesc.getTableName()).iterator();
     }
 
     /**
@@ -97,7 +113,7 @@ public class Join extends Operator{
      * @return The next matching tuple.
      */
     @Override
-    protected Tuple fetchNext() {
+    protected Tuple fetchNext() throws DbException{
         if (iterator != null && iterator.hasNext()) {
             return iterator.next();
         } else {

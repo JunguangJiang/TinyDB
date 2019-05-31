@@ -24,7 +24,7 @@ public class GlobalManager {
     private GlobalManager() {
         _catalog = new Catalog();
         _bufferpool = new BufferPool(BufferPool.DEFAULT_PAGES);
-        isBTree = true;
+        isBTree = false;
     }
 
     /** Return the buffer pool of the static GlobalManager instance */

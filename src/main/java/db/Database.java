@@ -43,11 +43,22 @@ public class Database {
      * If the table already exists, then return false.
      * We have to ensure each Table has different ids and names
      * @param tableName the name of the new table
-     * @param tupleDesc the descriptor of the tuple
+     * @param isBTree whether the table should build on BTree
+     * @param hasPrimaryKeyConstraint whether the Table has primary key constraint
      * @return the result of the query
      */
+    public QueryResult createTable(String tableName, TupleDesc tupleDesc, boolean isBTree, boolean hasPrimaryKeyConstraint) {
+        return createTable(tableName, tupleDesc, "", false, isBTree, hasPrimaryKeyConstraint);
+    }
+
+    /**
+     * create a Table based on BTree
+     * @param tableName the name of the new table
+     * @param tupleDesc the descriptor of the tuple
+     * @return
+     */
     public QueryResult createTable(String tableName, TupleDesc tupleDesc) {
-        return createTable(tableName, tupleDesc, "", false);
+        return createTable(tableName,tupleDesc,true,true);
     }
 
     /**
@@ -56,9 +67,14 @@ public class Database {
      * We have to ensure each Table has different ids and names
      * @param tableName the name of the new table
      * @param tupleDesc the descriptor of the tuple
+     * @param sql
+     * @param isLog
+     * @param isBTree whether the table should build on BTree
+     * @param hasPrimaryKeyConstraint whether the Table has primary key constraint
      * @return
      */
-    public QueryResult createTable(String tableName, TupleDesc tupleDesc, String sql, Boolean isLog) {
+    public QueryResult createTable(String tableName, TupleDesc tupleDesc, String sql, Boolean isLog,
+                                   boolean isBTree, boolean hasPrimaryKeyConstraint) {
         if (getTable(tableName) != null) {
             return new QueryResult(false, "Table " + tableName + " already exists.");
         } else {
@@ -72,7 +88,7 @@ public class Database {
                 }
             }
 
-            Table table = new Table(id, tableName, tupleDesc, file);
+            Table table = new Table(id, tableName, tupleDesc, file, isBTree, hasPrimaryKeyConstraint);
             nameIdMap.put(tableName, id);
             idTableMap.put(id, table);
             idSqlMap.put(id, sql);
