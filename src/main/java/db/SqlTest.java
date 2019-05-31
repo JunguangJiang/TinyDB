@@ -1,22 +1,26 @@
 package db;
 
-import db.field.Field;
-import db.parser.TinyDBOutput;
-
 import java.io.*;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
 
 public class SqlTest {
     private String path, name;
 
-    public SqlTest(String path, String name) {
+    private SqlTest(String path, String name) {
         this.path = path;
         this.name = name;
     }
 
-    public boolean run() {
+    private void run_() {
+        File sqlFile = Paths.get(path, name+".sql").toFile();
+        File outFile = Paths.get(path, name+".out").toFile();
+        Server server = new Server(path);
+        server.process(sqlFile, outFile);
+        server.close();
+    }
+
+    private boolean run() {
         File sqlFile = Paths.get(path, name+".sql").toFile();
         File outFile = Paths.get(path, name+".out").toFile();
         File ansFile = Paths.get(path, name+".ans").toFile();
@@ -73,19 +77,24 @@ public class SqlTest {
     }
 
     public static void main(String[] args){
-        File system_test_dir = new File("system_test_data");
-        try {
-            for(File file : system_test_dir.listFiles()) {
-                String test_name = file.toPath().toString();
-                SqlTest sqlTest = new SqlTest(test_name, "test");
-                if (sqlTest.run()) {
-                    System.out.println("pass " + test_name);
-                } else {
-                    System.out.println("fail " + test_name);
+        if (args.length == 0) {
+            File system_test_dir = new File("system_test_data");
+            try {
+                for(File file : system_test_dir.listFiles()) {
+                    String test_name = file.toPath().toString();
+                    SqlTest sqlTest = new SqlTest(test_name, "test");
+                    if (sqlTest.run()) {
+                        System.out.println("pass " + test_name);
+                    } else {
+                        System.out.println("fail " + test_name);
+                    }
                 }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
             }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+        }
+        else {
+            (new SqlTest((new File(args[0])).toPath().toString(), "test")).run_();
         }
     }
 }
