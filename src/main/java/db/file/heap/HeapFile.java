@@ -28,6 +28,7 @@ public class HeapFile implements DbFile {
     private File file;
     private int id;
     private TupleDesc tupleDesc;
+    private boolean hasPrimaryKeyConstraint=true;
 
     /**
      * Constructs a heap file backed by the specified file.
@@ -36,10 +37,11 @@ public class HeapFile implements DbFile {
      *            the file that stores the on-disk backing store for this heap
      *            file.
      */
-    public HeapFile(int id, File file, TupleDesc tupleDesc){
+    public HeapFile(int id, File file, TupleDesc tupleDesc, boolean hasPrimaryKeyConstraint){
         this.id = id;
         this.file = file;
         this.tupleDesc = tupleDesc;
+        this.hasPrimaryKeyConstraint = hasPrimaryKeyConstraint;
     }
 
     /**
@@ -137,7 +139,9 @@ public class HeapFile implements DbFile {
             throws IOException, PrimaryKeyViolation {
         ArrayList<Page> affectedPages = new ArrayList<>();
         try {
-            this.checkPrimaryKeyViolated(t); //Check whether the Tuple satisfies the Primary Key
+            if (hasPrimaryKeyConstraint) {
+                this.checkPrimaryKeyViolated(t); //Check whether the Tuple satisfies the Primary Key
+            }
             HeapPage heapPage = (HeapPage)this.getEmptyPage();
             if (heapPage == null) {
                 HeapPageId heapPageId = new HeapPageId(this.getId(), this.numPages());

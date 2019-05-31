@@ -157,7 +157,7 @@ public class BufferPool {
             file = GlobalManager.getDatabase().getDbFile(tableId);
             file.writePage(page);
         } catch (NullPointerException e){
-            System.out.println("Table "+tableId + " has already been deleted.");
+//            System.out.println("Table "+tableId + " has already been deleted.");
         }
         page.markDirty(false);
     }

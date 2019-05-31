@@ -16,6 +16,7 @@ public class TupleDesc implements Serializable, Cloneable {
     private String primaryKey;
     private int primaryKeyIndex;
     private int byteSize = -1;
+    private String tableName;
 
     public TupleDesc() {
         this(new TDItem[0], null);
@@ -140,6 +141,11 @@ public class TupleDesc implements Serializable, Cloneable {
         for (int i=0; i<tdItems.length; i++) {
             tdItems[i].tableName = tableName;
         }
+        this.tableName = tableName;
+    }
+
+    public String getTableName() {
+        return this.tableName;
     }
 
     /**
@@ -201,7 +207,11 @@ public class TupleDesc implements Serializable, Cloneable {
                     return false;
                 }
             }
-            return primaryKey.equals(tupleDesc.primaryKey);
+            if(primaryKey == null) {
+                return tupleDesc.primaryKey == null;
+            } else {
+                return primaryKey.equals(tupleDesc.primaryKey);
+            }
         }catch (NullPointerException | ClassCastException e){
             return false;
         }

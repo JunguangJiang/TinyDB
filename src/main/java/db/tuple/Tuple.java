@@ -108,11 +108,11 @@ public class Tuple implements Serializable {
      * merge two tuples into one tuple
      * @param tuple1
      * @param tuple2
+     * @param tupleDesc
      * @return
      */
-    public static Tuple merge(Tuple tuple1, Tuple tuple2) {
+    public static Tuple merge(Tuple tuple1, Tuple tuple2, TupleDesc tupleDesc) {
         TupleDesc tupleDesc1 = tuple1.getTupleDesc(), tupleDesc2 = tuple2.getTupleDesc();
-        TupleDesc tupleDesc = TupleDesc.merge(tupleDesc1, tupleDesc2);
         Tuple tuple = new Tuple(tupleDesc);
         int i;
         for (i = 0; i < tupleDesc1.numFields(); i++) {

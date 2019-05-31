@@ -52,9 +52,9 @@ Query OK, 0 row affected. (0.0 sec)
 +---------+
 | Table   |
 +---------+
-| STUDENT |
-+---------+
 |  SCHOOL |
++---------+
+| STUDENT |
 +---------+
 2 rows in set (0.0 sec)
 Query OK, 0 rows affected (0.0 sec)

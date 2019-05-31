@@ -78,19 +78,25 @@ public class SqlTest {
 
     public static void main(String[] args){
         if (args.length == 0) {
-            File system_test_dir = new File("system_test_data");
-            try {
-                for(File file : system_test_dir.listFiles()) {
-                    String test_name = file.toPath().toString();
-                    SqlTest sqlTest = new SqlTest(test_name, "test");
-                    if (sqlTest.run()) {
-                        System.out.println("pass " + test_name);
-                    } else {
-                        System.out.println("fail " + test_name);
-                    }
+            File root_dir = new File("system_test");
+            for(File dir: root_dir.listFiles()) {
+                if (!dir.getName().equals("basic")) {
+                    continue;
                 }
-            } catch (NullPointerException e) {
-                e.printStackTrace();
+                try {
+                    for(File file : dir.listFiles()) {
+                        String test_name = file.toPath().toString();
+                        System.out.println(test_name);
+                        SqlTest sqlTest = new SqlTest(test_name, "test");
+                        if (sqlTest.run()) {
+                            System.out.println("pass " + test_name);
+                        } else {
+                            System.out.println("fail " + test_name);
+                        }
+                    }
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
             }
         }
         else {
