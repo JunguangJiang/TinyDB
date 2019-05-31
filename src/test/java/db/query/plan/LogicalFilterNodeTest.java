@@ -1,6 +1,7 @@
 package db.query.plan;
 
 import db.GlobalManager;
+import db.error.SQLError;
 import db.field.Op;
 import db.field.Type;
 import db.error.TypeMismatch;
@@ -37,7 +38,13 @@ public class LogicalFilterNodeTest {
         TupleDesc tupleDesc = new TupleDesc(tdItems, "attr2");
         QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
         assertTrue(queryResult.succeeded());
-        LogicalScanNode scanNode = new LogicalScanNode("table","table");
+        LogicalScanNode scanNode;
+        try {
+            scanNode = new LogicalScanNode("table","table");
+        }catch (SQLError e){
+            fail();
+            return;
+        }
 
         FullColumnName attr1 = new FullColumnName("table", "attr1", null);
         FullColumnName attr2 = new FullColumnName("table", "attr2", null);

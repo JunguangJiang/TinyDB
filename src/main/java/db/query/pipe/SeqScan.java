@@ -1,6 +1,8 @@
 package db.query.pipe;
 
 import db.DbException;
+import db.GlobalManager;
+import db.error.SQLError;
 import db.file.Table;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;

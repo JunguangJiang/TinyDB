@@ -2,11 +2,11 @@ package db.query.pipe;
 
 import db.DbException;
 import db.GlobalManager;
+import db.error.SQLError;
 import db.file.BTree.BTreeFile;
 import db.file.BTree.IndexPredicate;
 import db.file.DbFileIterator;
 import db.file.Table;
-import db.query.pipe.OpIterator;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -26,33 +26,18 @@ public class BTreeScan implements OpIterator {
 
     /**
      * Creates a B+ tree scan over the specified table
-     * @param tableName the name of the Table
-     * @param indexPredicate
-     * 			  The index predicate to match. If null, the scan will return all tuples
-     *            in sorted order
+     * @param table
+     * @param indexPredicate The index predicate to match. If null, the scan will return all tuples
+     *                       in sorted order
      */
-	public BTreeScan(String tableName, IndexPredicate indexPredicate) {
-        this(tableName, tableName, indexPredicate);
-	}
-
-    /**
-     * Creates a B+ tree scan over the specified table
-     * @param tableName the name of the Table
-     * @param tableAlias the alias of the Table
-     * @param indexPredicate
-     *            The index predicate to match. If null, the scan will return all tuples
-     *            in sorted order
-     */
-	public BTreeScan(String tableName, String tableAlias, IndexPredicate indexPredicate) {
-        this.isOpen = false;
-        Table table = GlobalManager.getDatabase().getTable(tableName);
-        if (indexPredicate == null) {
-            this.iterator = GlobalManager.getDatabase().getDbFile(tableName).iterator();
+    public BTreeScan(Table table, IndexPredicate indexPredicate) {
+	    this.isOpen = false;
+	    if (indexPredicate == null) {
+	        this.iterator = table.getDbFile().iterator();
         } else {
-            this.iterator = ((BTreeFile)GlobalManager.getDatabase().getDbFile(tableName)).indexIterator(indexPredicate);
+	        this.iterator = ((BTreeFile)table.getDbFile()).indexIterator(indexPredicate);
         }
-        myTd = table.getTupleDesc();
-        myTd.setTableName(tableAlias);
+	    myTd = table.getTupleDesc();
     }
 
 	public void open() throws DbException {
