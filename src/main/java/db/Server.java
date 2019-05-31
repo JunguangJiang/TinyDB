@@ -3,6 +3,7 @@ package db;
 import db.parser.TinyDBOutput;
 import db.parser.TinyDBParser;
 import db.parser.Visitor;
+import jline.console.ConsoleReader;
 import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.*;
 import java.net.ServerSocket;
@@ -23,15 +24,6 @@ public class Server {
      * @param sqlPath the sql path where catalog and all the databases are stored in
      */
     Server(String sqlPath) {
-//         if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
-//            sqlPath += '/';
-//         }
-//         Server.sqlPath = sqlPath;
-//        if (!open()) {
-//            System.out.println("Can not load " + sqlPath);
-//            System.exit(-1);
-//        }
-//    }
         if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
             sqlPath += '/';
         }
@@ -150,8 +142,40 @@ public class Server {
         visitor.visit(tree);
     }
 
+    private static Boolean testPath(String path) {
+        File file = new File(path);
+        return (file.exists() && file.isDirectory());
+    }
+
+    private static String getPath(String[] args) {
+        String path = "";
+        if (args.length != 0) {
+            path = args[0];
+        }
+        try {
+            ConsoleReader reader = new ConsoleReader();
+            if (path.equals("")) {
+                System.out.println("Please input the working path: ");
+                path = reader.readLine();
+            }
+            while (true) {
+                if (testPath(path)) {
+                    System.out.println("Opening the Server now...");
+                    return path;
+                } else {
+                    System.out.println("Error directory, please input again:");
+                    path = reader.readLine();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return path;
+    }
+
     public static void main(String[] args) {
-        Server server = new Server(args[0]);
+        String path = getPath(args);
+        Server server = new Server(path);
         Runtime.getRuntime().addShutdownHook(new Thread(()->{
             System.out.println("persist before shutdown");
             server.close();
@@ -219,3 +243,5 @@ public class Server {
         }
     }
 }
+
+// java -cp .\build\libs\TinyDB-1.0.jar db.Main Server data
