@@ -2,6 +2,8 @@ package db;
 
 import java.io.*;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 public class SqlTest {
@@ -37,56 +39,80 @@ public class SqlTest {
     }
 
     /**
+     * get a String ArrayList which represents the head and the body of a Table from an String iterator
+     * @param iterator
+     * @return
+     */
+    private ArrayList<String> getTable(Iterator<String> iterator) {
+        ArrayList<String> tables = new ArrayList<>();
+        while (iterator.hasNext() && !iterator.next().startsWith("+")) {
+        }
+        if (!iterator.hasNext()) {
+            return tables;
+        } else {
+            while (iterator.hasNext()) {
+                String line = iterator.next();
+                if (line.startsWith("|")) {
+                    tables.add(line.replace(" ", ""));
+                } else if (!line.startsWith("+")) {
+                    break;
+                }
+            }
+            return tables;
+        }
+    }
+    private String formatTable(ArrayList<String> table){
+        Iterator<String> it = table.iterator();
+        if (! it.hasNext())
+            return "[]";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        sb.append(System.lineSeparator());
+        for (;;) {
+            String  e = it.next();
+            sb.append(e);
+            if (! it.hasNext())
+                return sb.append(']').append(System.lineSeparator()).toString();
+            sb.append(System.lineSeparator());
+        }
+    }
+
+    /**
      * Compare whether two files are the same
      * @param file1 expected answer file
      * @param file2 actual output file
      * @return
      */
     public boolean compare(File file1, File file2) throws IOException{
-        Iterator<String> iterator1 = (new BufferedReader(new FileReader(file1))).lines().filter(
-                (String s) -> s.startsWith("|")
-                ).iterator();
-        Iterator<String> iterator2 = (new BufferedReader(new FileReader(file2))).lines().filter(
-                (String s) -> s.startsWith("|")
-        ).iterator();
-        String line1, line2;
+        Iterator<String> iterator1 = (new BufferedReader(new FileReader(file1))).lines().iterator();
+        Iterator<String> iterator2 = (new BufferedReader(new FileReader(file2))).lines().iterator();
         int i=0;
-
-        String fmt = "line %d\n expected : \"%s\"\n actual : \"%s\"";
-        while (iterator1.hasNext()) {
-            line1 = iterator1.next();
-            if (iterator2.hasNext()) {
-                line2 = iterator2.next();
-                if (!line1.replace(" ", "").equals(line2.replace(" ", ""))) {
-                    System.out.println(String.format(fmt, i, line1, line2));
-                    return false;
-                }
-            } else{
-                System.out.println(String.format(fmt, i, line1, ""));
+        String fmt = "table %d\n expected : \"%s\"\n actual : \"%s\"";
+        while(true){
+            i++;
+            ArrayList<String> table1 = getTable(iterator1);
+            ArrayList<String> table2 = getTable(iterator2);
+            if (table1.size() == 0 && table2.size() == 0) {
+                break;
+            }
+            Collections.sort(table1);
+            Collections.sort(table2);
+            if(!table1.equals(table2)){
+                System.out.println(String.format(fmt, i, formatTable(table1), formatTable(table2)));
                 return false;
             }
-            i++;
         }
-        if (iterator2.hasNext()) {
-            line2 = iterator2.next();
-            System.out.println(String.format(fmt, i, "", line2));
-            return false;
-        } else {
-            return true;
-        }
+        return true;
     }
 
     public static void main(String[] args){
         if (args.length == 0) {
             File root_dir = new File("system_test");
             for(File dir: root_dir.listFiles()) {
-                if (!dir.getName().equals("basic")) {
-                    continue;
-                }
                 try {
                     for(File file : dir.listFiles()) {
                         String test_name = file.toPath().toString();
-                        System.out.println(test_name);
                         SqlTest sqlTest = new SqlTest(test_name, "test");
                         if (sqlTest.run()) {
                             System.out.println("pass " + test_name);
