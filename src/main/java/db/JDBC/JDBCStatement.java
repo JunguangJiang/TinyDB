@@ -33,10 +33,12 @@ public class JDBCStatement implements Statement {
 //            }
 
             String temp;
+            String sep = System.lineSeparator() + System.lineSeparator();
             while (true){
                 temp = in.readUTF();
-                if (temp.endsWith("\r\n\r\n")) {
-                    temp = temp.substring(0, temp.length() - 4);
+
+                if (temp.endsWith(sep)) {
+                    temp = temp.substring(0, temp.length() - sep.length());
                     sb.append(temp);
                     break;
                 }
