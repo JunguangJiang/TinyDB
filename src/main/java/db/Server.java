@@ -234,6 +234,7 @@ public class Server {
                         sum += jsosPart.length();
                         i += bufferSize;
                     }
+                    out.writeUTF("\r\n\r\n");
                     assert sum == result.length();
                 } catch (IOException e) {
                     e.printStackTrace();
