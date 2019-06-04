@@ -155,7 +155,8 @@ public class Server {
         try {
             ConsoleReader reader = new ConsoleReader();
             if (path.equals("")) {
-                System.out.println("Please input the working path: ");
+                System.out.printf("\nThe current path is %s\n\n", System.getProperty("user.dir"));
+                System.out.println("Please input a folder name to save data: ");
                 path = reader.readLine();
             }
             while (true) {
@@ -164,6 +165,7 @@ public class Server {
                     return path;
                 } else {
                     System.out.println("Error directory, please input again:");
+                    System.out.printf("The current path is %s\n", System.getProperty("user.dir"));
                     path = reader.readLine();
                 }
             }

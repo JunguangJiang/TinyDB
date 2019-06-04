@@ -85,7 +85,10 @@ public class Client {
             System.out.println(String.format("Total execute time: %.3f sec.", runTime / 1000.0));
             reader.close();
             fip.close();
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            System.out.printf("\nThe current path is %s , please input a correct path.\n\n", System.getProperty("user.dir"));
+        }
+        catch (Exception e) {
             e.printStackTrace();
             System.out.println("Read file " + msg + " fail!");
             throw new NoSuchElementException();
@@ -110,10 +113,7 @@ public class Client {
                         System.out.println(rs.getString(0));
                         break;
                     case 1:
-                        long startTime = System.currentTimeMillis();
                         handleImportSequence(st, sql);
-                        long endTime = System.currentTimeMillis();
-                        System.out.println(String.format("Total execute time: %.3f sec.", (endTime - startTime) / 1000.0));
                         break;
                     case -1:
                 }
