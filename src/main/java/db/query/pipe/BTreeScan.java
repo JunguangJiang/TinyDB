@@ -23,6 +23,7 @@ public class BTreeScan implements OpIterator {
 	private boolean isOpen;
 	private TupleDesc myTd;
 	private transient DbFileIterator iterator;
+	private Table table;
 
     /**
      * Creates a B+ tree scan over the specified table
@@ -32,6 +33,7 @@ public class BTreeScan implements OpIterator {
      */
     public BTreeScan(Table table, IndexPredicate indexPredicate) {
 	    this.isOpen = false;
+	    this.table = table;
 	    if (indexPredicate == null) {
 	        this.iterator = table.getDbFile().iterator();
         } else {
@@ -83,4 +85,9 @@ public class BTreeScan implements OpIterator {
 		close();
 		open();
 	}
+
+    @Override
+    public long count() {
+        return table.count;
+    }
 }

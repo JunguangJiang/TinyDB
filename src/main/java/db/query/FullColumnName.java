@@ -1,5 +1,7 @@
 package db.query;
 
+import db.error.SQLError;
+
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 
@@ -39,16 +41,16 @@ public class FullColumnName {
      * @throws NoSuchElementException if we cannot find the table alias name or
      *          there exists different tables for one attribute.
      */
-    public void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException {
+    public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError {
         if (this.tableName == null) {
             if (attrNameToTableName.containsKey(attrName)){
                 if (attrNameToTableName.get(attrName) == null) {
-                    throw new NoSuchElementException(attrName+" might belong to different tables.");
+                    throw new SQLError(attrName+" might belong to different tables.");
                 } else {
                     this.tableName = attrNameToTableName.get(attrName);
                 }
             } else {
-                throw new NoSuchElementException(attrName + " doesn't belong to any table.");
+                throw new SQLError(attrName + " doesn't belong to any table.");
             }
         }
     }

@@ -60,4 +60,5 @@ public interface OpIterator extends Serializable{
      */
     void close();
 
+    long count();
 }

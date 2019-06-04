@@ -171,21 +171,6 @@ public class Database {
         return results;
     }
 
-    public static Pair<String[], String[]> getTablesNameAndIncrementNumber(String content) {
-        String[] tablesMessage = content.split("\t");
-        String[] ret1 = new String[tablesMessage.length];
-        String[] ret2 = new String[tablesMessage.length];
-        System.out.println("tableMessage"+tablesMessage.length);
-        System.out.println(tablesMessage.toString());
-        for (int i = 0; i < tablesMessage.length; ++i) {
-            String[] items = tablesMessage[i].split(" ", 2);
-            System.out.println(items.length);
-            ret1[i] = items[0];
-            ret2[i] = items[1];
-        }
-        return new Pair<>(ret1, ret2);
-    }
-
     /**
      * parseDatabaseScript: run the create table sql sentence on the DatabaseScript
      * @param content: the record on the DatabaseScript
@@ -196,7 +181,7 @@ public class Database {
             assert lines.length > 0;
             Integer n = Integer.valueOf(lines[0]); // the number of tables
             StringBuilder sqlString = new StringBuilder();
-            for(int i=1+2*n; i<lines.length; i++) {
+            for(int i=1+3*n; i<lines.length; i++) {
                 sqlString.append(lines[i]);
             }
             BufferedWriter log = new BufferedWriter(new FileWriter(outFile));
@@ -208,9 +193,11 @@ public class Database {
             log.close();
             String[] names = Arrays.copyOfRange(lines,1,n+1);
             String[] incrementNumbers = Arrays.copyOfRange(lines, n+1, 2*n+1);
+            String[] counts = Arrays.copyOfRange(lines,2*n+1,3*n+1);
             for (int i = 0; i < names.length; ++i) {
                 Table table = idTableMap.get(nameIdMap.get(names[i]));
                 table.autoIncrementNumber = Long.parseLong(incrementNumbers[i]);
+                table.count = Long.parseLong(counts[i]);
             }
         }
         catch (Exception e) {
@@ -258,6 +245,10 @@ public class Database {
         }
         for (Integer id: idTableMap.keySet()) {
             stringBuilder.append(getTable(id).autoIncrementNumber);
+            stringBuilder.append(System.lineSeparator());
+        }
+        for (Integer id: idTableMap.keySet()) {
+            stringBuilder.append(getTable(id).count);
             stringBuilder.append(System.lineSeparator());
         }
         for (Integer id: idTableMap.keySet()) {

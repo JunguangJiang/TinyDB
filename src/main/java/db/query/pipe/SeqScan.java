@@ -63,5 +63,10 @@ public class SeqScan implements OpIterator{
     public void rewind() throws DbException {
         iterator.rewind();
     }
+
+    @Override
+    public long count() {
+        return table.count;
+    }
 }
 

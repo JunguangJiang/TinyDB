@@ -73,7 +73,7 @@ public class SqlTest {
             String  e = it.next();
             sb.append(e);
             if (! it.hasNext())
-                return sb.append(']').append(System.lineSeparator()).toString();
+                return sb.append(System.lineSeparator()).append(']').toString();
             sb.append(System.lineSeparator());
         }
     }

@@ -2,6 +2,7 @@ package db.file;
 
 import db.*;
 import db.error.PrimaryKeyViolation;
+import db.file.heap.HeapFile;
 import db.tuple.Tuple;
 import java.io.*;
 import java.util.*;
@@ -22,9 +23,9 @@ public class BufferPool {
     /** Default number of pages passed to the constructor. This is used by
      other classes. BufferPool should use the numPages argument to the
      constructor instead. */
-    public static final int DEFAULT_PAGES = 50;
+    public static final long DEFAULT_PAGES = Setting.BUFFER_POOL_PAGE_NUMBER; //50;
 
-    private int numPages;
+    private long numPages;
     private HashMap<PageId, Page> pageHashMap;
     private HashMap<PageId, Integer> recentlyUsed;
 
@@ -33,7 +34,7 @@ public class BufferPool {
      *
      * @param numPages maximum number of pages in this buffer pool.
      */
-    public BufferPool(int numPages) {
+    public BufferPool(long numPages) {
         this.numPages = numPages;
         this.pageHashMap = new HashMap<>();
         this.recentlyUsed = new HashMap<>();

@@ -4,6 +4,7 @@ import com.github.freva.asciitable.AsciiTable;
 import db.Database;
 import db.DbException;
 import db.GlobalManager;
+import db.Setting;
 import db.error.SQLError;
 import db.field.Op;
 import db.field.Type;
@@ -174,7 +175,8 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         int a = ctx.start.getStartIndex();
         int b = ctx.stop.getStopIndex();
         Interval interval = new Interval(a,b);
-        return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog, GlobalManager.isBTree(), true);
+        return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog,
+                Setting.isBTree, true);
     }
 
     /**
@@ -513,7 +515,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             }
 
             return physicalPlan.execute(header);
-        } catch (SQLError | NoSuchElementException e) {
+        } catch (SQLError | NoSuchElementException | DbException e) {
             return new QueryResult(false, e.getMessage());
         }
     }
@@ -658,6 +660,8 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             }
             opIterator.open();
             Tuple tuple = opIterator.next();
+            int deleteCount = (int)tuple.getField(0).getValue();
+            scanNode.table.count -= deleteCount;
             opIterator.close();
             return new QueryResult(true, "Query OK, " + tuple.getField(0).toString() + " rows affected.");
         } catch (DbException e){

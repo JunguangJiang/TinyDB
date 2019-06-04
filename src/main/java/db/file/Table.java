@@ -31,6 +31,7 @@ public class Table {
     private String name;
     public File file;
     public long autoIncrementNumber=0;
+    public long count;
 
     /**
      * @param id
@@ -50,6 +51,7 @@ public class Table {
         }
         this.name = name;
         this.file = file;
+        count = 0;
     }
 
     public DbFile getDbFile() {
@@ -80,6 +82,7 @@ public class Table {
         try {
             GlobalManager.getBufferPool().insertTuple(this.id, tuple);
             autoIncrementNumber++;
+            count++;
         } catch (IOException | DbException e){
             e.printStackTrace();
         } catch (PrimaryKeyViolation e) {
