@@ -101,7 +101,7 @@ public class Client {
         while (true) {
             try {
                 Statement st = conn.createStatement();
-                String sql = readSql(reader);
+                String sql = readSql(reader).trim();
                 if (sql.toUpperCase().equals("EXIT;"))
                     break;
                 switch (checkImportSequence(sql)) {
@@ -268,7 +268,7 @@ public class Client {
             try {
                 ConsoleReader reader = new ConsoleReader();
                 while (true) {
-                    url = reader.readLine();
+                    url = reader.readLine().trim();
                     if (testUrl(url)) {
                         return url;
                     } else {
@@ -292,7 +292,8 @@ public class Client {
     private static Boolean testUrl(String url) {
 //        String _pattern = "[12][0-9][0-9]|[1-9][0-9]|[0-9]";
         String pattern = "^jdbc:TinyDB://\\d+\\.\\d+\\.\\d+\\.\\d+:\\d+$";
-        return Pattern.matches(pattern, url);
+        String pattern2 = "^jdbc:TinyDB://[A-Za-z0-9+@&#/%?=~_|:;.,]+[A-Za-z0-9+@&#/%?=~_|]$";
+        return Pattern.matches(pattern, url) || Pattern.matches(pattern2, url);
     }
 }
 
