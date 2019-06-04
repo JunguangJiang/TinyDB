@@ -1,6 +1,7 @@
 package db.query.predicate;
 
-import db.error.TypeMismatch;
+import db.error.SQLError;
+
 import db.tuple.Tuple;
 
 import java.io.Serializable;
@@ -32,7 +33,7 @@ public class LogicalPredicate extends Predicate implements Serializable {
      * @return true if the compound predicate is true, false otherwise.
      */
     @Override
-    public boolean filter(Tuple tuple) throws TypeMismatch {
+    public boolean filter(Tuple tuple) throws SQLError {
         boolean c1 = left.filter(tuple);
         boolean c2 = right.filter(tuple);
         if (op == Op.AND) {

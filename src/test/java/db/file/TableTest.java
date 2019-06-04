@@ -64,16 +64,16 @@ public class TableTest {
         String[] attrNames = {
                 "id", "name"
         };
-        Object[] values = {
-                33, "myname"
+        String [] values = {
+                "33", "'myname'"
         };
         Table table = GlobalManager.getDatabase().getTable("table");
         queryResult = table.insertTuple(attrNames, values);
         System.out.println(queryResult.getInfo());
         assertTrue(queryResult.succeeded());
 
-        Object[] full_values = {
-                33, "myname2", 3.3
+        String[] full_values = {
+                "33", "'myname2'", "3.3"
         };
         queryResult = table.insertTuple(null, full_values);
         assertTrue(queryResult.succeeded());
@@ -98,8 +98,8 @@ public class TableTest {
         String[] attrNames = {
                 "id"
         };
-        Object[] values = {
-                33
+        String[] values = {
+                "33"
         };
         Table table = GlobalManager.getDatabase().getTable("table");
         queryResult = table.insertTuple(attrNames, values);
@@ -122,8 +122,8 @@ public class TableTest {
         String[] attrNames = {
                 "id", "names"
         };
-        Object[] values = {
-                33, "myname"
+        String[] values = {
+                "33", "'myname'"
         };
         Table table = GlobalManager.getDatabase().getTable("table");
         queryResult = table.insertTuple(attrNames, values);
@@ -146,8 +146,8 @@ public class TableTest {
         String[] attrNames = {
                 "name"
         };
-        Object[] values = {
-                "myname"
+        String[] values = {
+                "'myname'"
         };
         Table table = GlobalManager.getDatabase().getTable("table");
         queryResult = table.insertTuple(attrNames, values);

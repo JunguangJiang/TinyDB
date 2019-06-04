@@ -9,7 +9,7 @@ import db.file.BTree.BTreeFile;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
-import db.error.TypeMismatch;
+
 import db.field.Util;
 import db.file.heap.HeapFile;
 import db.query.QueryResult;
@@ -103,7 +103,7 @@ public class Table {
      * @return the QueryResult of the insert
      * @see QueryResult
      */
-    public QueryResult insertTuple(String[] attrNames, Object[] values) {
+    public QueryResult insertTuple(String[] attrNames, String[] values) {
         try {
             Tuple tuple = createTuple(attrNames, values, getTupleDesc(), autoIncrementNumber);
             return insertTuple(tuple);
@@ -125,8 +125,8 @@ public class Table {
      * @return the new Tuple
      * @throws Exception
      */
-    public static Tuple createTuple(String[] attrNames, Object[] values,
-                                     TupleDesc tupleDesc, long autoIncrementNumber) throws SQLError, NotNullViolation, TypeMismatch{
+    public static Tuple createTuple(String[] attrNames, String[] values,
+                                     TupleDesc tupleDesc, long autoIncrementNumber) throws SQLError{
         if (attrNames == null) {
             //attrNames are all the attribute names of the table
             ArrayList<String> attrNameList = new ArrayList<>(Arrays.asList(tupleDesc.getAttrNames()));
@@ -136,17 +136,17 @@ public class Table {
         if (attrNames.length != values.length) {
             throw new SQLError("The length of attribute must equal to the length of values");
         } else {
-            HashMap<String, Object> hashMap = new HashMap<>(); // map attrName to value
+            HashMap<String, String> hashMap = new HashMap<>(); // map attrName to value
             for (int i=0; i<attrNames.length; i++) {
                 hashMap.put(attrNames[i], values[i]);
             }
-            hashMap.put("PRIMARY", autoIncrementNumber); // PRIMARY is an auto increment attribute
+            hashMap.put("PRIMARY", String.valueOf(autoIncrementNumber)); // PRIMARY is an auto increment attribute
 
             Tuple tuple = new Tuple(tupleDesc);
             // Set each attribute to the corresponding value
             for (int i=0; i<tupleDesc.numFields(); i++) {
                 TDItem tdItem = tupleDesc.getTDItem(i);
-                Object value = hashMap.remove(tdItem.fieldName);
+                String value = hashMap.remove(tdItem.fieldName);
                 db.file.Util.checkNotNullConstraint(tdItem,value);
                 tuple.setField(i, Util.getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName));
             }

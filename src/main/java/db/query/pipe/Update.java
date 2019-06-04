@@ -4,7 +4,7 @@ import db.DbException;
 import db.GlobalManager;
 import db.error.SQLError;
 import db.field.Field;
-import db.error.TypeMismatch;
+
 import db.field.Util;
 import db.error.NotNullViolation;
 import db.error.PrimaryKeyViolation;
@@ -25,8 +25,8 @@ public class Update extends Operator{
      */
     public static class UpdateElement {
         public String attribute;
-        public Object value;
-        public UpdateElement(String attribute, Object value) {
+        public String value;
+        public UpdateElement(String attribute, String value) {
             this.attribute = attribute;
             this.value = value;
         }

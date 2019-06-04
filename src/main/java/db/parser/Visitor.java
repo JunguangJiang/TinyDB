@@ -18,6 +18,8 @@ import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 import org.antlr.v4.runtime.misc.Interval;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
@@ -274,7 +276,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         if (ctx.constants() == null) {
             return new QueryResult(false, "values can not be empty");
         }
-        Object[] values = (Object[]) visit(ctx.constants());
+        String[] values = (String[]) visit(ctx.constants());
         try {
             Table table = Util.getTable(ctx.tableName().getText(),null);
             return table.insertTuple(attrNames, values);
@@ -292,11 +294,11 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitConstants(TinyDBParser.ConstantsContext ctx) {
-        ArrayList<Object> values = new ArrayList<>();
+        ArrayList<String> values = new ArrayList<>();
         for (TinyDBParser.ConstantContext childCxt : ctx.constant()) {
-            values.add(visit(childCxt));
+            values.add((String)visit(childCxt));
         }
-        return values.toArray();
+        return values.toArray(new String[0]);
     }
 
     /**
@@ -311,20 +313,11 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitConstant(TinyDBParser.ConstantContext ctx) {
-        if (ctx.STRING_LITERAL() != null) {
-            String s = ctx.STRING_LITERAL().getText();
-            return s.substring(1, s.length()-1);
-        } else if (ctx.decimalLiteral() != null) {
-            Long number = Long.valueOf(ctx.decimalLiteral().getText());
-            if (ctx.getChildCount() == 2) {
-                number = -number;
-            }
-            return number;
-        } else if (ctx.REAL_LITERAL() != null){
-            return Double.valueOf(ctx.REAL_LITERAL().getText());
-        } else {
-            return null;
+        String value = ctx.getText();
+        if (ctx.STRING_LITERAL() == null && ctx.NULL_LITERAL() == null) {
+            value = new BigDecimal(value).toPlainString();
         }
+        return value;
     }
 
     /**
@@ -369,7 +362,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         return new LogicalFilterNode.KVCmpNode(
                 (FullColumnName)visit(ctx.fullColumnName()),
                 (Op) visit(ctx.comparisonOperator()),
-                visit(ctx.constant())
+                (String)visit(ctx.constant())
                 );
     }
 
@@ -383,7 +376,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         return new LogicalFilterNode.KVCmpNode(
                 (FullColumnName)visit(ctx.fullColumnName()),
                 Op.reverse((Op)visit(ctx.comparisonOperator())),
-                visit(ctx.constant())
+                (String)visit(ctx.constant())
         );
     }
 
@@ -408,11 +401,15 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitVvCmpExpressionPredicate(TinyDBParser.VvCmpExpressionPredicateContext ctx) {
-        return new LogicalFilterNode.VVCmpNode(
-                visit(ctx.constant(0)),
-                (Op)visit(ctx.comparisonOperator()),
-                visit(ctx.constant(1))
-        );
+        try {
+            return new LogicalFilterNode.VVCmpNode(
+                    (String)visit(ctx.constant(0)),
+                    (Op)visit(ctx.comparisonOperator()),
+                    (String)visit(ctx.constant(1))
+            );
+        } catch (SQLError sqlError){
+            throw new RuntimeException(sqlError.getMessage());
+        }
     }
 
     /**
@@ -722,7 +719,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitUpdatedElement(TinyDBParser.UpdatedElementContext ctx) {
-        return new Update.UpdateElement(ctx.attrName().getText(), visit(ctx.constant()));
+        return new Update.UpdateElement(ctx.attrName().getText(), (String)visit(ctx.constant()));
     }
 
     /**

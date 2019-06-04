@@ -130,9 +130,11 @@ constants
     ;
 
 constant
-    : STRING_LITERAL | decimalLiteral
+    : STRING_LITERAL
+    | decimalLiteral
     | '-' decimalLiteral
     | REAL_LITERAL
+    | '-' REAL_LITERAL
     | NULL_LITERAL
     ;
 

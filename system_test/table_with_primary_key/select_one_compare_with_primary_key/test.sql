@@ -58,8 +58,6 @@ select * from T where m_float <= 10.0;
 select * from T where m_float >= 10.0;
 select * from T where m_float <> 10.0;
 select * from T where m_float != 10.0;
--- test float compare with int --
-select * from T where m_float = 10;
 
 select * from T where m_double = 10.0;
 select * from T where m_double < 10.0;
@@ -68,8 +66,6 @@ select * from T where m_double <= 10.0;
 select * from T where m_double >= 10.0;
 select * from T where m_double <> 10.0;
 select * from T where m_double != 10.0;
--- test double compare with long --
-select * from T where m_double = 10;
 
 select * from T where m_string = "10";
 select * from T where m_string != "10";

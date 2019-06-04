@@ -629,7 +629,6 @@ Query OK, 1 row affected. (0.0 sec)
 |      20 |       20 |      20.0 |       20.0 |         20 |
 +---------+----------+-----------+------------+------------+
 19 rows in set (0.002 sec)
-Line 62 : Type mismatch: <M_FLOAT> expected LONG_TYPE, yet get FLOAT_TYPE
 +---------+----------+-----------+------------+------------+
 | T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
 +---------+----------+-----------+------------+------------+
@@ -816,7 +815,6 @@ Line 62 : Type mismatch: <M_FLOAT> expected LONG_TYPE, yet get FLOAT_TYPE
 |      20 |       20 |      20.0 |       20.0 |         20 |
 +---------+----------+-----------+------------+------------+
 19 rows in set (0.002 sec)
-Line 72 : Type mismatch: <M_DOUBLE> expected LONG_TYPE, yet get DOUBLE_TYPE
 +---------+----------+-----------+------------+------------+
 | T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
 +---------+----------+-----------+------------+------------+

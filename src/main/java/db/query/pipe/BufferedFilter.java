@@ -3,8 +3,6 @@ package db.query.pipe;
 import db.DbException;
 import db.Setting;
 import db.error.SQLError;
-import db.error.TypeMismatch;
-import db.error.PrimaryKeyViolation;
 import db.file.TupleBuffer;
 import db.query.predicate.Predicate;
 import db.tuple.Tuple;

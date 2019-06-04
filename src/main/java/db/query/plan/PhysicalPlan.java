@@ -3,7 +3,7 @@ package db.query.plan;
 import com.github.freva.asciitable.AsciiTable;
 import db.DbException;
 import db.error.SQLError;
-import db.error.TypeMismatch;
+
 import db.error.PrimaryKeyViolation;
 import db.query.QueryResult;
 import db.query.pipe.OpIterator;

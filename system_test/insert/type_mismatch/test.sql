@@ -29,20 +29,12 @@ select * from T;
 insert into T values (4, "4", 4.0, 4.0, "4");
 insert into T(m_int, m_long, m_double, m_string) values (14, "14", 14.0, "14");
 select * from T;
-
--- float -> int --
-insert into T values (5, 5, 5, 5.0, "5");
-insert into T(m_int, m_long, m_float, m_string) values (15, 15, 15, "15");
 select * from T;
 
 -- float -> string --
 insert into T values (6, 6, "6", 6.0, "6");
 insert into T(m_int, m_long, m_float, m_string) values (16, 16, "16", "16");
 select * from T;
-
--- double -> int --
-insert into T values (7, 7, 7.0, 7, "7");
-insert into T(m_int, m_long, m_double, m_string) values (17, 17, 17, "17");
 select * from T;
 
 -- double -> string --

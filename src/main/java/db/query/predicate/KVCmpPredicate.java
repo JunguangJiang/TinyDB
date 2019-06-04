@@ -1,8 +1,9 @@
 package db.query.predicate;
 
+import db.error.SQLError;
 import db.field.Field;
 import db.field.Op;
-import db.error.TypeMismatch;
+
 import db.field.Util;
 import db.query.plan.LogicalFilterNode;
 import db.tuple.Tuple;
@@ -19,14 +20,14 @@ public class KVCmpPredicate extends Predicate implements Serializable {
     private int keyIdx;
     private Field valueField;
 
-    public KVCmpPredicate(LogicalFilterNode.KVCmpNode cmp, TupleDesc tupleDesc) throws TypeMismatch{
+    public KVCmpPredicate(LogicalFilterNode.KVCmpNode cmp, TupleDesc tupleDesc) throws SQLError {
         keyIdx = tupleDesc.fullColumnNameToIndex(cmp.fullColumnName);
         valueField = Util.getField(cmp.value, tupleDesc.getTDItem(keyIdx));
         this.op = cmp.op;
     }
 
     @Override
-    public boolean filter(Tuple tuple) throws TypeMismatch {
+    public boolean filter(Tuple tuple) throws SQLError {
         return tuple.getField(keyIdx).compare(op, valueField);
     }
 }
