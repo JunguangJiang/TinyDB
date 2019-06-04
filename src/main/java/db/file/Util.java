@@ -1,10 +1,16 @@
 package db.file;
 
 import db.error.NotNullViolation;
+import db.field.Field;
 import db.tuple.TDItem;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 public class Util {
     /**
@@ -31,6 +37,26 @@ public class Util {
             if (value == null) {
                 throw new NotNullViolation(tdItem.fieldName);
             }
+        }
+    }
+
+    /**
+     * parse a tuple from DataInputStream
+     * @param td
+     * @param dis
+     * @return
+     */
+    public static Tuple parseTuple(TupleDesc td, DataInputStream dis) {
+        try {
+            Tuple t = new Tuple(td);
+            for (int j = 0; j < td.numFields(); j++) {
+                Field f = td.getTDItem(j).parse(dis);
+                t.setField(j, f);
+            }
+            return t;
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+            throw new NoSuchElementException("parsing error!");
         }
     }
 }

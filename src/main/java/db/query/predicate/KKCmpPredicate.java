@@ -7,7 +7,7 @@ import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
 /**
- * KVCmpPredicate compares an FullColumnName of a Table and a FullColumnName of another Table
+ * KKCmpPredicate compares an FullColumnName of a Table and a FullColumnName of another Table
  */
 public class KKCmpPredicate extends Predicate {
     private Op op;

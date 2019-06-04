@@ -110,18 +110,9 @@ public class HeapPage implements Page {
         }
 
         // read fields in the tuple
-        Tuple t = new Tuple(td);
+        Tuple t = Util.parseTuple(td, dis);
         RecordId rid = new RecordId(pid, slotId);
         t.setRecordId(rid);
-        try {
-            for (int j=0; j<td.numFields(); j++) {
-                Field f= td.getTDItem(j).parse(dis);
-                t.setField(j, f);
-            }
-        } catch (java.text.ParseException e) {
-            e.printStackTrace();
-            throw new NoSuchElementException("parsing error!");
-        }
 
         return t;
     }

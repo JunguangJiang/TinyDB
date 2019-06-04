@@ -142,7 +142,7 @@ public class HeapFile implements DbFile {
             if (hasPrimaryKeyConstraint) {
                 this.checkPrimaryKeyViolated(t); //Check whether the Tuple satisfies the Primary Key
             }
-            HeapPage heapPage = (HeapPage)this.getEmptyPage();
+            HeapPage heapPage = (HeapPage)this.getEmptyPage(0);
             if (heapPage == null) {
                 HeapPageId heapPageId = new HeapPageId(this.getId(), this.numPages());
                 heapPage = new HeapPage(heapPageId, HeapPage.createEmptyPageData(), tupleDesc);
@@ -159,16 +159,16 @@ public class HeapFile implements DbFile {
     }
 
     /**
-     *
+     * @param start find from which page
      * @return a page which has empty slots, if all the pages have no empty slot, then return null
      * @throws DbException
      */
-    public Page getEmptyPage()
+    public Page getEmptyPage(int start)
             throws DbException {
         try {
             int tableId = this.getId();
             int numPages = this.numPages();
-            for (int i = 0; i < numPages; i++) {
+            for (int i = start; i < numPages; i++) {
                 HeapPageId pageId = new HeapPageId(tableId, i);
                 Page page = GlobalManager.getBufferPool().getPage(pageId);
                 if (((HeapPage)page).getNumEmptySlots() != 0){

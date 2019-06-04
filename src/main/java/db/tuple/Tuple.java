@@ -125,6 +125,14 @@ public class Tuple implements Serializable {
         return tuple;
     }
 
+    public static Tuple merge(Tuple tuple1, Tuple tuple2, TupleDesc tupleDesc, boolean swap) {
+        if (swap) {
+            return merge(tuple2, tuple1, tupleDesc);
+        } else {
+            return merge(tuple1, tuple2, tupleDesc);
+        }
+    }
+
     public void serialize(DataOutputStream dos) throws IOException{
         for (Field field: fields) {
             field.serialize(dos);

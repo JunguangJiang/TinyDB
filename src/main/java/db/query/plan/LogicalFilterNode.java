@@ -1,5 +1,6 @@
 package db.query.plan;
 
+import db.error.SQLError;
 import db.field.Op;
 import db.error.TypeMismatch;
 import db.field.Util;
@@ -13,6 +14,7 @@ import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /** A LogicalFilterNode represents the parameters of a filter in the WHERE clause of a query.
@@ -32,7 +34,7 @@ public class LogicalFilterNode {
          * @throws NoSuchElementException if we cannot find the table alias name or
          *          there exists different tables for one attribute.
          */
-        void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException;
+        void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError;
     }
 
 
@@ -53,7 +55,7 @@ public class LogicalFilterNode {
         }
 
         @Override
-        public void disambiguateName(HashMap<String, String> attrNameToTableName) {
+        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError{
             fullColumnName.disambiguateName(attrNameToTableName);
         }
     }
@@ -74,7 +76,7 @@ public class LogicalFilterNode {
         }
 
         @Override
-        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException {
+        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError {
             lhs.disambiguateName(attrNameToTableName);
             rhs.disambiguateName(attrNameToTableName);
         }
@@ -108,7 +110,7 @@ public class LogicalFilterNode {
         }
 
         @Override
-        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException {
+        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError {
         }
     }
 
@@ -180,8 +182,11 @@ public class LogicalFilterNode {
         }
 
         @Override
-        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException {
-            iterator().forEachRemaining(x->x.disambiguateName(attrNameToTableName));
+        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError {
+            for (BaseFilterNode node: this){
+                node.disambiguateName(attrNameToTableName);
+            }
+//            iterator().forEachRemaining(x->x.disambiguateName(attrNameToTableName));
         }
     }
 
@@ -200,8 +205,11 @@ public class LogicalFilterNode {
         }
 
         @Override
-        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException {
-            iterator().forEachRemaining(x->x.disambiguateName(attrNameToTableName));
+        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError {
+//            iterator().forEachRemaining(x->x.disambiguateName(attrNameToTableName));
+            for(AndNode node: this){
+                node.disambiguateName(attrNameToTableName);
+            }
         }
     }
 }

@@ -1,15 +1,14 @@
 package db.query.plan;
 
+import db.DbException;
 import db.GlobalManager;
+import db.Setting;
 import db.error.SQLError;
 import db.error.TypeMismatch;
 import db.file.BTree.BTreeFile;
 import db.file.BTree.IndexPredicate;
 import db.file.Table;
-import db.query.pipe.BTreeScan;
-import db.query.pipe.Filter;
-import db.query.pipe.OpIterator;
-import db.query.pipe.SeqScan;
+import db.query.pipe.*;
 import db.query.plan.LogicalFilterNode.*;
 import db.query.predicate.Predicate;
 
@@ -26,11 +25,17 @@ public class Util {
      * @throws TypeMismatch
      */
     public static OpIterator getOptimizedBTreeScan(LogicalScanNode scanNode,
-                                                   AndNode andNode) throws TypeMismatch, SQLError {
+                                                   AndNode andNode) throws TypeMismatch, SQLError, DbException {
         IndexPredicate indexPredicate = andNode.extractIndexPredicate(scanNode);
         BTreeScan scan = new BTreeScan(scanNode.table, indexPredicate);
         Predicate predicate = andNode.extractKVPredicate(scanNode).predicate(scanNode.tupleDesc);
-        return new Filter(predicate, scan);
+        return new BufferedFilter(predicate, scan);
+    }
+
+    public static OpIterator getOptimizedSeqScan(LogicalScanNode scanNode, AndNode andNode) throws TypeMismatch, SQLError, DbException{
+        SeqScan scan = new SeqScan(scanNode.table);
+        Predicate predicate = andNode.extractKVPredicate(scanNode).predicate(scanNode.tupleDesc);
+        return new BufferedFilter(predicate,scan);
     }
 
     /**
@@ -44,15 +49,19 @@ public class Util {
      * @throws TypeMismatch
      */
     public static OpIterator getScan(LogicalScanNode scanNode, AndNode andNode, boolean optimized)
-            throws TypeMismatch, SQLError {
-        if (GlobalManager.isBTree()) {
+            throws TypeMismatch, SQLError, DbException {
+        if (Setting.isBTree) {
             if (optimized) {
                 return getOptimizedBTreeScan(scanNode, andNode);
             } else {
                 return new BTreeScan(scanNode.table,null);
             }
         } else {
-            return new SeqScan(scanNode.table);
+            if (optimized) {
+                return getOptimizedSeqScan(scanNode, andNode);
+            } else {
+                return new SeqScan(scanNode.table);
+            }
         }
     }
 

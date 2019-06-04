@@ -1,0 +1,165 @@
+package db.file;
+
+import db.DbException;
+import db.Main;
+import db.tuple.Tuple;
+import db.tuple.TupleDesc;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+/**
+ * TupleBuffer can store the middle result of pipe opIterator
+ * when the buffer is full, it will write tuples to disk automatically
+ *
+ */
+public class TupleBuffer {
+    private int max_buffer_num; // max number of tuples in the memory
+    private long tuple_num; // total number of tuples(including memory and disk)
+    private int pos;
+    private File file;
+    private DataInputStream dis;
+    private DataOutputStream dos;
+    private ArrayList<Tuple> tuples; // tuples in the memory
+    private Iterator<Tuple> iterator;
+    private TupleDesc tupleDesc;
+    private boolean flushed; // whether has flushed to the disk
+    static public int DEFAULT_MAX_BYTES = 1024*1024*4;//max buffer bytes in the the momory 4MB
+
+    public TupleBuffer(File file, TupleDesc tupleDesc) throws DbException{
+        this(DEFAULT_MAX_BYTES, file, tupleDesc);
+    }
+
+    /**
+     *
+     * @param max_bytes max bytes of memory usage
+     * @param file the file where the tuples should be stored when the buffer is full
+     * @param tupleDesc
+     * @throws DbException
+     */
+    public TupleBuffer(long max_bytes, File file, TupleDesc tupleDesc) throws DbException{
+        this.flushed = false;
+        this.max_buffer_num = (int)Math.ceil((double)max_bytes / tupleDesc.getSize());
+        this.file = file;
+        this.tupleDesc = tupleDesc;
+        try {
+            this.dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+        } catch (FileNotFoundException e){
+            throw new DbException(e.getMessage());
+        }
+        tuples = new ArrayList<>();
+        tuple_num = 0;
+        pos = 0;
+    }
+
+    /**
+     * add a new Tuple to the buffer, if the buffer is full, then write it to the disk
+     * @param tuple
+     * @throws DbException
+     */
+    public void add(Tuple tuple) throws DbException{
+        tuples.add(tuple);
+        tuple_num++;
+        if (tuples.size() >= max_buffer_num) {
+            flush();
+        }
+    }
+
+    /**
+     * After the adding is finished, should call this method
+     * @throws DbException
+     */
+    public void finisheAdding() throws DbException{
+        try {
+            if (flushed) {
+                flush();
+            }
+            dos.close();
+            rewind();
+        } catch (IOException e){
+            throw new DbException(e.getMessage());
+        }
+
+    }
+
+    /**
+     *
+     * @throws DbException
+     */
+    public void rewind() throws DbException{
+        try {
+            pos = 0;
+            if (flushed) {
+                dis = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
+                load();
+            }
+            iterator = tuples.iterator();
+        } catch (IOException e){
+            throw new DbException(e.getMessage());
+        }
+    }
+
+    /**
+     * get the next tuple
+     * @return null if there are no more tuples
+     */
+    public Tuple next() {
+        if (iterator.hasNext()) {
+            return iterator.next();
+        } else {
+            if (flushed) {
+                load();
+                iterator = tuples.iterator();
+                if (iterator.hasNext()) {
+                    return iterator.next();
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Remove the TupleBuffer from disk
+     */
+    public void close() {
+        file.delete();
+    }
+
+    public long getTupleNum() {
+        return tuple_num;
+    }
+
+    /**
+     * flush all the tuples in the buffer to the disk
+     * @throws DbException
+     */
+    private void flush() throws DbException{
+        try {
+            System.out.println("flush "+tuples.size());
+            flushed = true;
+            for (Tuple tuple: tuples) {
+                tuple.serialize(dos);
+            }
+            dos.flush();
+            tuples.clear();
+        } catch (IOException e){
+            throw new DbException(e.getMessage());
+        }
+    }
+
+    /**
+     * Load tuples from disk to buffer
+     */
+    private void load() {
+        tuples.clear();
+        while (pos < tuple_num && tuples.size() <= max_buffer_num) {
+            pos++;
+            Tuple tuple = Util.parseTuple(tupleDesc, dis);
+            tuples.add(tuple);
+        }
+    }
+}

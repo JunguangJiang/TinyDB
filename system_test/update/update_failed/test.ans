@@ -1,0 +1,81 @@
+Query OK, 1 row affected (0.014 sec)
+Database changed (0.0 sec)
+Query OK, 0 row affected. (0.005 sec)
+Query OK, 1 row affected. (0.008 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.0 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.0 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.0 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.0 sec)
+Query OK, 1 row affected. (0.001 sec)
+Query OK, 1 row affected. (0.001 sec)
+Line 33 : Type mismatch: <M_LONG> expected DOUBLE_TYPE, yet get LONG_TYPE
+Line 34 : Type mismatch: <M_LONG> expected STRING_TYPE, yet get LONG_TYPE
+Line 36 : Type mismatch: <M_INT> expected DOUBLE_TYPE, yet get INT_TYPE
+Line 37 : Type mismatch: <M_INT> expected STRING_TYPE, yet get INT_TYPE
+Line 39 : Type mismatch: <M_FLOAT> expected LONG_TYPE, yet get FLOAT_TYPE
+Line 40 : Type mismatch: <M_FLOAT> expected STRING_TYPE, yet get FLOAT_TYPE
+Line 42 : Type mismatch: <M_DOUBLE> expected LONG_TYPE, yet get DOUBLE_TYPE
+Line 43 : Type mismatch: <M_DOUBLE> expected STRING_TYPE, yet get DOUBLE_TYPE
+Line 45 : Type mismatch: <M_STRING> expected LONG_TYPE, yet get STRING_TYPE
+Line 46 : Type mismatch: <M_STRING> expected DOUBLE_TYPE, yet get STRING_TYPE
+Line 49 : FullColumnName M_STRING can not be null
+Line 52 : Duplicate value '19' for key M_LONG
+Line 55 : Duplicate value '23' for key M_LONG
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
+|       1 |        1 |       1.0 |        1.0 |          1 |
++---------+----------+-----------+------------+------------+
+|       2 |        2 |       2.0 |        2.0 |          2 |
++---------+----------+-----------+------------+------------+
+|       3 |        3 |       3.0 |        3.0 |          3 |
++---------+----------+-----------+------------+------------+
+|       4 |        4 |       4.0 |        4.0 |          4 |
++---------+----------+-----------+------------+------------+
+|       5 |        5 |       5.0 |        5.0 |          5 |
++---------+----------+-----------+------------+------------+
+|       6 |        6 |       6.0 |        6.0 |          6 |
++---------+----------+-----------+------------+------------+
+|       7 |        7 |       7.0 |        7.0 |          7 |
++---------+----------+-----------+------------+------------+
+|       8 |        8 |       8.0 |        8.0 |          8 |
++---------+----------+-----------+------------+------------+
+|       9 |        9 |       9.0 |        9.0 |          9 |
++---------+----------+-----------+------------+------------+
+|      10 |       10 |      10.0 |       10.0 |         10 |
++---------+----------+-----------+------------+------------+
+|      11 |       11 |      11.0 |       11.0 |         11 |
++---------+----------+-----------+------------+------------+
+|      12 |       12 |      12.0 |       12.0 |         12 |
++---------+----------+-----------+------------+------------+
+|      13 |       13 |      13.0 |       13.0 |         13 |
++---------+----------+-----------+------------+------------+
+|      14 |       14 |      14.0 |       14.0 |         14 |
++---------+----------+-----------+------------+------------+
+|      15 |       15 |      15.0 |       15.0 |         15 |
++---------+----------+-----------+------------+------------+
+|      16 |       16 |      16.0 |       16.0 |         16 |
++---------+----------+-----------+------------+------------+
+|      17 |       17 |      17.0 |       17.0 |         17 |
++---------+----------+-----------+------------+------------+
+|      18 |       18 |      18.0 |       18.0 |         18 |
++---------+----------+-----------+------------+------------+
+|      19 |       19 |      19.0 |       19.0 |         19 |
++---------+----------+-----------+------------+------------+
+|      20 |       20 |      20.0 |       20.0 |         20 |
++---------+----------+-----------+------------+------------+
+20 rows in set (0.069 sec)
+Query OK, 0 rows affected (0.001 sec)

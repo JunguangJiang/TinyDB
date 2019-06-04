@@ -80,7 +80,7 @@ public class Util {
                 case LONG_TYPE:
                     return new LongField((long)value, false);
                 default:
-                    throw new TypeMismatch(name, Type.LONG_TYPE, type);
+                    throw new TypeMismatch(name, type, Type.LONG_TYPE);
             }
         } else if (value instanceof Integer) {
             switch (type) {
@@ -89,7 +89,7 @@ public class Util {
                 case LONG_TYPE:
                     return new LongField(((Integer) value).longValue(), false);
                 default:
-                    throw new TypeMismatch(name, Type.INT_TYPE, type);
+                    throw new TypeMismatch(name, type, Type.INT_TYPE);
             }
         } else if (value instanceof Double) {
             switch (type) {
@@ -98,7 +98,7 @@ public class Util {
                 case DOUBLE_TYPE:
                     return new DoubleField((double)value, false);
                 default:
-                    throw new TypeMismatch(name, Type.DOUBLE_TYPE, type);
+                    throw new TypeMismatch(name, type, Type.DOUBLE_TYPE);
             }
         } else if (value instanceof Float) {
             switch (type) {
@@ -107,13 +107,13 @@ public class Util {
                 case DOUBLE_TYPE:
                     return new DoubleField(((Float) value).doubleValue(), false);
                 default:
-                    throw new TypeMismatch(name, Type.FLOAT_TYPE, type);
+                    throw new TypeMismatch(name, type, Type.FLOAT_TYPE);
             }
         } else if (value instanceof String) {
             if (type == Type.STRING_TYPE) {
                 return new StringField((String)value, maxLen, false);
             } else {
-                throw new TypeMismatch(name, Type.STRING_TYPE, type);
+                throw new TypeMismatch(name, type, Type.STRING_TYPE);
             }
         } else {
             throw new NotImplementedException();
