@@ -1,7 +1,8 @@
 package db.query.predicate;
 
+import db.error.SQLError;
 import db.field.Op;
-import db.error.TypeMismatch;
+
 import db.query.plan.LogicalFilterNode;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -20,7 +21,7 @@ public class KKCmpPredicate extends Predicate {
     }
 
     @Override
-    public boolean filter(Tuple tuple) throws TypeMismatch {
+    public boolean filter(Tuple tuple) throws SQLError {
         return tuple.getField(lhs).compare(op, tuple.getField(rhs));
     }
 }

@@ -4,7 +4,7 @@ import db.DbException;
 import db.GlobalManager;
 import db.Setting;
 import db.error.SQLError;
-import db.error.TypeMismatch;
+
 import db.file.BTree.BTreeFile;
 import db.file.BTree.IndexPredicate;
 import db.file.Table;
@@ -22,17 +22,17 @@ public class Util {
      * @param scanNode
      * @param andNode
      * @return
-     * @throws TypeMismatch
+     * @throws SQLError
      */
     public static OpIterator getOptimizedBTreeScan(LogicalScanNode scanNode,
-                                                   AndNode andNode) throws TypeMismatch, SQLError, DbException {
+                                                   AndNode andNode) throws SQLError, DbException {
         IndexPredicate indexPredicate = andNode.extractIndexPredicate(scanNode);
         BTreeScan scan = new BTreeScan(scanNode.table, indexPredicate);
         Predicate predicate = andNode.extractKVPredicate(scanNode).predicate(scanNode.tupleDesc);
         return new BufferedFilter(predicate, scan);
     }
 
-    public static OpIterator getOptimizedSeqScan(LogicalScanNode scanNode, AndNode andNode) throws TypeMismatch, SQLError, DbException{
+    public static OpIterator getOptimizedSeqScan(LogicalScanNode scanNode, AndNode andNode) throws SQLError, DbException{
         SeqScan scan = new SeqScan(scanNode.table);
         Predicate predicate = andNode.extractKVPredicate(scanNode).predicate(scanNode.tupleDesc);
         return new BufferedFilter(predicate,scan);
@@ -46,10 +46,9 @@ public class Util {
      * @param andNode
      * @param optimized
      * @return
-     * @throws TypeMismatch
      */
     public static OpIterator getScan(LogicalScanNode scanNode, AndNode andNode, boolean optimized)
-            throws TypeMismatch, SQLError, DbException {
+            throws SQLError, DbException {
         if (Setting.isBTree) {
             if (optimized) {
                 return getOptimizedBTreeScan(scanNode, andNode);

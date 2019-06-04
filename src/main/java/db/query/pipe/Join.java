@@ -3,7 +3,6 @@ package db.query.pipe;
 import db.DbException;
 import db.Setting;
 import db.error.SQLError;
-import db.error.TypeMismatch;
 import db.field.Field;
 import db.field.Op;
 import db.file.*;
@@ -11,13 +10,12 @@ import db.query.FullColumnName;
 import db.query.predicate.Predicate;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
-
 import db.query.plan.LogicalFilterNode.*;
+
 /**
  * The Join operator implements the relational join operation.
  */
@@ -35,9 +33,8 @@ public class Join extends Operator{
      * @param lhs
      * @param cmp if cmp is null, then do no filtering
      * @param rhs
-     * @throws TypeMismatch
      */
-    public Join(OpIterator lhs, BaseFilterNode cmp, OpIterator rhs) throws SQLError, DbException{
+    public Join(OpIterator lhs, BaseFilterNode cmp, OpIterator rhs) throws DbException{
         this.lhs = lhs;
         this.rhs = rhs;
         this.mergedTupleDesc = TupleDesc.merge(lhs.getTupleDesc(), rhs.getTupleDesc());

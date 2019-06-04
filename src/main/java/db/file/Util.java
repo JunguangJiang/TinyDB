@@ -32,9 +32,9 @@ public class Util {
      * @param value
      * @throws Exception if the constraint is not satisfied
      */
-    public static void checkNotNullConstraint(TDItem tdItem, Object value) throws NotNullViolation {
+    public static void checkNotNullConstraint(TDItem tdItem, String value) throws NotNullViolation {
         if (tdItem.notNull || tdItem.isPrimaryKey) {
-            if (value == null) {
+            if (db.field.Util.isNull(value)) {
                 throw new NotNullViolation(tdItem.fieldName);
             }
         }

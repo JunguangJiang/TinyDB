@@ -4,7 +4,6 @@ import db.GlobalManager;
 import db.error.SQLError;
 import db.field.Op;
 import db.field.Type;
-import db.error.TypeMismatch;
 import db.file.BTree.IndexPredicate;
 import db.query.FullColumnName;
 import db.query.QueryResult;
@@ -50,10 +49,10 @@ public class LogicalFilterNodeTest {
         FullColumnName attr2 = new FullColumnName("table", "attr2", null);
         FullColumnName attr3 = new FullColumnName("table2", "attr1", null);
         KKCmpNode node1 = new KKCmpNode(attr1, Op.GREATER_THAN, attr2);
-        KVCmpNode node2 = new KVCmpNode(attr1, Op.NOT_EQUALS, 4);
+        KVCmpNode node2 = new KVCmpNode(attr1, Op.NOT_EQUALS, "4");
         VVCmpNode node3 = new VVCmpNode(false);
-        KVCmpNode node4 = new KVCmpNode(attr2,Op.EQUALS, 5);
-        KVCmpNode node5 = new KVCmpNode(attr3, Op.LESS_THAN_OR_EQ, 5);
+        KVCmpNode node4 = new KVCmpNode(attr2,Op.EQUALS, "5");
+        KVCmpNode node5 = new KVCmpNode(attr3, Op.LESS_THAN_OR_EQ, "5");
 
 
         try{
@@ -70,7 +69,7 @@ public class LogicalFilterNodeTest {
             andNode.remove(node4);
             indexPredicate = andNode.extractIndexPredicate(scanNode);
             assertEquals(indexPredicate, null);
-        } catch (TypeMismatch e) {
+        } catch (SQLError e) {
             fail();
         }
 
@@ -85,10 +84,10 @@ public class LogicalFilterNodeTest {
         FullColumnName attr2 = new FullColumnName("table", "attr2", null);
         FullColumnName attr3 = new FullColumnName("table2", "attr1", null);
         KKCmpNode node1 = new KKCmpNode(attr1, Op.GREATER_THAN, attr2);
-        KVCmpNode node2 = new KVCmpNode(attr1, Op.NOT_EQUALS, 4);
+        KVCmpNode node2 = new KVCmpNode(attr1, Op.NOT_EQUALS, "4");
         VVCmpNode node3 = new VVCmpNode(false);
-        KVCmpNode node4 = new KVCmpNode(attr2,Op.EQUALS, 5);
-        KVCmpNode node5 = new KVCmpNode(attr3, Op.LESS_THAN_OR_EQ, 5);
+        KVCmpNode node4 = new KVCmpNode(attr2,Op.EQUALS, "5");
+        KVCmpNode node5 = new KVCmpNode(attr3, Op.LESS_THAN_OR_EQ, "5");
         andNode.add(node1);
         andNode.add(node2);
         andNode.add(node3);
@@ -112,7 +111,7 @@ public class LogicalFilterNodeTest {
             expected.add(node4);
             expected.add(node5);
             assertArrayEquals(result.toArray(), expected.toArray());
-        } catch (TypeMismatch e) {
+        } catch (SQLError e) {
             fail();
         }
 

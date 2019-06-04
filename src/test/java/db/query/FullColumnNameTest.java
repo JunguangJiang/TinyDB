@@ -41,21 +41,22 @@ public class FullColumnNameTest {
         }
         assertTrue(failed);
 
-        // no table assigned and table appears in map
-        attrNameToTableName.put("attr", "table");
-        fullColumnName.disambiguateName(attrNameToTableName);
-        assertEquals(fullColumnName.tableName,"table");
-
-        // table assigned and table appear in map
-        attrNameToTableName.put("attr","table2");
-        fullColumnName.disambiguateName(attrNameToTableName);
-        assertEquals(fullColumnName.tableName,"table");
-
-        // no table assigned and table appear multiple times in map
-        attrNameToTableName.put("attr", null);
-        fullColumnName.tableName = null;
-        failed = false;
         try{
+            // no table assigned and table appears in map
+            attrNameToTableName.put("attr", "table");
+            fullColumnName.disambiguateName(attrNameToTableName);
+            assertEquals(fullColumnName.tableName,"table");
+
+            // table assigned and table appear in map
+            attrNameToTableName.put("attr","table2");
+            fullColumnName.disambiguateName(attrNameToTableName);
+            assertEquals(fullColumnName.tableName,"table");
+
+            // no table assigned and table appear multiple times in map
+            attrNameToTableName.put("attr", null);
+            fullColumnName.tableName = null;
+            failed = false;
+
             fullColumnName.disambiguateName(attrNameToTableName);
         }catch (Exception e) {
             failed = true;

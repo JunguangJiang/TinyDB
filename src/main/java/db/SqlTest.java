@@ -109,9 +109,19 @@ public class SqlTest {
     public static void main(String[] args){
         if (args.length == 0) {
             File root_dir = new File("system_test");
-            for(File dir: root_dir.listFiles()) {
+            File[] dirs = root_dir.listFiles();
+            if (dirs == null) {
+                System.out.println(root_dir.toPath() + " is not valid");
+                return;
+            }
+            for(File dir: dirs) {
                 try {
-                    for(File file : dir.listFiles()) {
+                    File[] files = dir.listFiles();
+                    if (files == null) {
+                        System.out.println(dir.toPath() + " is not valid");
+                        continue;
+                    }
+                    for(File file : files) {
                         String test_name = file.toPath().toString();
                         SqlTest sqlTest = new SqlTest(test_name, "test");
                         if (sqlTest.run()) {

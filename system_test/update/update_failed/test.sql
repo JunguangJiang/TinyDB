@@ -36,10 +36,8 @@ update T set m_long = "444" where m_long = 19;
 update T set m_int = 233.9 where m_long = 20;
 update T set m_int = "444" where m_long = 19;
 
-update T set m_float = 31 where m_long=20;
 update T set m_float = "RRR" where m_long = 19;
 
-update T set m_double = 44 where m_long=20;
 update T set m_double = "HHH" where m_long = 19;
 
 update T set m_string = 44 where m_long = 20;
