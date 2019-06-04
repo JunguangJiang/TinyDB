@@ -20,30 +20,34 @@ public class JDBCStatement implements Statement {
             out.writeUTF(sql);
 
             InputStream inFromServer = conn.getInputStream();
-//            DataInputStream in = new DataInputStream(inFromServer);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inFromServer));
+            DataInputStream in = new DataInputStream(inFromServer);
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(inFromServer));
 
             StringBuilder sb = new StringBuilder();
-            String firstLine = reader.readLine().substring(2);
-            sb.append(firstLine);
-            sb.append("\r\n");
-            while (reader.ready()) {
-                sb.append(reader.readLine());
-                sb.append("\r\n");
-            }
-
-//            String temp;
-//            while (true){
-//                temp = in.readUTF();
-//                if (temp.endsWith("\r\n\r\n")) {
-//                    temp = temp.substring(0, temp.length() - 4);
-//                    sb.append(temp);
-//                    break;
-//                }
-//                sb.append(temp);
+//            String firstLine = reader.readLine();
+//            sb.append(firstLine);
+//            sb.append("\r\n");
+//            while (reader.ready()) {
+//                sb.append(reader.readLine());
+//                sb.append("\r\n");
 //            }
 
+            String temp;
+            String sep = System.lineSeparator() + System.lineSeparator();
+            while (true){
+                temp = in.readUTF();
+
+                if (temp.endsWith(sep)) {
+                    temp = temp.substring(0, temp.length() - sep.length());
+                    sb.append(temp);
+                    break;
+                }
+                sb.append(temp);
+            }
+
             String rs = sb.toString();
+//            if (rs.length() >= 2)
+//                rs = rs.substring(2);
 //            String rs = in.readUTF();
             return new JDBCResultSet(rs);
         }

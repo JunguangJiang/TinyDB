@@ -1,0 +1,90 @@
+Query OK, 1 row affected (0.019 sec)
+Database changed (0.001 sec)
+Query OK, 0 row affected. (0.007 sec)
++----------+
+| Database |
++----------+
+|     TEST |
++----------+
+1 rows in set (0.078 sec)
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.015 sec)
+Line 14 : Type mismatch: <M_INT> expected DOUBLE_TYPE, yet get INT_TYPE
+Line 15 : Type mismatch: <M_INT> expected DOUBLE_TYPE, yet get INT_TYPE
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.0 sec)
+Line 19 : Type mismatch: <M_INT> expected STRING_TYPE, yet get INT_TYPE
+Line 20 : Type mismatch: <M_INT> expected STRING_TYPE, yet get INT_TYPE
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.001 sec)
+Line 24 : Type mismatch: <M_LONG> expected DOUBLE_TYPE, yet get LONG_TYPE
+Line 25 : Type mismatch: <M_LONG> expected DOUBLE_TYPE, yet get LONG_TYPE
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.001 sec)
+Line 29 : Type mismatch: <M_LONG> expected STRING_TYPE, yet get LONG_TYPE
+Line 30 : Type mismatch: <M_LONG> expected STRING_TYPE, yet get LONG_TYPE
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.001 sec)
+Line 34 : Type mismatch: <M_FLOAT> expected LONG_TYPE, yet get FLOAT_TYPE
+Line 35 : Type mismatch: <M_FLOAT> expected LONG_TYPE, yet get FLOAT_TYPE
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.0 sec)
+Line 39 : Type mismatch: <M_FLOAT> expected STRING_TYPE, yet get FLOAT_TYPE
+Line 40 : Type mismatch: <M_FLOAT> expected STRING_TYPE, yet get FLOAT_TYPE
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.0 sec)
+Line 44 : Type mismatch: <M_DOUBLE> expected LONG_TYPE, yet get DOUBLE_TYPE
+Line 45 : Type mismatch: <M_DOUBLE> expected LONG_TYPE, yet get DOUBLE_TYPE
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.001 sec)
+Line 49 : Type mismatch: <M_DOUBLE> expected STRING_TYPE, yet get DOUBLE_TYPE
+Line 50 : Type mismatch: <M_DOUBLE> expected STRING_TYPE, yet get DOUBLE_TYPE
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.001 sec)
+Line 54 : Type mismatch: <M_STRING> expected LONG_TYPE, yet get STRING_TYPE
+Line 55 : Type mismatch: <M_STRING> expected LONG_TYPE, yet get STRING_TYPE
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.0 sec)
+Line 59 : Type mismatch: <M_STRING> expected DOUBLE_TYPE, yet get STRING_TYPE
+Line 60 : Type mismatch: <M_STRING> expected DOUBLE_TYPE, yet get STRING_TYPE
++---------+----------+-----------+------------+------------+
+| T.M_INT | T.M_LONG | T.M_FLOAT | T.M_DOUBLE | T.M_STRING |
++---------+----------+-----------+------------+------------+
++---------+----------+-----------+------------+------------+
+0 rows in set (0.0 sec)
+Query OK, 0 rows affected (0.001 sec)
++----------+
+| Database |
++----------+
++----------+
+0 rows in set (0.0 sec)
