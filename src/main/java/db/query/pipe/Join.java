@@ -87,60 +87,90 @@ public class Join extends Operator{
         long lcount = lhs.count();
         long rcount = rhs.count();
 
+        assert lcount >= 0 && rcount >= 0;
 
         // check when to do HashJoin optimization
         boolean hashJoin = false;
+        long lmemoryUsage = lcount * lhs.getTupleDesc().getSize();
+        long rmemoryUsage = rcount * rhs.getTupleDesc().getSize();
         if (cmp instanceof KKCmpNode &&  ((KKCmpNode)cmp).op == Op.EQUALS) {
-            long hashMemoryUsage = lcount * lhs.getTupleDesc().getSize()
-                    + rcount * rhs.getTupleDesc().getSize();
+            long hashMemoryUsage = Math.min(lmemoryUsage, rmemoryUsage);
             hashJoin = hashMemoryUsage < Setting.MAX_MEMORY_BYTES_FOR_JOIN_HASH_MAP;
         }
-
         if (hashJoin) { // HashJoin
-            int lidx, ridx;
+            int lidx, ridx; // index of Field in the lhs and rhs
             FullColumnName lname = ((KKCmpNode) this.cmp).lhs,
                     rname=((KKCmpNode) this.cmp).rhs;
             try {
                 lidx = lhs.getTupleDesc().fullColumnNameToIndex(lname);
                 ridx = rhs.getTupleDesc().fullColumnNameToIndex(rname);
             } catch (NoSuchElementException e){
-                lidx = lhs.getTupleDesc().fullColumnNameToIndex(rname);
-                ridx = rhs.getTupleDesc().fullColumnNameToIndex(lname);
+                try {
+                    lidx = lhs.getTupleDesc().fullColumnNameToIndex(rname);
+                    ridx = rhs.getTupleDesc().fullColumnNameToIndex(lname);
+                }catch (NoSuchElementException e2) {
+                    throw new SQLError("the attributes in the on clause must belong to the table before." + e2.getMessage());
+                }
             }
-            HashMap<Field, ArrayList<Tuple>> lHashMap = getHashMap(lhs, lidx);
-            HashMap<Field, ArrayList<Tuple>> rHashMap = getHashMap(rhs, ridx);
-
-            // ensure that HashMap that has less values is in the outer loop
+            HashMap<Field, ArrayList<Tuple>> inner;
+            OpIterator outer;
+            int outerIdx;
             boolean swap = false;
-            HashMap<Field, ArrayList<Tuple>> outer = lHashMap, inner = rHashMap;
-            if (lHashMap.size() > rHashMap.size()) {
+            // smaller child table is stored in the HashMap in the memory
+            // while the bigger child table can be stored in the disk
+            if (lmemoryUsage < rmemoryUsage) {
+                inner = getHashMap(lhs, lidx);
+                outer = rhs;
+                outerIdx = ridx;
                 swap = true;
-                outer = rHashMap;
-                inner = lHashMap;
+            } else {
+                inner = getHashMap(rhs, ridx);
+                outer = lhs;
+                outerIdx = lidx;
             }
-            // do the hash join
-            for(Field field: outer.keySet()) {
-                if (inner.containsKey(field)) {
-                    for(Tuple tuple1: outer.get(field)) {
-                        for(Tuple tuple2: inner.get(field)) {
-                            Tuple mergedTuple = Tuple.merge(tuple1, tuple2, getTupleDesc(), swap);
-                            tupleBuffer.add(mergedTuple);
-                        }
+            while (outer.hasNext()) {
+                Tuple tuple1 = outer.next();
+                Field field = tuple1.getField(outerIdx);
+                if (inner.containsKey(field)){
+                    ArrayList<Tuple> arrayList = inner.get(field);
+                    for (Tuple tuple2: arrayList) {
+                        Tuple mergedTuple = Tuple.merge(tuple1, tuple2, getTupleDesc(), swap);
+                        tupleBuffer.add(mergedTuple);
                     }
                 }
             }
+//            HashMap<Field, ArrayList<Tuple>> lHashMap = getHashMap(lhs, lidx);
+//            HashMap<Field, ArrayList<Tuple>> rHashMap = getHashMap(rhs, ridx);
+//
+//            // ensure that HashMap that has less values is in the outer loop
+//            boolean swap = false;
+//            HashMap<Field, ArrayList<Tuple>> outer = lHashMap, inner = rHashMap;
+//            if (lHashMap.size() > rHashMap.size()) {
+//                swap = true;
+//                outer = rHashMap;
+//                inner = lHashMap;
+//            }
+//            // do the hash join
+//            for(Field field: outer.keySet()) {
+//                if (inner.containsKey(field)) {
+//                    for(Tuple tuple1: outer.get(field)) {
+//                        for(Tuple tuple2: inner.get(field)) {
+//                            Tuple mergedTuple = Tuple.merge(tuple1, tuple2, getTupleDesc(), swap);
+//                            tupleBuffer.add(mergedTuple);
+//                        }
+//                    }
+//                }
+//            }
         } else { //Nested-Loop Join
             predicate = cmp.predicate(mergedTupleDesc);
 
             // ensure that the inner loop has less tuples
             boolean swap = false;
             OpIterator outer=lhs, inner=rhs;
-            if (lcount >= 0 && rcount >= 0){ // can do optimize
-                if (lcount < rcount) {
-                    outer = rhs;
-                    inner = lhs;
-                    swap = true;
-                }
+            if (lcount < rcount) {
+                outer = rhs;
+                inner = lhs;
+                swap = true;
             }
 
             // do the nested-loop join

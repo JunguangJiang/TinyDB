@@ -13,29 +13,23 @@ import db.query.plan.LogicalFilterNode.*;
 import db.query.predicate.Predicate;
 
 public class Util {
-
     /**
-     * Get a Filter OpIterator from scanNode and andNode.
-     * will do BTreeScan based on scanNode and IndexPredicate extracted from andNode
-     * and then do Filter based on the KVCmpPredicate extracted from andNode.
-     *
+     * do Filter based on the KVCmpPredicate extracted from andNode.
+     * @param scan
      * @param scanNode
      * @param andNode
      * @return
      * @throws SQLError
+     * @throws DbException
      */
-    public static OpIterator getOptimizedBTreeScan(LogicalScanNode scanNode,
-                                                   AndNode andNode) throws SQLError, DbException {
-        IndexPredicate indexPredicate = andNode.extractIndexPredicate(scanNode);
-        BTreeScan scan = new BTreeScan(scanNode.table, indexPredicate);
-        Predicate predicate = andNode.extractKVPredicate(scanNode).predicate(scanNode.tupleDesc);
-        return new BufferedFilter(predicate, scan);
-    }
-
-    public static OpIterator getOptimizedSeqScan(LogicalScanNode scanNode, AndNode andNode) throws SQLError, DbException{
-        SeqScan scan = new SeqScan(scanNode.table);
-        Predicate predicate = andNode.extractKVPredicate(scanNode).predicate(scanNode.tupleDesc);
-        return new BufferedFilter(predicate,scan);
+    private static OpIterator optimize(OpIterator scan, LogicalScanNode scanNode, AndNode andNode) throws SQLError, DbException{
+        AndNode kvnodes = andNode.extractKVPredicate(scanNode);
+        if (kvnodes.size() == 0){
+            return scan;
+        } else {
+            Predicate predicate = kvnodes.predicate(scanNode.tupleDesc);
+            return new BufferedFilter(predicate, scan);
+        }
     }
 
     /**
@@ -49,19 +43,20 @@ public class Util {
      */
     public static OpIterator getScan(LogicalScanNode scanNode, AndNode andNode, boolean optimized)
             throws SQLError, DbException {
+        OpIterator scan;
         if (Setting.isBTree) {
-            if (optimized) {
-                return getOptimizedBTreeScan(scanNode, andNode);
-            } else {
-                return new BTreeScan(scanNode.table,null);
+            IndexPredicate indexPredicate = null;
+            if (optimized){
+                indexPredicate = andNode.extractIndexPredicate(scanNode);
             }
+            scan = new BTreeScan(scanNode.table,indexPredicate);
         } else {
-            if (optimized) {
-                return getOptimizedSeqScan(scanNode, andNode);
-            } else {
-                return new SeqScan(scanNode.table);
-            }
+            scan = new SeqScan(scanNode.table);
         }
+        if (optimized) {
+            scan = optimize(scan, scanNode, andNode);
+        }
+        return scan;
     }
 
     /**

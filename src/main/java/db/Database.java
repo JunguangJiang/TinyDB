@@ -1,5 +1,7 @@
 package db;
 
+import db.error.SQLError;
+import db.file.BufferPool;
 import db.file.DbFile;
 import db.file.Table;
 import db.parser.TinyDBOutput;
@@ -47,7 +49,7 @@ public class Database {
      * @param hasPrimaryKeyConstraint whether the Table has primary key constraint
      * @return the result of the query
      */
-    public QueryResult createTable(String tableName, TupleDesc tupleDesc, boolean isBTree, boolean hasPrimaryKeyConstraint) {
+    public QueryResult createTable(String tableName, TupleDesc tupleDesc, boolean isBTree, boolean hasPrimaryKeyConstraint) throws SQLError {
         return createTable(tableName, tupleDesc, "", false, isBTree, hasPrimaryKeyConstraint);
     }
 
@@ -57,7 +59,7 @@ public class Database {
      * @param tupleDesc the descriptor of the tuple
      * @return
      */
-    public QueryResult createTable(String tableName, TupleDesc tupleDesc) {
+    public QueryResult createTable(String tableName, TupleDesc tupleDesc) throws SQLError{
         return createTable(tableName,tupleDesc,true,true);
     }
 
@@ -74,7 +76,10 @@ public class Database {
      * @return
      */
     public QueryResult createTable(String tableName, TupleDesc tupleDesc, String sql, Boolean isLog,
-                                   boolean isBTree, boolean hasPrimaryKeyConstraint) {
+                                   boolean isBTree, boolean hasPrimaryKeyConstraint) throws SQLError {
+        if (tupleDesc.getSize() >= BufferPool.getPageSize() / 2){
+            throw new SQLError("Row size too large. The maximum row size for table is " + BufferPool.getPageSize() / 2);
+        }
         if (getTable(tableName) != null) {
             return new QueryResult(false, "Table " + tableName + " already exists.");
         } else {

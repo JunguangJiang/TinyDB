@@ -63,7 +63,6 @@ public class LogicalPlan
             for(FullColumnName fullColumnName: fullColumnNames){
                 fullColumnName.disambiguateName(attrToTable);
             }
-//            fullColumnNames.iterator().forEachRemaining(x->x.disambiguateName(attrToTable));
         }
     }
 
