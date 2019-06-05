@@ -6,6 +6,8 @@ import db.error.NotNullViolation;
 import db.error.PrimaryKeyViolation;
 import db.error.SQLError;
 import db.file.BTree.BTreeFile;
+import db.file.BTree.BTreeLeafPage;
+import db.file.BTree.BTreePageId;
 import db.file.BTree.BTreeRootPtrPage;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
@@ -49,9 +51,18 @@ public class Table {
         if (isBTree) {
             if(file.length() == 0){
                 try {
-                    BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(file, true));
+                    /*BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(file, true));
                     byte[] emptyRootPtrData = BTreeRootPtrPage.createEmptyPageData();
                     bw.write(emptyRootPtrData);
+                    bw.close();*/
+                    BufferedOutputStream bw = new BufferedOutputStream(
+                            new FileOutputStream(file, true));
+                    byte[] emptyRootPtrData = BTreeRootPtrPage.createEmptyPageData();
+                    byte[] emptyLeafData = BTreeLeafPage.createEmptyPageData();
+                    emptyRootPtrData[3] = 1;
+                    emptyRootPtrData[4] = BTreePageId.LEAF;
+                    bw.write(emptyRootPtrData);
+                    bw.write(emptyLeafData);
                     bw.close();
                 }
                 catch (IOException e){

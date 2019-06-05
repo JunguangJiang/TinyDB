@@ -523,11 +523,14 @@ public class BTreeFile implements DbFile {
 		BTreePageId rootId = rootPtr.getRootId();
 
 		if(rootId == null) { // the root has just been created, so set the root pointer to point to it		
-			rootId = new BTreePageId(tableid, 1 + numPages(), BTreePageId.LEAF);
+			/*rootId = new BTreePageId(tableid, 1 + numPages(), BTreePageId.LEAF);
 			rootPtr = (BTreeRootPtrPage) getPage(dirtypages, BTreeRootPtrPage.getId(tableid));
 			rootPtr.setRootId(rootId);
 			BTreeLeafPage rootPage = new BTreeLeafPage(rootId, BTreePage.createEmptyPageData(), this.keyField);
-			dirtypages.put(rootId, rootPage);
+			dirtypages.put(rootId, rootPage);*/
+			rootId = new BTreePageId(tableid, numPages(), BTreePageId.LEAF);
+			rootPtr = (BTreeRootPtrPage) getPage(dirtypages, BTreeRootPtrPage.getId(tableid));
+			rootPtr.setRootId(rootId);
 		}
 
 		// find and lock the left-most leaf page corresponding to the key field,
