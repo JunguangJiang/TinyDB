@@ -20,7 +20,7 @@ import java.io.*;
 public class BTreeHeaderPage implements Page {
 	private volatile boolean dirty = false;
 	
-	final static int INDEX_SIZE = Type.INT_TYPE.getBytes();
+	final static int INDEX_SIZE = 4;
 
 	final BTreePageId pid;
 	final byte header[];
@@ -46,19 +46,13 @@ public class BTreeHeaderPage implements Page {
 		DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
 
 		// Read the next and prev pointers
-		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			this.nextPage = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
-			e.printStackTrace();
-		}
+			//Field f = Type.INT_TYPE.parse(dis);
+			//this.nextPage = (Integer)((IntField) f).getValue();
+		this.nextPage = dis.readInt();
 
-		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			this.prevPage = (Integer) ((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
-			e.printStackTrace();
-		}
+			//Field f = Type.INT_TYPE.parse(dis);
+			//this.prevPage = (Integer) ((IntField) f).getValue();
+		this.prevPage = dis.readInt();
 
 		// allocate and read the header slots of this page
 		header = new byte[getHeaderSize()];
@@ -81,9 +75,9 @@ public class BTreeHeaderPage implements Page {
 	/**
 	 * Computes the number of bytes in the header while saving room for pointers
 	 */
-	private static int getHeaderSize() {        
+	private static int getHeaderSize() {
 		// pointerBytes: nextPage and prevPage pointers
-		int pointerBytes = 2 * INDEX_SIZE; 
+		int pointerBytes = 2 * INDEX_SIZE;
 		return BufferPool.getPageSize() - pointerBytes;
 	}
 
@@ -141,13 +135,11 @@ public class BTreeHeaderPage implements Page {
 		// write out the next and prev pointers
 		try {
 			dos.writeInt(nextPage);
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		try {
 			dos.writeInt(prevPage);
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

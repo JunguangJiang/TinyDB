@@ -6,6 +6,7 @@ import db.error.NotNullViolation;
 import db.error.PrimaryKeyViolation;
 import db.error.SQLError;
 import db.file.BTree.BTreeFile;
+import db.file.BTree.BTreeRootPtrPage;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -14,7 +15,9 @@ import db.field.Util;
 import db.file.heap.HeapFile;
 import db.query.QueryResult;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +47,18 @@ public class Table {
                  boolean isBTree, boolean hasPrimaryKeyConstraint) {
         this.id = id;
         if (isBTree) {
+            if(file.length() == 0){
+                try {
+                    BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(file, true));
+                    byte[] emptyRootPtrData = BTreeRootPtrPage.createEmptyPageData();
+                    bw.write(emptyRootPtrData);
+                    bw.close();
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+
             this.dbFile = new BTreeFile(id, file, tupleDesc);
         } else {
             this.dbFile = new HeapFile(id, file, tupleDesc, hasPrimaryKeyConstraint);

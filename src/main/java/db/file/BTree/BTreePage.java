@@ -20,7 +20,7 @@ import java.io.*;
 public abstract class BTreePage implements Page {
 	protected volatile boolean dirty = false;
 
-	protected final static int INDEX_SIZE = Type.INT_TYPE.getBytes();
+	protected final static int INDEX_SIZE = 4;
 
 	protected final BTreePageId pid;
 	protected final TupleDesc td;

@@ -81,9 +81,9 @@ public class BTreeFile implements DbFile {
 		BufferedInputStream bis = null;
 
 		try {
-            if(f.length() == 0) {
+            /*if(f.length() == 0) {
                 initEmptyFile(f);
-            }
+            }*/
             bis = new BufferedInputStream(new FileInputStream(f));
 			if(id.pgcateg() == BTreePageId.ROOT_PTR) {
 				byte pageBuf[] = new byte[BTreeRootPtrPage.getPageSize()];
@@ -523,9 +523,11 @@ public class BTreeFile implements DbFile {
 		BTreePageId rootId = rootPtr.getRootId();
 
 		if(rootId == null) { // the root has just been created, so set the root pointer to point to it		
-			rootId = new BTreePageId(tableid, numPages(), BTreePageId.LEAF);
+			rootId = new BTreePageId(tableid, 1 + numPages(), BTreePageId.LEAF);
 			rootPtr = (BTreeRootPtrPage) getPage(dirtypages, BTreeRootPtrPage.getId(tableid));
 			rootPtr.setRootId(rootId);
+			BTreeLeafPage rootPage = new BTreeLeafPage(rootId, BTreePage.createEmptyPageData(), this.keyField);
+			dirtypages.put(rootId, rootPage);
 		}
 
 		// find and lock the left-most leaf page corresponding to the key field,
@@ -1263,8 +1265,15 @@ class BTreeFileIterator extends AbstractDbFileIterator {
 	public void open() throws DbException {
 		BTreeRootPtrPage rootPtr = (BTreeRootPtrPage) GlobalManager.getBufferPool().getPage(BTreeRootPtrPage.getId(f.getId()));
 		BTreePageId root = rootPtr.getRootId();
-		curp = f.findLeafPage(root, null);
-		it = curp.iterator();
+		if(root == null){
+			// Empty BTreeFile
+			curp = null;
+			it = null;
+		}
+		else {
+			curp = f.findLeafPage(root, null);
+			it = curp.iterator();
+		}
 	}
 
 	/**

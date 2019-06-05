@@ -75,9 +75,10 @@ public class BTreeInternalPage extends BTreePage {
 
 		// Read the parent pointer
 		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			this.parent = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
+			//Field f = Type.INT_TYPE.parse(dis);
+			//this.parent = (Integer)((IntField) f).getValue();
+			this.parent = dis.readInt();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
@@ -213,9 +214,10 @@ public class BTreeInternalPage extends BTreePage {
 		// read child pointer
 		int child = -1;
 		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			child = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
+			//Field f = Type.INT_TYPE.parse(dis);
+			//child = (Integer)((IntField) f).getValue();
+			child = dis.readInt();
+		} catch (IOException e) {
 			e.printStackTrace();
 			throw new NoSuchElementException("parsing error!");
 		}
@@ -238,7 +240,6 @@ public class BTreeInternalPage extends BTreePage {
 		// write out the parent pointer
 		try {
 			dos.writeInt(parent);
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -77,26 +77,17 @@ public class BTreeLeafPage extends BTreePage {
 		DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
 
 		// Read the parent and sibling pointers
-		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			this.parent = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
-			e.printStackTrace();
-		}
+			//Field f = Type.INT_TYPE.parse(dis);
+			//this.parent = (Integer)((IntField) f).getValue();
+		this.parent = dis.readInt();
 
-		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			this.leftSibling = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
-			e.printStackTrace();
-		}
+			//Field f = Type.INT_TYPE.parse(dis);
+			//this.leftSibling = (Integer)((IntField) f).getValue();
+		this.leftSibling = dis.readInt();
 
-		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			this.rightSibling = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
-			e.printStackTrace();
-		}
+			//Field f = Type.INT_TYPE.parse(dis);
+			//this.rightSibling = (Integer)((IntField) f).getValue();
+		this.rightSibling = dis.readInt();
 
 		// allocate and read the header slots of this page
 		header = new byte[getHeaderSize()];
