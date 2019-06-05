@@ -35,8 +35,8 @@ select * from T;
 -- 3.402823e+38 ~ 1.401298e-45 --
 
 -- -- max +, - --
-insert into T values (3, 3, 3.402824e+38, 3.0, "3");
-select * from T;
+-- insert into T values (3, 3, 3.402824e+38, 3.0, "3");
+-- select * from T;
 -- insert into T values (13, 13, -3.402823e+39, 13.0, "13");
 -- select * from T;
 -- -- min +, -  --
