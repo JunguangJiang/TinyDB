@@ -51,8 +51,9 @@ public class Client {
     private static long getRunTime(Statement st, String sql) throws SQLException{
         long startTime = System.currentTimeMillis();
         ResultSet rs = st.executeQuery(sql);
+        while (rs.next())
+            System.out.print(rs.getString(0));
         long endTime = System.currentTimeMillis();
-        System.out.println(rs.getString(0));
         return (endTime - startTime);
     }
 
@@ -110,7 +111,8 @@ public class Client {
                 switch (checkImportSequence(sql)) {
                     case 0:
                         ResultSet rs = st.executeQuery(sql);
-                        System.out.println(rs.getString(0));
+                        while (rs.next())
+                            System.out.print(rs.getString(0));
                         break;
                     case 1:
                         handleImportSequence(st, sql);

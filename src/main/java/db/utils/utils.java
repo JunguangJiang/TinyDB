@@ -36,6 +36,7 @@ public class utils {
         return sb.toString();
     }
 
+
     /**
      * @param s: the raw sentence of the query sentence
      * @param out

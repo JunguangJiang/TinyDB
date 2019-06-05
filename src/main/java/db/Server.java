@@ -9,9 +9,12 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import db.utils.utils;
 
@@ -103,23 +106,36 @@ public class Server {
         }
     }
 
+    private String sendFile(DataOutputStream socketOut, String filename) {
+        try (FileReader reader = new FileReader(filename);
+             BufferedReader br = new BufferedReader(reader)
+        ) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                socketOut.writeUTF(line  + System.lineSeparator());
+            }
+            socketOut.writeUTF(System.lineSeparator() + System.lineSeparator());
+            return "";
+        } catch (IOException e) {
+            System.out.println("Read data files failed!");
+            return "500 Internal Error";
+        }
+    }
+
     /**
      * process sql command and return result
      * @param sql: sql command
      */
-    private String process(String sql) {
+    private String processAndSend(DataOutputStream socketOut, String sql) {
         String output_filename = sqlPath + "Client.out";
         File output = new File(output_filename);
         try (BufferedWriter outputBufferedWriter = new BufferedWriter(new FileWriter(output))){
             TinyDBOutput out = new TinyDBOutput(outputBufferedWriter);
             this.process(sql, out);
-            return utils.readFile(output_filename);
+            return sendFile(socketOut, output_filename);
         } catch (RuntimeException e) {
-//            e.printStackTrace();
-//            if (e.getMessage() != null && e.getMessage().equals("shutdown!!!"))
-//                throw new SQLException(e.getMessage());
             return "500 Internal Error";
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println("Read data files failed!");
             return "500 Internal Error";
         } finally {
@@ -211,6 +227,83 @@ public class Server {
             this.server = server;
         }
 
+//        private static String handleImportSequence(Server server, String sql) throws NoSuchElementException {
+//            String msg = sql.split(" ", 2)[1];
+//            try {
+//                FileInputStream fip = new FileInputStream(new File(msg.substring(0, msg.length() - 1)));
+//                InputStreamReader reader = new InputStreamReader(fip, "UTF-8");
+//                StringBuilder sb = new StringBuilder();
+//                StringBuilder rs = new StringBuilder();
+//                int i = 0;
+//                long runTime = 0;
+//                long startTime, endTime;
+//                while (reader.ready()) {
+//                    int c = reader.read();
+//                    sb.append((char) c);
+//                    if (c == ';')
+//                        i++;
+//                    if (i == 100) {
+//                        startTime = System.currentTimeMillis();
+//                        rs.append(server.process(sb.toString()));
+//                        endTime = System.currentTimeMillis();
+//                        runTime += (endTime - startTime);
+//                        sb.delete(0, sb.length());
+//                        i = 0;
+//                    }
+//                }
+//                if (sb.length() > 0) {
+//                    startTime = System.currentTimeMillis();
+//                    rs.append(server.process(sb.toString()));
+//                    endTime = System.currentTimeMillis();
+//                    runTime += (endTime - startTime);
+//                }
+//                rs.append(String.format("\n\nTotal execute time: %.3f sec.", runTime / 1000.0));
+//                reader.close();
+//                fip.close();
+//                return rs.toString();
+//            } catch (FileNotFoundException e) {
+//                return String.format("\nThe current path is %s , please input a correct path.\n\n", System.getProperty("user.dir"));
+//            }
+//            catch (Exception e) {
+//                e.printStackTrace();
+//                return String.format("Read file %s fail!", msg);
+//            }
+//        }
+//
+//        /**
+//         * to check whether the SQL is the the import command
+//         * @param sql: the sql to check
+//         * @return  if is import sequence, then 1; if is import sequence but error filename, then -1;otherwise 0
+//         */
+//        private static Boolean checkImportSequence(String sql) {
+//            String upperCaseSQL = sql.toUpperCase();
+//            if (upperCaseSQL.startsWith("IMPORT")) {
+//                String[] msg = sql.split(" ", 2);
+//                if (msg.length != 2) {
+//                    System.out.println("Error input, please input the correct filename!");
+//                    return false; // import but error input
+//                }
+//                return true;
+//            }
+//            return false; // otherwise
+//        }
+
+        private static void writeBack(DataOutputStream out, String result) throws IOException{
+            int bufferSize = 60000;
+            int i =0;
+            int sum = 0;
+
+            while(i < result.length()){
+                int endIdx = java.lang.Math.min(result.length(), i + bufferSize);
+                String jsosPart = result.substring(i,endIdx);
+                out.writeUTF(jsosPart);
+                sum += jsosPart.length();
+                i += bufferSize;
+            }
+            out.writeUTF(System.lineSeparator() + System.lineSeparator());
+            assert sum == result.length();
+        }
+
         /**
          * run: override the thread function
          * get input from client and write back the SQL result
@@ -221,23 +314,11 @@ public class Server {
                 try {
                     DataInputStream in = new DataInputStream(socket.getInputStream());
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-
                     String sql = in.readUTF();
-
-                    String result = server.process(sql);
-                    int bufferSize = 60000;
-                    int i =0;
-                    int sum = 0;
-
-                    while(i < result.length()){
-                        int endIdx = java.lang.Math.min(result.length(), i + bufferSize);
-                        String jsosPart = result.substring(i,endIdx);
-                        out.writeUTF(jsosPart);
-                        sum += jsosPart.length();
-                        i += bufferSize;
-                    }
-                    out.writeUTF(System.lineSeparator() + System.lineSeparator());
-                    assert sum == result.length();
+                    String result;
+                    result = server.processAndSend(out, sql);
+                    if (result.length() > 0)
+                        writeBack(out, result);
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;
