@@ -107,13 +107,16 @@ public class Server {
     }
 
     private String sendFile(DataOutputStream socketOut, String filename) {
-        try (FileReader reader = new FileReader(filename);
-             BufferedReader br = new BufferedReader(reader)
+        try (FileReader reader = new FileReader(filename)
         ) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                socketOut.writeUTF(line  + System.lineSeparator());
+            char[] buf = new char[0xffff];  // 1MB
+            int num;
+            while((num = reader.read(buf)) != -1){
+                socketOut.writeUTF(new String(buf, 0, num));
             }
+//            while ((line = br.readLine()) != null) {
+//                socketOut.writeUTF(line  + System.lineSeparator());
+//            }
             socketOut.writeUTF(System.lineSeparator() + System.lineSeparator());
             return "";
         } catch (IOException e) {
@@ -289,7 +292,7 @@ public class Server {
 //        }
 
         private static void writeBack(DataOutputStream out, String result) throws IOException{
-            int bufferSize = 60000;
+            int bufferSize = 0xffff;
             int i =0;
             int sum = 0;
 
@@ -300,7 +303,7 @@ public class Server {
                 sum += jsosPart.length();
                 i += bufferSize;
             }
-            out.writeUTF(System.lineSeparator() + System.lineSeparator());
+            out.writeUTF(System.lineSeparator() + System.lineSeparator() + System.lineSeparator());
             assert sum == result.length();
         }
 

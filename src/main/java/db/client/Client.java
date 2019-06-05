@@ -66,22 +66,23 @@ public class Client {
         try {
             FileInputStream fip = new FileInputStream(new File(msg.substring(0, msg.length() - 1)));
             InputStreamReader reader = new InputStreamReader(fip, "UTF-8");
-            StringBuilder sb = new StringBuilder();
-            int i = 0;
+            StringBuilder total = new StringBuilder();
+            StringBuilder current = new StringBuilder();
             long runTime = 0;
             while (reader.ready()) {
                 int c = reader.read();
-                sb.append((char) c);
-                if (c == ';')
-                    i++;
-                if (i == 100) {
-                    runTime += getRunTime(st, sb.toString());
-                    sb.delete(0, sb.length());
-                    i = 0;
+                current.append((char) c);
+                if (c == ';') {
+                    if (total.length() + current.length() > 0xffff) {
+                        runTime += getRunTime(st, total.toString());
+                        total.delete(0, total.length());
+                    }
+                    total.append(current);
+                    current.delete(0, current.length());
                 }
             }
-            if (sb.length() > 0) {
-                runTime += getRunTime(st, sb.toString());
+            if (total.length() > 0) {
+                runTime += getRunTime(st, total.toString());
             }
             System.out.println(String.format("Total execute time: %.3f sec.", runTime / 1000.0));
             reader.close();

@@ -17,7 +17,9 @@ public class JDBCStatement implements Statement {
         try {
             OutputStream outToServer = conn.getOutputStream();
             DataOutputStream out = new DataOutputStream(outToServer);
+
             out.writeUTF(sql);
+
             InputStream inFromServer = conn.getInputStream();
             DataInputStream in = new DataInputStream(inFromServer);
 //            BufferedReader reader = new BufferedReader(new InputStreamReader(inFromServer));
