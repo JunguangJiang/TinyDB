@@ -9,6 +9,7 @@ import db.error.SQLError;
 import db.field.Op;
 import db.field.Type;
 import db.error.NotNullViolation;
+import db.file.BufferPool;
 import db.query.pipe.*;
 import db.file.Table;
 import db.query.*;
@@ -76,7 +77,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         try {
             queryResult = (QueryResult) super.visitSqlStatement(ctx);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             queryResult = new QueryResult(false, e.getMessage());
         }
         long endTime = System.currentTimeMillis();
@@ -177,8 +178,12 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         int a = ctx.start.getStartIndex();
         int b = ctx.stop.getStopIndex();
         Interval interval = new Interval(a,b);
-        return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog,
-                Setting.isBTree, true);
+        try {
+            return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog,
+                    Setting.isBTree, true);
+        } catch (SQLError e) {
+            return new QueryResult(false,e.getMessage());
+        }
     }
 
     /**
@@ -214,7 +219,15 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
         if (ctx.STRING() != null) {
             hashMap.put("type", Type.STRING_TYPE);
-            hashMap.put("maxLen", Integer.valueOf(ctx.lengthOneDimension().DECIMAL_LITERAL().getText()));
+            try {
+                int max_len = Integer.valueOf(ctx.lengthOneDimension().DECIMAL_LITERAL().getText());
+                if (max_len <= 0){
+                    throw new RuntimeException("string length must be positive");
+                }
+                hashMap.put("maxLen", max_len);
+            } catch (NumberFormatException e){
+                throw new RuntimeException("string length must be 1-"+ BufferPool.getPageSize()/2);
+            }
         } else {
             hashMap.put("type", Type.getType(ctx.getText()));
             hashMap.put("maxLen", 0);
