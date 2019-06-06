@@ -2,7 +2,7 @@ package db.query.pipe;
 
 import db.DbException;
 import db.error.SQLError;
-import db.error.TypeMismatch;
+
 import db.error.PrimaryKeyViolation;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -66,4 +66,5 @@ public interface OpIterator extends Serializable{
      */
     void close();
 
+    long count();
 }

@@ -1,7 +1,7 @@
 package db;
 
 import db.field.Type;
-import db.error.TypeMismatch;
+
 import db.error.PrimaryKeyViolation;
 import db.query.pipe.OpIterator;
 import db.tuple.TDItem;
@@ -56,17 +56,17 @@ public class Utility {
         OpIterator opIterator = new OpIterator() {
             private Iterator<Tuple> iterator;
             @Override
-            public void open() throws DbException, TypeMismatch, PrimaryKeyViolation {
+            public void open() throws DbException, PrimaryKeyViolation {
                 iterator = tuples.iterator();
             }
 
             @Override
-            public boolean hasNext() throws DbException, TypeMismatch, PrimaryKeyViolation {
+            public boolean hasNext() throws DbException, PrimaryKeyViolation {
                 return iterator.hasNext();
             }
 
             @Override
-            public Tuple next() throws DbException, NoSuchElementException, TypeMismatch, PrimaryKeyViolation {
+            public Tuple next() throws DbException, NoSuchElementException, PrimaryKeyViolation {
                 return iterator.next();
             }
 
@@ -82,6 +82,11 @@ public class Utility {
 
             @Override
             public void close() {
+            }
+
+            @Override
+            public long count() {
+                return -1;
             }
         };
         return opIterator;

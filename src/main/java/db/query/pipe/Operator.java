@@ -2,7 +2,7 @@ package db.query.pipe;
 
 import db.DbException;
 import db.error.SQLError;
-import db.error.TypeMismatch;
+
 import db.error.PrimaryKeyViolation;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -77,4 +77,13 @@ public abstract class Operator implements OpIterator{
      * @return return the TupleDesc of the output tuples of this operator
      * */
     public abstract TupleDesc getTupleDesc();
+
+    /**
+     * @return the number of tuples in the opIterator
+     *          -1 if has not counted
+     */
+    @Override
+    public long count() {
+        return -1;
+    }
 }

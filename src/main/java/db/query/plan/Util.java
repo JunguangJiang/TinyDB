@@ -1,36 +1,35 @@
 package db.query.plan;
 
+import db.DbException;
 import db.GlobalManager;
+import db.Setting;
 import db.error.SQLError;
-import db.error.TypeMismatch;
+
 import db.file.BTree.BTreeFile;
 import db.file.BTree.IndexPredicate;
 import db.file.Table;
-import db.query.pipe.BTreeScan;
-import db.query.pipe.Filter;
-import db.query.pipe.OpIterator;
-import db.query.pipe.SeqScan;
+import db.query.pipe.*;
 import db.query.plan.LogicalFilterNode.*;
 import db.query.predicate.Predicate;
 
 public class Util {
-
     /**
-     * Get a Filter OpIterator from scanNode and andNode.
-     * will do BTreeScan based on scanNode and IndexPredicate extracted from andNode
-     * and then do Filter based on the KVCmpPredicate extracted from andNode.
-     *
+     * do Filter based on the KVCmpPredicate extracted from andNode.
+     * @param scan
      * @param scanNode
      * @param andNode
      * @return
-     * @throws TypeMismatch
+     * @throws SQLError
+     * @throws DbException
      */
-    public static OpIterator getOptimizedBTreeScan(LogicalScanNode scanNode,
-                                                   AndNode andNode) throws TypeMismatch, SQLError {
-        IndexPredicate indexPredicate = andNode.extractIndexPredicate(scanNode);
-        BTreeScan scan = new BTreeScan(scanNode.table, indexPredicate);
-        Predicate predicate = andNode.extractKVPredicate(scanNode).predicate(scanNode.tupleDesc);
-        return new Filter(predicate, scan);
+    private static OpIterator optimize(OpIterator scan, LogicalScanNode scanNode, AndNode andNode) throws SQLError, DbException{
+        AndNode kvnodes = andNode.extractKVPredicate(scanNode);
+        if (kvnodes.size() == 0){
+            return scan;
+        } else {
+            Predicate predicate = kvnodes.predicate(scanNode.tupleDesc);
+            return new BufferedFilter(predicate, scan);
+        }
     }
 
     /**
@@ -41,19 +40,23 @@ public class Util {
      * @param andNode
      * @param optimized
      * @return
-     * @throws TypeMismatch
      */
     public static OpIterator getScan(LogicalScanNode scanNode, AndNode andNode, boolean optimized)
-            throws TypeMismatch, SQLError {
-        if (GlobalManager.isBTree()) {
-            if (optimized) {
-                return getOptimizedBTreeScan(scanNode, andNode);
-            } else {
-                return new BTreeScan(scanNode.table,null);
+            throws SQLError, DbException {
+        OpIterator scan;
+        if (Setting.isBTree) {
+            IndexPredicate indexPredicate = null;
+            if (optimized){
+                indexPredicate = andNode.extractIndexPredicate(scanNode);
             }
+            scan = new BTreeScan(scanNode.table,indexPredicate);
         } else {
-            return new SeqScan(scanNode.table);
+            scan = new SeqScan(scanNode.table);
         }
+        if (optimized) {
+            scan = optimize(scan, scanNode, andNode);
+        }
+        return scan;
     }
 
     /**

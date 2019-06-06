@@ -1,5 +1,7 @@
 package db;
 
+import db.error.SQLError;
+import db.file.BufferPool;
 import db.file.DbFile;
 import db.file.Table;
 import db.parser.TinyDBOutput;
@@ -47,7 +49,7 @@ public class Database {
      * @param hasPrimaryKeyConstraint whether the Table has primary key constraint
      * @return the result of the query
      */
-    public QueryResult createTable(String tableName, TupleDesc tupleDesc, boolean isBTree, boolean hasPrimaryKeyConstraint) {
+    public QueryResult createTable(String tableName, TupleDesc tupleDesc, boolean isBTree, boolean hasPrimaryKeyConstraint) throws SQLError {
         return createTable(tableName, tupleDesc, "", false, isBTree, hasPrimaryKeyConstraint);
     }
 
@@ -57,7 +59,7 @@ public class Database {
      * @param tupleDesc the descriptor of the tuple
      * @return
      */
-    public QueryResult createTable(String tableName, TupleDesc tupleDesc) {
+    public QueryResult createTable(String tableName, TupleDesc tupleDesc) throws SQLError{
         return createTable(tableName,tupleDesc,true,true);
     }
 
@@ -74,7 +76,10 @@ public class Database {
      * @return
      */
     public QueryResult createTable(String tableName, TupleDesc tupleDesc, String sql, Boolean isLog,
-                                   boolean isBTree, boolean hasPrimaryKeyConstraint) {
+                                   boolean isBTree, boolean hasPrimaryKeyConstraint) throws SQLError {
+        if (tupleDesc.getSize() >= BufferPool.getPageSize() / 2){
+            throw new SQLError("Row size too large. The maximum row size for table is " + BufferPool.getPageSize() / 2);
+        }
         if (getTable(tableName) != null) {
             return new QueryResult(false, "Table " + tableName + " already exists.");
         } else {
@@ -171,21 +176,6 @@ public class Database {
         return results;
     }
 
-    public static Pair<String[], String[]> getTablesNameAndIncrementNumber(String content) {
-        String[] tablesMessage = content.split("\t");
-        String[] ret1 = new String[tablesMessage.length];
-        String[] ret2 = new String[tablesMessage.length];
-        System.out.println("tableMessage"+tablesMessage.length);
-        System.out.println(tablesMessage.toString());
-        for (int i = 0; i < tablesMessage.length; ++i) {
-            String[] items = tablesMessage[i].split(" ", 2);
-            System.out.println(items.length);
-            ret1[i] = items[0];
-            ret2[i] = items[1];
-        }
-        return new Pair<>(ret1, ret2);
-    }
-
     /**
      * parseDatabaseScript: run the create table sql sentence on the DatabaseScript
      * @param content: the record on the DatabaseScript
@@ -196,7 +186,7 @@ public class Database {
             assert lines.length > 0;
             Integer n = Integer.valueOf(lines[0]); // the number of tables
             StringBuilder sqlString = new StringBuilder();
-            for(int i=1+2*n; i<lines.length; i++) {
+            for(int i=1+3*n; i<lines.length; i++) {
                 sqlString.append(lines[i]);
             }
             BufferedWriter log = new BufferedWriter(new FileWriter(outFile));
@@ -208,9 +198,11 @@ public class Database {
             log.close();
             String[] names = Arrays.copyOfRange(lines,1,n+1);
             String[] incrementNumbers = Arrays.copyOfRange(lines, n+1, 2*n+1);
+            String[] counts = Arrays.copyOfRange(lines,2*n+1,3*n+1);
             for (int i = 0; i < names.length; ++i) {
                 Table table = idTableMap.get(nameIdMap.get(names[i]));
                 table.autoIncrementNumber = Long.parseLong(incrementNumbers[i]);
+                table.count = Long.parseLong(counts[i]);
             }
         }
         catch (Exception e) {
@@ -258,6 +250,10 @@ public class Database {
         }
         for (Integer id: idTableMap.keySet()) {
             stringBuilder.append(getTable(id).autoIncrementNumber);
+            stringBuilder.append(System.lineSeparator());
+        }
+        for (Integer id: idTableMap.keySet()) {
+            stringBuilder.append(getTable(id).count);
             stringBuilder.append(System.lineSeparator());
         }
         for (Integer id: idTableMap.keySet()) {

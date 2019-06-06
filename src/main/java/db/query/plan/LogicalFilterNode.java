@@ -1,7 +1,9 @@
 package db.query.plan;
 
+import db.error.SQLError;
+import db.field.Field;
 import db.field.Op;
-import db.error.TypeMismatch;
+
 import db.field.Util;
 import db.file.BTree.IndexPredicate;
 import db.query.FullColumnName;
@@ -13,6 +15,7 @@ import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /** A LogicalFilterNode represents the parameters of a filter in the WHERE clause of a query.
@@ -22,9 +25,8 @@ public class LogicalFilterNode {
         /**
          * convert a clause into the corresponding Predicate
          * @param tupleDesc
-         * @throws TypeMismatch
          */
-        Predicate predicate(TupleDesc tupleDesc) throws TypeMismatch;
+        Predicate predicate(TupleDesc tupleDesc) throws SQLError;
 
         /**
          * Find a proper table alias name for each attribute that has no table name assigned.
@@ -32,7 +34,7 @@ public class LogicalFilterNode {
          * @throws NoSuchElementException if we cannot find the table alias name or
          *          there exists different tables for one attribute.
          */
-        void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException;
+        void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError;
     }
 
 
@@ -40,20 +42,20 @@ public class LogicalFilterNode {
     public static class KVCmpNode implements BaseFilterNode{
         public FullColumnName fullColumnName;
         public Op op;
-        public Object value;
-        public KVCmpNode(FullColumnName fullColumnName, Op op, Object value) {
+        public String value;
+        public KVCmpNode(FullColumnName fullColumnName, Op op, String value) {
             this.fullColumnName = fullColumnName;
             this.op = op;
             this.value = value;
         }
 
         @Override
-        public Predicate predicate(TupleDesc tupleDesc) throws TypeMismatch{
+        public Predicate predicate(TupleDesc tupleDesc) throws SQLError{
             return new KVCmpPredicate(this, tupleDesc);
         }
 
         @Override
-        public void disambiguateName(HashMap<String, String> attrNameToTableName) {
+        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError{
             fullColumnName.disambiguateName(attrNameToTableName);
         }
     }
@@ -69,12 +71,12 @@ public class LogicalFilterNode {
         }
 
         @Override
-        public Predicate predicate(TupleDesc tupleDesc) throws TypeMismatch{
+        public Predicate predicate(TupleDesc tupleDesc) throws SQLError{
             return new KKCmpPredicate(this, tupleDesc);
         }
 
         @Override
-        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException {
+        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError {
             lhs.disambiguateName(attrNameToTableName);
             rhs.disambiguateName(attrNameToTableName);
         }
@@ -86,7 +88,12 @@ public class LogicalFilterNode {
      * */
     public static class VVCmpNode implements BaseFilterNode{
         private boolean cmp;
-        public VVCmpNode(Object lhs, Op op, Object rhs) {
+        public VVCmpNode(String lhs, Op op, String rhs) throws SQLError{
+            Field lField = Util.getField(lhs);
+            Field rField = Util.getField(rhs);
+            if (lField.getType() != rField.getType()) {
+                throw new SQLError(lField.getType() + " cannot be compared with "+rField.getType());
+            }
             cmp = Util.getField(lhs).compare(op, Util.getField(rhs));
         }
         public VVCmpNode(boolean cmp) {
@@ -96,7 +103,7 @@ public class LogicalFilterNode {
         public Predicate predicate(){
             return new Predicate() {
                 @Override
-                public boolean filter(Tuple tuple) throws TypeMismatch {
+                public boolean filter(Tuple tuple) throws SQLError {
                     return cmp;
                 }
             };
@@ -108,7 +115,7 @@ public class LogicalFilterNode {
         }
 
         @Override
-        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException {
+        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError {
         }
     }
 
@@ -119,9 +126,9 @@ public class LogicalFilterNode {
          * the KVCmpNode will be removed from AndNode
          * @param scanNode
          * @return
-         * @throws TypeMismatch
+         * @throws SQLError
          */
-        public IndexPredicate extractIndexPredicate(LogicalScanNode scanNode) throws TypeMismatch {
+        public IndexPredicate extractIndexPredicate(LogicalScanNode scanNode) throws SQLError {
             AndNode andNode = getKVCmpNodes(scanNode.tableName, scanNode.tupleDesc.getPrimaryKey());
             if (andNode.size() >= 1) {
                 KVCmpNode cmpNode = (KVCmpNode)andNode.get(0);
@@ -139,7 +146,7 @@ public class LogicalFilterNode {
          * @param node
          * @return
          */
-        public AndNode extractKVPredicate(LogicalScanNode node) throws TypeMismatch{
+        public AndNode extractKVPredicate(LogicalScanNode node) throws SQLError{
             AndNode andNode = getKVCmpNodes(node.tableName,null);
             this.removeAll(andNode);
             return andNode;
@@ -151,9 +158,9 @@ public class LogicalFilterNode {
          * @param tableName the table name, always match if null
          * @param primaryKey the primary key of the table, always match if null
          * @return
-         * @throws TypeMismatch
+         * @throws SQLError
          */
-        public AndNode getKVCmpNodes(String tableName, String primaryKey) throws TypeMismatch {
+        public AndNode getKVCmpNodes(String tableName, String primaryKey) throws SQLError {
             AndNode andNode = new AndNode();
             for (BaseFilterNode filterNode: this) {
                 if (filterNode instanceof KVCmpNode) {
@@ -167,7 +174,7 @@ public class LogicalFilterNode {
             return andNode;
         }
 
-        public Predicate predicate(TupleDesc tupleDesc) throws TypeMismatch{
+        public Predicate predicate(TupleDesc tupleDesc) throws SQLError{
             if (this.size() == 0) {
                 return (new VVCmpNode(true)).predicate();
             } else {
@@ -180,14 +187,17 @@ public class LogicalFilterNode {
         }
 
         @Override
-        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException {
-            iterator().forEachRemaining(x->x.disambiguateName(attrNameToTableName));
+        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError {
+            for (BaseFilterNode node: this){
+                node.disambiguateName(attrNameToTableName);
+            }
+//            iterator().forEachRemaining(x->x.disambiguateName(attrNameToTableName));
         }
     }
 
     public static class OrNode extends ArrayList<AndNode> implements BaseFilterNode{
         @Override
-        public Predicate predicate(TupleDesc tupleDesc) throws TypeMismatch{
+        public Predicate predicate(TupleDesc tupleDesc) throws SQLError{
             if (this.size() == 0) {
                 return (new VVCmpNode(false)).predicate();
             } else {
@@ -200,8 +210,11 @@ public class LogicalFilterNode {
         }
 
         @Override
-        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws NoSuchElementException {
-            iterator().forEachRemaining(x->x.disambiguateName(attrNameToTableName));
+        public void disambiguateName(HashMap<String, String> attrNameToTableName) throws SQLError {
+//            iterator().forEachRemaining(x->x.disambiguateName(attrNameToTableName));
+            for(AndNode node: this){
+                node.disambiguateName(attrNameToTableName);
+            }
         }
     }
 }

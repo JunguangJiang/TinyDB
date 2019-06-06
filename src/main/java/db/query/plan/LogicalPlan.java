@@ -1,4 +1,5 @@
 package db.query.plan;
+import db.DbException;
 import db.error.SQLError;
 import db.query.pipe.*;
 import db.query.*;
@@ -33,7 +34,7 @@ public class LogicalPlan
      */
     public LogicalPlan(LogicalFilterNode.OrNode or,
                        ArrayList<LogicalJoinNode> joinNodes,
-                       ArrayList<FullColumnName> fullColumnNames){
+                       ArrayList<FullColumnName> fullColumnNames) throws SQLError{
         this.or = or;
         this.joinNodes = joinNodes;
         this.fullColumnNames = fullColumnNames;
@@ -47,7 +48,7 @@ public class LogicalPlan
      * @throws NoSuchElementException if we cannot find the table alias name or
      *      there exists different tables for one attribute.
      */
-    private void disambiguateName() throws NoSuchElementException {
+    private void disambiguateName() throws SQLError {
         HashMap<String, String> attrToTable = LogicalJoinNode.getAttrToTable(joinNodes);
 
         if (or != null) {
@@ -59,7 +60,9 @@ public class LogicalPlan
             }
         }
         if (fullColumnNames != null) {
-            fullColumnNames.iterator().forEachRemaining(x->x.disambiguateName(attrToTable));
+            for(FullColumnName fullColumnName: fullColumnNames){
+                fullColumnName.disambiguateName(attrToTable);
+            }
         }
     }
 
@@ -67,7 +70,7 @@ public class LogicalPlan
      * Attempts to find the optimal plan to order the joins in the plan.
      *  @return A OpIterator representing this plan.
      */
-    public OpIterator physicalPlan() throws SQLError {
+    public OpIterator physicalPlan() throws SQLError, DbException {
         OpIterator scans[]= new OpIterator[this.joinNodes.size()];
 
         LogicalFilterNode.AndNode andNode=null;

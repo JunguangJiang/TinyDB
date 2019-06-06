@@ -4,10 +4,12 @@ import com.github.freva.asciitable.AsciiTable;
 import db.Database;
 import db.DbException;
 import db.GlobalManager;
+import db.Setting;
 import db.error.SQLError;
 import db.field.Op;
 import db.field.Type;
 import db.error.NotNullViolation;
+import db.file.BufferPool;
 import db.query.pipe.*;
 import db.file.Table;
 import db.query.*;
@@ -17,6 +19,8 @@ import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 import org.antlr.v4.runtime.misc.Interval;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
@@ -73,7 +77,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         try {
             queryResult = (QueryResult) super.visitSqlStatement(ctx);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             queryResult = new QueryResult(false, e.getMessage());
         }
         long endTime = System.currentTimeMillis();
@@ -174,7 +178,12 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         int a = ctx.start.getStartIndex();
         int b = ctx.stop.getStopIndex();
         Interval interval = new Interval(a,b);
-        return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog, GlobalManager.isBTree(), true);
+        try {
+            return GlobalManager.getDatabase().createTable(tableName, tupleDesc, ctx.start.getInputStream().getText(interval), this.isLog,
+                    Setting.isBTree, true);
+        } catch (SQLError e) {
+            return new QueryResult(false,e.getMessage());
+        }
     }
 
     /**
@@ -210,7 +219,15 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
         if (ctx.STRING() != null) {
             hashMap.put("type", Type.STRING_TYPE);
-            hashMap.put("maxLen", Integer.valueOf(ctx.lengthOneDimension().DECIMAL_LITERAL().getText()));
+            try {
+                int max_len = Integer.valueOf(ctx.lengthOneDimension().DECIMAL_LITERAL().getText());
+                if (max_len <= 0){
+                    throw new RuntimeException("string length must be positive");
+                }
+                hashMap.put("maxLen", max_len);
+            } catch (NumberFormatException e){
+                throw new RuntimeException("string length must be 1-"+ BufferPool.getPageSize()/2);
+            }
         } else {
             hashMap.put("type", Type.getType(ctx.getText()));
             hashMap.put("maxLen", 0);
@@ -272,7 +289,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         if (ctx.constants() == null) {
             return new QueryResult(false, "values can not be empty");
         }
-        Object[] values = (Object[]) visit(ctx.constants());
+        String[] values = (String[]) visit(ctx.constants());
         try {
             Table table = Util.getTable(ctx.tableName().getText(),null);
             return table.insertTuple(attrNames, values);
@@ -290,11 +307,11 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitConstants(TinyDBParser.ConstantsContext ctx) {
-        ArrayList<Object> values = new ArrayList<>();
+        ArrayList<String> values = new ArrayList<>();
         for (TinyDBParser.ConstantContext childCxt : ctx.constant()) {
-            values.add(visit(childCxt));
+            values.add((String)visit(childCxt));
         }
-        return values.toArray();
+        return values.toArray(new String[0]);
     }
 
     /**
@@ -309,20 +326,11 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitConstant(TinyDBParser.ConstantContext ctx) {
-        if (ctx.STRING_LITERAL() != null) {
-            String s = ctx.STRING_LITERAL().getText();
-            return s.substring(1, s.length()-1);
-        } else if (ctx.decimalLiteral() != null) {
-            Long number = Long.valueOf(ctx.decimalLiteral().getText());
-            if (ctx.getChildCount() == 2) {
-                number = -number;
-            }
-            return number;
-        } else if (ctx.REAL_LITERAL() != null){
-            return Double.valueOf(ctx.REAL_LITERAL().getText());
-        } else {
-            return null;
+        String value = ctx.getText();
+        if (ctx.STRING_LITERAL() == null && ctx.NULL_LITERAL() == null) {
+            value = new BigDecimal(value).toPlainString();
         }
+        return value;
     }
 
     /**
@@ -367,7 +375,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         return new LogicalFilterNode.KVCmpNode(
                 (FullColumnName)visit(ctx.fullColumnName()),
                 (Op) visit(ctx.comparisonOperator()),
-                visit(ctx.constant())
+                (String)visit(ctx.constant())
                 );
     }
 
@@ -381,7 +389,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         return new LogicalFilterNode.KVCmpNode(
                 (FullColumnName)visit(ctx.fullColumnName()),
                 Op.reverse((Op)visit(ctx.comparisonOperator())),
-                visit(ctx.constant())
+                (String)visit(ctx.constant())
         );
     }
 
@@ -406,11 +414,15 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitVvCmpExpressionPredicate(TinyDBParser.VvCmpExpressionPredicateContext ctx) {
-        return new LogicalFilterNode.VVCmpNode(
-                visit(ctx.constant(0)),
-                (Op)visit(ctx.comparisonOperator()),
-                visit(ctx.constant(1))
-        );
+        try {
+            return new LogicalFilterNode.VVCmpNode(
+                    (String)visit(ctx.constant(0)),
+                    (Op)visit(ctx.comparisonOperator()),
+                    (String)visit(ctx.constant(1))
+            );
+        } catch (SQLError sqlError){
+            throw new RuntimeException(sqlError.getMessage());
+        }
     }
 
     /**
@@ -513,7 +525,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             }
 
             return physicalPlan.execute(header);
-        } catch (SQLError | NoSuchElementException e) {
+        } catch (SQLError | NoSuchElementException | DbException e) {
             return new QueryResult(false, e.getMessage());
         }
     }
@@ -658,6 +670,8 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             }
             opIterator.open();
             Tuple tuple = opIterator.next();
+            int deleteCount = (int)tuple.getField(0).getValue();
+            scanNode.table.count -= deleteCount;
             opIterator.close();
             return new QueryResult(true, "Query OK, " + tuple.getField(0).toString() + " rows affected.");
         } catch (DbException e){
@@ -718,7 +732,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitUpdatedElement(TinyDBParser.UpdatedElementContext ctx) {
-        return new Update.UpdateElement(ctx.attrName().getText(), visit(ctx.constant()));
+        return new Update.UpdateElement(ctx.attrName().getText(), (String)visit(ctx.constant()));
     }
 
     /**

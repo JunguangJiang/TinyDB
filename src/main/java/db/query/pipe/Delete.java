@@ -3,9 +3,7 @@ package db.query.pipe;
 import db.DbException;
 import db.GlobalManager;
 import db.error.SQLError;
-import db.error.TypeMismatch;
 import db.field.*;
-import db.error.PrimaryKeyViolation;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 

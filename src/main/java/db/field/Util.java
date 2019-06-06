@@ -1,6 +1,7 @@
 package db.field;
 
-import db.error.TypeMismatch;
+import db.error.SQLError;
+
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -9,22 +10,40 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Util {
     /**
-     * When the Field is uncertain, get the most likely Field according to the value
-     * @param value might be String, Integer, Float, etc.
+     * whether value represents a String
+     * @param value
+     * @return
      */
-    public static Field getField(Object value) {
-        if (value instanceof Integer) {
-            return new IntField((int)value, false);
-        } else if (value instanceof Long) {
-            return new LongField((long)value, false);
-        } else if (value instanceof Float) {
-            return new FloatField((float)value, false);
-        } else if (value instanceof Double) {
-            return new DoubleField((double)value, false);
-        } else if (value instanceof String) {
-            return new StringField((String)value, ((String)value).length(), false);
-        } else {
-            throw new NotImplementedException();
+    private static boolean isString(String value) {
+        return (value.startsWith("'") && value.endsWith("'")) ||
+                (value.startsWith("\"") && value.endsWith("\""));
+    }
+
+    /**
+     * whether value represents NULL
+     * @param value
+     * @return
+     */
+    public static boolean isNull(String value) {
+        return value == null || value.toUpperCase().equals("NULL");
+    }
+
+    /**
+     * When the Field is uncertain, get the most likely Field according to the value
+     * @param value
+     */
+    public static Field getField(String value) {
+        if (isString(value)){
+            return new StringField(value.substring(1, value.length()-1), value.length()-2, false);
+        }
+        try {
+            return new DoubleField(Double.parseDouble(value), false);
+        } catch (NumberFormatException e){
+            try {
+                return new LongField(Long.valueOf(value), false);
+            } catch (NumberFormatException e2){
+                throw new NotImplementedException();
+            }
         }
     }
 
@@ -54,76 +73,51 @@ public class Util {
      * @param value value of the Field, might be Integer, Float or String
      * @param tdItem TDItem describing the Field
      * @return the Field
-     * @throws TypeMismatch when the Type was mismatched
+     * @throws SQLError when the Type was mismatched
      */
-    public static Field getField(Object value, TDItem tdItem) throws TypeMismatch {
+    public static Field getField(String value, TDItem tdItem) throws SQLError {
         return getField(value, tdItem.fieldType, tdItem.maxLen, tdItem.fieldName);
     }
 
     /**
      *
-     * @param value value of the Field, might be Integer, Float or String
+     * @param value value of the Field
      * @param type Type of the Field, might be INT_TYPE, LONG_TYPE, FLOAT_TYPE, DOUBLE_TYPE, STRING_TYPE
      * @param maxLen max length of the StringField
      * @param name the name of the Field
      * @return the Field
-     * @throws TypeMismatch when the Type was mismatched
+     * @throws SQLError when the Type was mismatched
      */
-    public static Field getField(Object value, Type type, int maxLen, String name) throws TypeMismatch{
-        if (value == null) {
+    public static Field getField(String value, Type type, int maxLen, String name) throws SQLError{
+        if (isNull(value)) {
             return getNullField(type, maxLen);
         }
-        if (value instanceof Long) {
+        try {
             switch (type) {
                 case INT_TYPE:
-                    return new IntField(((Long) value).intValue(), false);
+                    return new IntField(Integer.valueOf(value), false);
                 case LONG_TYPE:
-                    return new LongField((long)value, false);
-                default:
-                    throw new TypeMismatch(name, Type.LONG_TYPE, type);
-            }
-        } else if (value instanceof Integer) {
-            switch (type) {
-                case INT_TYPE:
-                    return new IntField((int)value, false);
-                case LONG_TYPE:
-                    return new LongField(((Integer) value).longValue(), false);
-                default:
-                    throw new TypeMismatch(name, Type.INT_TYPE, type);
-            }
-        } else if (value instanceof Double) {
-            switch (type) {
+                    return new LongField(Long.valueOf(value),false);
                 case FLOAT_TYPE:
-                    return new FloatField(((Double) value).floatValue(), false);
+                    return new FloatField(Float.valueOf(value), false);
                 case DOUBLE_TYPE:
-                    return new DoubleField((double)value, false);
+                    return new DoubleField(Double.valueOf(value), false);
+                case STRING_TYPE:
+                    if (isString(value)) {
+                        value = value.substring(1, value.length()-1);
+                        if (value.length() > maxLen) {
+                            throw new SQLError("Out of range value for column " + name);
+                        }
+                        return new StringField(value, maxLen);
+                    }
+                    throw new SQLError("Column " + name + " expected " + type + " yet get " + value);
                 default:
-                    throw new TypeMismatch(name, Type.DOUBLE_TYPE, type);
+                    throw new NotImplementedException();
             }
-        } else if (value instanceof Float) {
-            switch (type) {
-                case FLOAT_TYPE:
-                    return new FloatField((float)value, false);
-                case DOUBLE_TYPE:
-                    return new DoubleField(((Float) value).doubleValue(), false);
-                default:
-                    throw new TypeMismatch(name, Type.FLOAT_TYPE, type);
-            }
-        } else if (value instanceof String) {
-            if (type == Type.STRING_TYPE) {
-                return new StringField((String)value, maxLen, false);
-            } else {
-                throw new TypeMismatch(name, Type.STRING_TYPE, type);
-            }
-        } else {
-            throw new NotImplementedException();
+        } catch (NumberFormatException e) {
+            throw new SQLError("Column " + name + " expected " + type + " yet get " + value);
         }
-    }
 
-    /**
-     * @see Util#getField(Object, Type, int, String) */
-    public static Field getField(Object value, Type type, int maxLen) throws TypeMismatch{
-        return getField(value, type, maxLen, "");
     }
 
     /**
@@ -143,7 +137,17 @@ public class Util {
         return tuple;
     }
 
-    public static Boolean checkNullCompare(Field lhs, Op op, Field rhs) {
+    /**
+     * check if there exists null field in the expression
+     * @param lhs
+     * @param op
+     * @param rhs
+     * @return null if op is not 'IS', 'IS_NOT' and there are no "NULL" field.
+     *          else
+     *              true if the expression is true
+     *              false if the expression is false
+     */
+    static Boolean checkNullCompare(Field lhs, Op op, Field rhs) {
         switch (op) {
             case IS:
                 assert rhs.isNull();
