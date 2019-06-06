@@ -2,7 +2,6 @@ package db.file;
 
 import db.error.NotNullViolation;
 import db.tuple.TDItem;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 
