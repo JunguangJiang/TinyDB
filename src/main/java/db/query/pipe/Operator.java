@@ -41,6 +41,10 @@ public abstract class Operator implements OpIterator{
         return result;
     }
 
+    public void deleteNext() throws DbException{
+        // Unused
+    }
+
     /**
      * Returns the next Tuple in the iterator, or null if the iteration is
      * finished. Operator uses this method to implement both <code>next</code>

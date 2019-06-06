@@ -89,6 +89,9 @@ public enum Type implements Serializable {
                 dis.skipBytes(maxLen-strLen);
                 return new StringField(new String(bs), maxLen, dis.readBoolean());
             } catch (IOException e) {
+                System.out.println("Error:");
+                e.printStackTrace();
+                System.out.println("Error end");
                 throw new ParseException("couldn't parse", 0);
             }
         }

@@ -64,8 +64,13 @@ public class Delete extends Operator{
         } else {
             fetched = true;
             while (child.hasNext()) {
-                Tuple c = child.next();
-                GlobalManager.getBufferPool().deleteTuple(c);
+                //todo 这样删不行，迭代器和Page内部的改变不同步
+                if(GlobalManager.isBTree())
+                    child.deleteNext();
+                else{
+                    Tuple c = child.next();
+                    GlobalManager.getBufferPool().deleteTuple(c);
+                }
                 count++;
             }
             return Util.getCountTuple(count, "delete count");

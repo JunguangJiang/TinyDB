@@ -29,6 +29,12 @@ public interface DbFileIterator {
     public Tuple next() throws DbException, NoSuchElementException;
 
     /**
+     * Delete the next tuple of the iterator.
+     * @see db.query.pipe.Delete
+     */
+    public void deleteNext() throws DbException;
+
+    /**
      * Resets the iterator to the start.
      * @throws DbException When rewind is unsupported.
      */

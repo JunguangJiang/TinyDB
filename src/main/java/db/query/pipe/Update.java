@@ -100,6 +100,7 @@ public class Update extends Operator{
         }
         int count = 0;
         while (child.hasNext()) {
+            //todo 修改迭代器的访问方式
             count++;
             Tuple oldTuple = child.next();
             Tuple newTuple = oldTuple.clone();

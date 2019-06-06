@@ -73,6 +73,15 @@ public class HeapFileIterator implements DbFileIterator {
     }
 
     /**
+     * Delete next tuple of the iterator.
+     * @see db.query.pipe.Delete
+     */
+    @Override
+    public void deleteNext() {
+        // Unused
+    }
+
+    /**
      * Resets the iterator to the start.
      * @throws DbException When rewind is unsupported.
      */

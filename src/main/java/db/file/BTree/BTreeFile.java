@@ -541,6 +541,7 @@ public class BTreeFile implements DbFile {
 		Iterator<Tuple> it = leafPage.iterator();
 		int primaryKeyIndex = td.getPrimaryKeyIndex();
 		while(it.hasNext()){
+			//todo 找到比它大的就停
 		    Tuple tuple = it.next();
 		    if(tuple.getField(primaryKeyIndex).equals(t.getField(primaryKeyIndex))){
 		        throw new PrimaryKeyViolation(td.getPrimaryKey(), tuple.getField(primaryKeyIndex));
@@ -1309,6 +1310,35 @@ class BTreeFileIterator extends AbstractDbFileIterator {
 	}
 
 	/**
+	 * Delete next tuple of the iterator.
+	 * @see db.query.pipe.Delete
+	 */
+	@Override
+	public void deleteNext() throws DbException{
+		// todo
+		if (it != null && !it.hasNext())
+			it = null;
+
+		while (it == null && curp != null) {
+			BTreePageId nextp = curp.getRightSiblingId();
+			if(nextp == null) {
+				curp = null;
+			}
+			else {
+				curp = (BTreeLeafPage) GlobalManager.getBufferPool().getPage(nextp);
+				it = curp.iterator();
+				if (!it.hasNext())
+					it = null;
+			}
+		}
+		if (it == null)
+			return;
+		else{
+
+		}
+	}
+
+	/**
 	 * rewind this iterator back to the beginning of the tuples
 	 */
 	public void rewind() throws DbException{
@@ -1356,14 +1386,20 @@ class BTreeSearchIterator extends AbstractDbFileIterator {
 		BTreeRootPtrPage rootPtr = (BTreeRootPtrPage) GlobalManager.getBufferPool().getPage(
 		        BTreeRootPtrPage.getId(f.getId()));
 		BTreePageId root = rootPtr.getRootId();
-		if(ipred.getOp() == Op.EQUALS || ipred.getOp() == Op.GREATER_THAN
-				|| ipred.getOp() == Op.GREATER_THAN_OR_EQ) {
-			curp = f.findLeafPage(root, ipred.getField());
+		if(root == null){
+			curp = null;
+			it = null;
 		}
-		else {
-			curp = f.findLeafPage(root, null);
+		else{
+            if(ipred.getOp() == Op.EQUALS || ipred.getOp() == Op.GREATER_THAN
+                    || ipred.getOp() == Op.GREATER_THAN_OR_EQ) {
+                curp = f.findLeafPage(root, ipred.getField());
+            }
+            else {
+                curp = f.findLeafPage(root, null);
+            }
+            it = curp.iterator();
 		}
-		it = curp.iterator();
 	}
 
 	/**
@@ -1406,6 +1442,15 @@ class BTreeSearchIterator extends AbstractDbFileIterator {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Delete next tuple of the iterator.
+	 * @see db.query.pipe.Delete
+	 */
+	@Override
+	public void deleteNext()  throws DbException {
+		// todo
 	}
 
 	/**
