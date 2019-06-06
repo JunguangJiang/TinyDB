@@ -216,7 +216,8 @@ public class BTreeFile implements DbFile {
 					entry = it.next();
 				}
 
-				if (f.compare(Op.LESS_THAN_OR_EQ, entry.getKey())) {
+				// if (f.compare(Op.LESS_THAN_OR_EQ, entry.getKey())) {
+				if (f.compare(Op.LESS_THAN, entry.getKey())) {
 					nextSearchId = entry.getLeftChild();
 				} else {
 					// greater than the last one
@@ -1175,20 +1176,42 @@ public class BTreeFile implements DbFile {
 			rootPtr.setHeaderId(headerId);
 		}
 
+        if(emptyPageNo == 336){
+
+            System.out.println("STOPHERE");
+        }
 		// iterate through all the existing header pages to find the one containing the slot
 		// corresponding to emptyPageNo
-		while(headerId != null && (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() < emptyPageNo) {
+        boolean shouldCreateHeader = false;
+		while(headerId != null && (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() <= emptyPageNo) {
 			BTreeHeaderPage headerPage = (BTreeHeaderPage) getPage(dirtypages, headerId);
 			prevId = headerId;
 			headerId = headerPage.getNextPageId();
 			headerPageCount++;
+			if(headerId == null && (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() > emptyPageNo){
+			    shouldCreateHeader = true;
+			    break;
+            }
 		}
+
 
 		// at this point headerId should either be null or set with 
 		// the headerPage containing the slot corresponding to emptyPageNo.
 		// Add header pages until we have one with a slot corresponding to emptyPageNo
-		while((headerPageCount + 1) * BTreeHeaderPage.getNumSlots() < emptyPageNo) {
-			BTreeHeaderPage prevPage = (BTreeHeaderPage) getPage(dirtypages, prevId);
+		while(shouldCreateHeader || (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() < emptyPageNo) {
+		    if(shouldCreateHeader){
+		        shouldCreateHeader = false;
+		        headerPageCount--;
+            }
+
+            BTreeHeaderPage prevPage = null;
+            try {
+                prevPage = (BTreeHeaderPage) getPage(dirtypages, prevId);
+            }
+            catch (NullPointerException e){
+                e.printStackTrace();
+                throw e;
+            }
 			
 			BTreeHeaderPage headerPage = (BTreeHeaderPage) getEmptyPage(dirtypages, BTreePageId.HEADER);
 			headerId = headerPage.getId();
@@ -1200,11 +1223,35 @@ public class BTreeFile implements DbFile {
 			prevId = headerId;
 		}
 
+		/*
+		if(headerId == null && (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() == emptyPageNo){
+            BTreeHeaderPage prevPage = null;
+            try {
+                prevPage = (BTreeHeaderPage) getPage(dirtypages, prevId);
+            }
+            catch (NullPointerException e){
+                e.printStackTrace();
+                throw e;
+            }
+            BTreeHeaderPage headerPage = (BTreeHeaderPage) getEmptyPage(dirtypages, BTreePageId.HEADER);
+            headerId = headerPage.getId();
+            headerPage.init();
+            headerPage.setPrevPageId(prevId);
+            prevPage.setNextPageId(headerId);
+            headerPageCount++;
+            prevId = headerId;
+        }*/
+
 		// now headerId should be set with the headerPage containing the slot corresponding to 
 		// emptyPageNo
 		BTreeHeaderPage headerPage = (BTreeHeaderPage) getPage(dirtypages, headerId);
 		int emptySlot = emptyPageNo - headerPageCount * BTreeHeaderPage.getNumSlots();
-		headerPage.markSlotUsed(emptySlot, false);
+		try {
+            headerPage.markSlotUsed(emptySlot, false);
+        }
+        catch (ArrayIndexOutOfBoundsException e){
+		    e.printStackTrace();
+        }
 	}
 
 	/**
