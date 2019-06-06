@@ -354,6 +354,10 @@ public class BTreeInternalPage extends BTreePage {
 			throw new DbException("tried to delete null entry.");
 		if(deleteRightChild) {
 			markSlotUsed(rid.getTupleNumber(), false);
+			int maxEntries = getMaxEntries();
+			for(int i = rid.getTupleNumber(); i < maxEntries; i++){
+				moveEntry(i+1, i);
+			}
 		}
 		else {
 			for(int i = rid.getTupleNumber() - 1; i >= 0; i--) {

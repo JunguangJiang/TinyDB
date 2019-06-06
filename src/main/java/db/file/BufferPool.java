@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class BufferPool {
     /** Bytes per page, including header. */
-    private static final int DEFAULT_PAGE_SIZE = 4096;
+    private static final int DEFAULT_PAGE_SIZE = 50;
 
     private static int pageSize = DEFAULT_PAGE_SIZE;
 
@@ -92,6 +92,8 @@ public class BufferPool {
             page.markDirty(true);
             pageHashMap.put(page.getId(), page);
         }
+        //todo delete it
+        System.out.println(1);
     }
 
     /**
@@ -114,6 +116,7 @@ public class BufferPool {
             pages = dbFile.deleteTuple(t);
             for (Page page : pages) {
                 page.markDirty(true);
+                pageHashMap.put(page.getId(), page);
             }
         }
         catch (DbException | IOException e){

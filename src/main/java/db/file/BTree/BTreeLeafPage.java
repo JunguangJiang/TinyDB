@@ -296,6 +296,10 @@ public class BTreeLeafPage extends BTreePage {
 		if (!isSlotUsed(rid.getTupleNumber()))
 			throw new DbException("tried to delete null tuple.");
 		markSlotUsed(rid.getTupleNumber(), false);
+		int maxTuples = getMaxTuples();
+		for(int i = rid.getTupleNumber(); i < maxTuples - 1; i++){
+			moveRecord(i+1, i);
+		}
 		t.setRecordId(null);
 	}
 

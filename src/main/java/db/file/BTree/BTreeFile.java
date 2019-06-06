@@ -849,7 +849,7 @@ public class BTreeFile implements DbFile {
             parent.updateEntry(entry);
 
             rightEntry.setRightChild(pid);
-            assert page.reverseIterator().hasNext();
+            // assert page.reverseIterator().hasNext();
             rightEntry.setLeftChild(page.reverseIterator().next().getRightChild());
 
             // entry.setLeftChild(entry.getRightChild());

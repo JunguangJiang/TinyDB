@@ -2,10 +2,14 @@ package db.query.pipe;
 
 import db.DbException;
 import db.GlobalManager;
+import db.Setting;
 import db.error.SQLError;
 import db.field.*;
+import db.file.TupleBuffer;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
+
+import java.io.File;
 
 /**
  * The delete operator. Delete reads tuples from its child operator and removes
@@ -61,16 +65,26 @@ public class Delete extends Operator{
            return null;
         } else {
             fetched = true;
+            TupleBuffer tuple_buf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_FILTER_BUFFER,
+                    new File(getTupleDesc().getTableName()+":delete.data"), getTupleDesc());
             while (child.hasNext()) {
                 //todo 这样删不行，迭代器和Page内部的改变不同步
-                if(GlobalManager.isBTree())
-                    child.deleteNext();
+                if(Setting.isBTree){
+                    //child.deleteNext();
+                    tuple_buf.add(child.next());
+                }
                 else{
                     Tuple c = child.next();
                     GlobalManager.getBufferPool().deleteTuple(c);
                 }
                 count++;
             }
+            tuple_buf.finisheAdding();
+            Tuple c;
+            while((c = tuple_buf.next()) != null){
+                GlobalManager.getBufferPool().deleteTuple(c);
+            }
+            tuple_buf.close();
             return Util.getCountTuple(count, "delete count");
         }
     }
