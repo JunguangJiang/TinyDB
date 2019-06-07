@@ -27,9 +27,6 @@ public class TupleBuffer {
     private TupleDesc tupleDesc;
     private boolean flushed; // whether has flushed to the disk
     static public int DEFAULT_MAX_BYTES = 1024*1024*4;//max buffer bytes in the the momory 4MB
-    public TupleBuffer(File file, TupleDesc tupleDesc) throws DbException{
-        this(DEFAULT_MAX_BYTES, file, tupleDesc);
-    }
 
     /**
      *

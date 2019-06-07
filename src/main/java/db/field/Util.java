@@ -128,7 +128,7 @@ public class Util {
      */
     public static Tuple getCountTuple(long count, String name) {
         TDItem[] tdItems = {
-                new TDItem(Type.INT_TYPE, name, false)
+                new TDItem(Type.LONG_TYPE, name, false)
         };
         TupleDesc tupleDesc = new TupleDesc(tdItems, null);
         Tuple tuple = new Tuple(tupleDesc);

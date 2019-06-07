@@ -77,7 +77,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         try {
             queryResult = (QueryResult) super.visitSqlStatement(ctx);
         } catch (Exception e) {
-//            e.printStackTrace();
+            e.printStackTrace();
             queryResult = new QueryResult(false, e.getMessage());
         }
         long endTime = System.currentTimeMillis();
@@ -670,7 +670,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             }
             opIterator.open();
             Tuple tuple = opIterator.next();
-            int deleteCount = (int)tuple.getField(0).getValue();
+            long deleteCount = (long)tuple.getField(0).getValue();
             scanNode.table.count -= deleteCount;
             opIterator.close();
             return new QueryResult(true, "Query OK, " + tuple.getField(0).toString() + " rows affected.");
