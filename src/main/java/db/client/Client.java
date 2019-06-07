@@ -109,7 +109,7 @@ public class Client {
         try {
             long startTime = System.currentTimeMillis();
             ResultSet rs = ((JDBCStatement)st).executeFile(filename);
-            System.out.println("Send successfully, printing results");
+//            System.out.println("Send successfully, printing results");
             while (rs.next())
                 System.out.print(rs.getString(0));
             long endTime = System.currentTimeMillis();
