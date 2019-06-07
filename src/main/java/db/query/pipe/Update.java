@@ -2,16 +2,19 @@ package db.query.pipe;
 
 import db.DbException;
 import db.GlobalManager;
+import db.Setting;
 import db.error.SQLError;
 import db.field.Field;
 
 import db.field.Util;
 import db.error.NotNullViolation;
 import db.error.PrimaryKeyViolation;
+import db.file.TupleBuffer;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -99,31 +102,73 @@ public class Update extends Operator{
             throw new PrimaryKeyViolation(child.getTupleDesc().getPrimaryKey(), primaryKeyValue);
         }
         int count = 0;
+        TupleBuffer oldTupleBuf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_FILTER_BUFFER,
+                new File(getTupleDesc().getTableName()+":oldBuf.data"), getTupleDesc());
+        TupleBuffer newTupleBuf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_FILTER_BUFFER,
+                new File(getTupleDesc().getTableName()+":newBuf.data"), getTupleDesc());
         while (child.hasNext()) {
-            //todo 修改迭代器的访问方式
-            count++;
+            //todo 统一写法
             Tuple oldTuple = child.next();
             Tuple newTuple = oldTuple.clone();
-            //make a new tuple, delete the old tuple and insert the new tuple
-            int tableid = oldTuple.getRecordId().getPageId().getTableId();
-            GlobalManager.getBufferPool().deleteTuple(oldTuple);
-
-            for (int i=0; i<indexes.length; i++){
-                newTuple.setField(indexes[i], fields[i]);
+            if(Setting.isBTree){
+                oldTupleBuf.add(oldTuple);
+                for (int i=0; i<indexes.length; i++){
+                    newTuple.setField(indexes[i], fields[i]);
+                }
+                newTupleBuf.add(newTuple);
             }
+            else{
+                //make a new tuple, delete the old tuple and insert the new tuple
+                int tableid = oldTuple.getRecordId().getPageId().getTableId();
+                GlobalManager.getBufferPool().deleteTuple(oldTuple);
+
+                for (int i=0; i<indexes.length; i++){
+                    newTuple.setField(indexes[i], fields[i]);
+                }
+                try {
+                    GlobalManager.getBufferPool().insertTuple(tableid, newTuple);
+                } catch (DbException | IOException e) {
+                    e.printStackTrace();
+                } catch (PrimaryKeyViolation e) {
+                    try {
+                        GlobalManager.getBufferPool().insertTuple(tableid, oldTuple);
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                    oldTupleBuf.finisheAdding();
+                    newTupleBuf.finisheAdding();
+                    oldTupleBuf.close();
+                    newTupleBuf.close();
+                    throw e;
+                }
+                count++;
+            }
+        }
+        oldTupleBuf.finisheAdding();
+        newTupleBuf.finisheAdding();
+        Tuple c;
+        while((c = oldTupleBuf.next()) != null){
+            int tableid = c.getRecordId().getPageId().getTableId();
+            GlobalManager.getBufferPool().deleteTuple(c);
+            Tuple t = newTupleBuf.next();
             try {
-                GlobalManager.getBufferPool().insertTuple(tableid, newTuple);
+                GlobalManager.getBufferPool().insertTuple(tableid, t);
             } catch (DbException | IOException e) {
                 e.printStackTrace();
             } catch (PrimaryKeyViolation e) {
                 try {
-                    GlobalManager.getBufferPool().insertTuple(tableid, oldTuple);
+                    GlobalManager.getBufferPool().insertTuple(tableid, t);
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
+                oldTupleBuf.close();
+                newTupleBuf.close();
                 throw e;
             }
+            count++;
         }
+        oldTupleBuf.close();
+        newTupleBuf.close();
         return Util.getCountTuple(count, "update counts");
     }
 }
