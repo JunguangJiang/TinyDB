@@ -293,7 +293,7 @@ public class Server {
                             break;
                     }
                     fileWriter.close();
-                    System.out.println("Read successfully");
+//                    System.out.println("Read successfully");
 
                     FileReader fileReader = new FileReader(inputFilename);
                     BufferedReader in = new BufferedReader(fileReader);
