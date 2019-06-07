@@ -1,7 +1,10 @@
 package db.file;
 
+import db.Setting;
 import db.error.NotNullViolation;
 import db.field.Field;
+import db.file.BTree.BTreePageId;
+import db.file.heap.HeapPageId;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -53,6 +56,20 @@ public class Util {
                 Field f = td.getTDItem(j).parse(dis);
                 t.setField(j, f);
             }
+            /*try {
+                int tableid = dis.readInt();
+                PageId tmpPageId;
+                if(Setting.isBTree){
+                    tmpPageId = new BTreePageId(tableid, 0, 0);
+                }
+                else{
+                    tmpPageId = new HeapPageId(tableid, 0);
+                }
+                t.setRecordId(new RecordId(tmpPageId, 0));
+            }
+            catch (IOException e){
+                throw new java.text.ParseException("couldn't parse", 0);
+            }*/
             return t;
         } catch (java.text.ParseException e) {
             e.printStackTrace();

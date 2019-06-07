@@ -6,6 +6,7 @@ import db.Setting;
 import db.error.SQLError;
 import db.field.*;
 import db.file.TupleBuffer;
+import db.file.TupleBufferBTree;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
@@ -64,7 +65,7 @@ public class Delete extends Operator{
            return null;
         } else {
             fetched = true;
-            TupleBuffer tuple_buf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_FILTER_BUFFER,
+            TupleBufferBTree tuple_buf = new TupleBufferBTree(Setting.MAX_MEMORY_BYTES_FOR_FILTER_BUFFER,
                     new File(getTupleDesc().getTableName()+":delete.data"), getTupleDesc());
             while (child.hasNext()) {
                 tuple_buf.add(child.next());

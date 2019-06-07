@@ -107,6 +107,7 @@ public class BufferPool {
      */
     public void deleteTuple(Tuple t) {
         int tableId = 0;
+        //todo delete the try sentence
         try {
             tableId = t.getRecordId().getPageId().getTableId();
         }

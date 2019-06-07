@@ -1002,7 +1002,7 @@ public class BTreeFile implements DbFile {
 	 * many pages since parent pointers will need to be updated when an internal node merges.
 	 * @see #handleMinOccupancyPage(HashMap, BTreePage)
 	 */
-	public ArrayList<Page> deleteTuple(Tuple t)
+	public ArrayList<Page> deleteTupleOrigin(Tuple t)
 			throws DbException, IOException {
 		HashMap<PageId, Page> dirtypages = new HashMap<PageId, Page>();
 
@@ -1034,13 +1034,13 @@ public class BTreeFile implements DbFile {
 	 * many pages since parent pointers will need to be updated when an internal node merges.
 	 * @see #handleMinOccupancyPage(HashMap, BTreePage)
 	 */
-	/*
+
 	public ArrayList<Page> deleteTuple(Tuple t)
 			throws DbException, IOException {
 		HashMap<PageId, Page> dirtypages = new HashMap<PageId, Page>();
-		BTreeRootPtrPage rootPtr = getRootPtrPage(new HashMap<>());
+		BTreeRootPtrPage rootPtr = getRootPtrPage(dirtypages);
 		BTreePageId rootId = rootPtr.getRootId();
-		BTreeLeafPage leafPage = findLeafPage(new HashMap<>(), rootId, t.getField(keyField));
+		BTreeLeafPage leafPage = findLeafPage(dirtypages, rootId, t.getField(keyField));
 		Iterator<Tuple> it = leafPage.iterator();
 		Tuple target = null;
 		int fieldLen = td.numFields();
@@ -1073,7 +1073,7 @@ public class BTreeFile implements DbFile {
 		ArrayList<Page> dirtyPagesArr = new ArrayList<Page>();
 		dirtyPagesArr.addAll(dirtypages.values());
 		return dirtyPagesArr;
-	}*/
+	}
 
 	/**
 	 * Get a read lock on the root pointer page. Create the root pointer page and root page
