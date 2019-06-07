@@ -126,13 +126,13 @@ public class Util {
      * @param name the name of the operation
      * @return
      */
-    public static Tuple getCountTuple(int count, String name) {
+    public static Tuple getCountTuple(long count, String name) {
         TDItem[] tdItems = {
-                new TDItem(Type.INT_TYPE, name, false)
+                new TDItem(Type.LONG_TYPE, name, false)
         };
         TupleDesc tupleDesc = new TupleDesc(tdItems, null);
         Tuple tuple = new Tuple(tupleDesc);
-        Field field = new IntField(count, false);
+        Field field = new LongField(count, false);
         tuple.setField(0, field);
         return tuple;
     }

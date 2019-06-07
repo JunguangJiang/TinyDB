@@ -42,7 +42,7 @@ public class Join extends Operator{
             cmp = new VVCmpNode(true);
         }
         this.cmp = cmp;
-        String filename = "Join:"+this.lhs.getTupleDesc().getTableName() + ":" + rhs.getTupleDesc().getTableName() + ".db";
+        String filename = "Join:"+this.lhs.getTupleDesc().getTableName() + ":" + rhs.getTupleDesc().getTableName() + ".data";
         File file = new File(filename);
         this.tupleBuffer = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_JOIN_BUFFER,
                 file, mergedTupleDesc);
@@ -139,28 +139,6 @@ public class Join extends Operator{
                     }
                 }
             }
-//            HashMap<Field, ArrayList<Tuple>> lHashMap = getHashMap(lhs, lidx);
-//            HashMap<Field, ArrayList<Tuple>> rHashMap = getHashMap(rhs, ridx);
-//
-//            // ensure that HashMap that has less values is in the outer loop
-//            boolean swap = false;
-//            HashMap<Field, ArrayList<Tuple>> outer = lHashMap, inner = rHashMap;
-//            if (lHashMap.size() > rHashMap.size()) {
-//                swap = true;
-//                outer = rHashMap;
-//                inner = lHashMap;
-//            }
-//            // do the hash join
-//            for(Field field: outer.keySet()) {
-//                if (inner.containsKey(field)) {
-//                    for(Tuple tuple1: outer.get(field)) {
-//                        for(Tuple tuple2: inner.get(field)) {
-//                            Tuple mergedTuple = Tuple.merge(tuple1, tuple2, getTupleDesc(), swap);
-//                            tupleBuffer.add(mergedTuple);
-//                        }
-//                    }
-//                }
-//            }
         } else { //Nested-Loop Join
             predicate = cmp.predicate(mergedTupleDesc);
 

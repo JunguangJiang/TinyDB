@@ -60,7 +60,6 @@ public class Delete extends Operator{
      */
     @Override
     protected Tuple fetchNext() throws DbException, SQLError {
-        int count = 0;
         if (fetched) {
            return null;
         } else {
@@ -68,20 +67,13 @@ public class Delete extends Operator{
             TupleBuffer tuple_buf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_FILTER_BUFFER,
                     new File(getTupleDesc().getTableName()+":delete.data"), getTupleDesc());
             while (child.hasNext()) {
-                //todo Í³Ò»Ð´·¨
-                if(Setting.isBTree){
-                    tuple_buf.add(child.next());
-                }
-                else{
-                    Tuple c = child.next();
-                    GlobalManager.getBufferPool().deleteTuple(c);
-                }
-                count++;
+                tuple_buf.add(child.next());
             }
             tuple_buf.finisheAdding();
-            Tuple c;
-            while((c = tuple_buf.next()) != null){
-                GlobalManager.getBufferPool().deleteTuple(c);
+            long count = tuple_buf.getTupleNum();
+            while(tuple_buf.hasNext()){
+                Tuple tuple = tuple_buf.next();
+                GlobalManager.getBufferPool().deleteTuple(tuple);
             }
             tuple_buf.close();
             return Util.getCountTuple(count, "delete count");

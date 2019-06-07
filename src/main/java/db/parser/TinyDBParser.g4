@@ -54,12 +54,16 @@ insertStatement
     ;
 
 selectStatement
-    : SELECT fullColumnNames FROM tableSources (WHERE whereExpr=predicate)?
+    : SELECT (
+        STAR
+        | COUNT '(' STAR ')'
+        | fullColumnNames
+    )
+    FROM tableSources (WHERE whereExpr=predicate)?
     ;
 
 fullColumnNames
-    : STAR
-    | fullColumnName (',' fullColumnName)*
+    : fullColumnName (',' fullColumnName)*
     ;
 
 fullColumnName

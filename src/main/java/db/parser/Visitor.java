@@ -77,7 +77,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         try {
             queryResult = (QueryResult) super.visitSqlStatement(ctx);
         } catch (Exception e) {
-//            e.printStackTrace();
+            e.printStackTrace();
             queryResult = new QueryResult(false, e.getMessage());
         }
         long endTime = System.currentTimeMillis();
@@ -493,7 +493,12 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
 
     /**
      * selectStatement
-     *     : SELECT fullColumnNames FROM tableSources (WHERE whereExpr=predicate)?
+     *     : SELECT (
+     *         STAR
+     *         | COUNT '(' STAR ')'
+     *         | fullColumnNames
+     *     )
+     *     FROM tableSources (WHERE whereExpr=predicate)?
      *     ;
      * @param ctx
      * @return
@@ -506,10 +511,11 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
                 or = (LogicalFilterNode.OrNode) visit(ctx.whereExpr);
             }
             ArrayList<LogicalJoinNode> joinNodes = (ArrayList<LogicalJoinNode>) visit(ctx.tableSources());
-            ArrayList<FullColumnName> fullColumnNames = (ArrayList<FullColumnName>)visit(ctx.fullColumnNames());
 
+            ArrayList<FullColumnName> fullColumnNames = null;
             String[] header=null;
-            if (fullColumnNames != null) {
+            if (ctx.fullColumnNames() != null) {
+                fullColumnNames = (ArrayList<FullColumnName>)visit(ctx.fullColumnNames());
                 header = new String[fullColumnNames.size()];
                 for (int i=0; i<fullColumnNames.size(); i++) {
                     header[i] = fullColumnNames.get(i).toString();
@@ -524,17 +530,17 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
                 header = planIterator.getTupleDesc().fullNames();
             }
 
-            return physicalPlan.execute(header);
+            return physicalPlan.execute(header, ctx.COUNT() != null);
         } catch (SQLError | NoSuchElementException | DbException e) {
             return new QueryResult(false, e.getMessage());
         }
     }
 
     /**
-     * fullColumnNames
-     *     : STAR
-     *     | fullColumnName (',' fullColumnName)*
-     *     ;
+     *
+     fullColumnNames
+     : fullColumnName (',' fullColumnName)*
+     ;
      * @param ctx
      * @return
      * null if project all the elements(*)
@@ -542,9 +548,6 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
      */
     @Override
     public Object visitFullColumnNames(TinyDBParser.FullColumnNamesContext ctx) {
-        if (ctx.STAR() != null) {
-            return null;
-        }
         ArrayList<FullColumnName> names = new ArrayList<>();
         for (TinyDBParser.FullColumnNameContext context: ctx.fullColumnName()) {
             names.add((FullColumnName)visit(context));
@@ -670,7 +673,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
             }
             opIterator.open();
             Tuple tuple = opIterator.next();
-            int deleteCount = (int)tuple.getField(0).getValue();
+            long deleteCount = (long)tuple.getField(0).getValue();
             scanNode.table.count -= deleteCount;
             opIterator.close();
             return new QueryResult(true, "Query OK, " + tuple.getField(0).toString() + " rows affected.");

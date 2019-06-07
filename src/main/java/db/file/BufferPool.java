@@ -90,7 +90,6 @@ public class BufferPool {
         ArrayList<Page> affectedPages = dbFile.insertTuple(t);
         for (Page page : affectedPages) {
             page.markDirty(true);
-            pageHashMap.put(page.getId(), page);
         }
     }
 
@@ -114,7 +113,6 @@ public class BufferPool {
             pages = dbFile.deleteTuple(t);
             for (Page page : pages) {
                 page.markDirty(true);
-                // pageHashMap.put(page.getId(), page);
             }
         }
         catch (DbException | IOException e){
@@ -178,7 +176,7 @@ public class BufferPool {
                 evictedPageId = pageId;
             }
         }
-
+        
         if(pageHashMap.get(evictedPageId).isDirty()){
             try {
                 flushPage(evictedPageId);

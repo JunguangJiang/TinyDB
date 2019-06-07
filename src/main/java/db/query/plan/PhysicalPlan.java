@@ -25,21 +25,31 @@ public class PhysicalPlan {
      * execute the select operation
      * @return the result String of select query
      */
-    public QueryResult execute(String[] header) {
+    public QueryResult execute(String[] header, boolean countOnly) {
         try {
             this.root.open();
             // add tuple desc to the result
             TupleDesc tupleDesc = root.getTupleDesc();
 
-            // add tuples to the result
             ArrayList<String[]> data = new ArrayList<>();
-            while (root.hasNext()) {
-                Tuple tuple = root.next();
-                String[] body = new String[tupleDesc.numFields()];
-                for (int i=0; i<tupleDesc.numFields(); i++) {
-                    body[i] = tuple.getField(i).toString();
+            if (countOnly) {
+                header = new String[] {"count(*)"};
+                long count=0;
+                while (root.hasNext()) {
+                    Tuple tuple = root.next();
+                    count++;
                 }
-                data.add(body);
+                data.add(new String[]{String.valueOf(count)});
+            } else {
+                // add tuples to the result
+                while (root.hasNext()) {
+                    Tuple tuple = root.next();
+                    String[] body = new String[tupleDesc.numFields()];
+                    for (int i=0; i<tupleDesc.numFields(); i++) {
+                        body[i] = tuple.getField(i).toString();
+                    }
+                    data.add(body);
+                }
             }
             String result = AsciiTable.getTable(header, data.toArray(new String[0][])) +
                     System.lineSeparator() + String.format("%d rows in set", data.size());
