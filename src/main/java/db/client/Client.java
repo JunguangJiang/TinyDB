@@ -51,8 +51,9 @@ public class Client {
     private static long getRunTime(Statement st, String sql) throws SQLException{
         long startTime = System.currentTimeMillis();
         ResultSet rs = st.executeQuery(sql);
+        while (rs.next())
+            System.out.print(rs.getString(0));
         long endTime = System.currentTimeMillis();
-        System.out.println(rs.getString(0));
         return (endTime - startTime);
     }
 
@@ -65,27 +66,31 @@ public class Client {
         try {
             FileInputStream fip = new FileInputStream(new File(msg.substring(0, msg.length() - 1)));
             InputStreamReader reader = new InputStreamReader(fip, "UTF-8");
-            StringBuilder sb = new StringBuilder();
-            int i = 0;
+            StringBuilder total = new StringBuilder();
+            StringBuilder current = new StringBuilder();
             long runTime = 0;
             while (reader.ready()) {
                 int c = reader.read();
-                sb.append((char) c);
-                if (c == ';')
-                    i++;
-                if (i == 100) {
-                    runTime += getRunTime(st, sb.toString());
-                    sb.delete(0, sb.length());
-                    i = 0;
+                current.append((char) c);
+                if (c == ';') {
+                    if (total.length() + current.length() > 0xffff) {
+                        runTime += getRunTime(st, total.toString());
+                        total.delete(0, total.length());
+                    }
+                    total.append(current);
+                    current.delete(0, current.length());
                 }
             }
-            if (sb.length() > 0) {
-                runTime += getRunTime(st, sb.toString());
+            if (total.length() > 0) {
+                runTime += getRunTime(st, total.toString());
             }
             System.out.println(String.format("Total execute time: %.3f sec.", runTime / 1000.0));
             reader.close();
             fip.close();
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            System.out.printf("\nThe current path is %s , please input a correct path.\n\n", System.getProperty("user.dir"));
+        }
+        catch (Exception e) {
             e.printStackTrace();
             System.out.println("Read file " + msg + " fail!");
             throw new NoSuchElementException();
@@ -101,19 +106,17 @@ public class Client {
         while (true) {
             try {
                 Statement st = conn.createStatement();
-                String sql = readSql(reader);
+                String sql = readSql(reader).trim();
                 if (sql.toUpperCase().equals("EXIT;"))
                     break;
                 switch (checkImportSequence(sql)) {
                     case 0:
                         ResultSet rs = st.executeQuery(sql);
-                        System.out.println(rs.getString(0));
+                        while (rs.next())
+                            System.out.print(rs.getString(0));
                         break;
                     case 1:
-                        long startTime = System.currentTimeMillis();
                         handleImportSequence(st, sql);
-                        long endTime = System.currentTimeMillis();
-                        System.out.println(String.format("Total execute time: %.3f sec.", (endTime - startTime) / 1000.0));
                         break;
                     case -1:
                 }
@@ -268,7 +271,7 @@ public class Client {
             try {
                 ConsoleReader reader = new ConsoleReader();
                 while (true) {
-                    url = reader.readLine();
+                    url = reader.readLine().trim();
                     if (testUrl(url)) {
                         return url;
                     } else {
@@ -292,7 +295,8 @@ public class Client {
     private static Boolean testUrl(String url) {
 //        String _pattern = "[12][0-9][0-9]|[1-9][0-9]|[0-9]";
         String pattern = "^jdbc:TinyDB://\\d+\\.\\d+\\.\\d+\\.\\d+:\\d+$";
-        return Pattern.matches(pattern, url);
+        String pattern2 = "^jdbc:TinyDB://[A-Za-z0-9+@&#/%?=~_|:;.,]+[A-Za-z0-9+@&#/%?=~_|]$";
+        return Pattern.matches(pattern, url) || Pattern.matches(pattern2, url);
     }
 }
 

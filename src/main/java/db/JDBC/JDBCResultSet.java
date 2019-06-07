@@ -1,5 +1,7 @@
 package db.JDBC;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -10,14 +12,33 @@ import java.util.Map;
 
 public class JDBCResultSet implements ResultSet {
     private String result;
+    private DataInputStream socketIn;
+    private boolean hasNext;
 
-    JDBCResultSet(String result) {
-        this.result = result;
+//    JDBCResultSet(String result) {
+//        this.result = result;
+//    }
+
+    JDBCResultSet(DataInputStream socketIn) {
+        this.socketIn = socketIn;
+        this.hasNext = true;
     }
 
     @Override
     public boolean next() throws SQLException {
-        return false;
+        String sep = System.lineSeparator() + System.lineSeparator();
+        try {
+            if (!this.hasNext)
+                return false;
+            this.result = this.socketIn.readUTF();
+            this.hasNext = !this.result.endsWith(sep);
+            if (!this.hasNext)
+                this.result = this.result.substring(0, this.result.length() - sep.length());
+        }
+        catch (IOException e) {
+            throw new SQLException("Read socket error.");
+        }
+        return true;
     }
 
     @Override
