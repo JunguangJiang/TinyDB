@@ -1,9 +1,7 @@
 package db.file.BTree;
 
 import db.DbException;
-import db.field.*;
 import db.file.BufferPool;
-import db.field.Type;
 import db.file.Debug;
 import db.file.Page;
 
