@@ -993,8 +993,8 @@ public class BTreeFile implements DbFile {
 	}
 
 	/**
-	 * Delete a tuple from this BTreeFile. 
-	 * May cause pages to merge or redistribute entries/tuples if the pages 
+	 * Delete a tuple from this BTreeFile.
+	 * May cause pages to merge or redistribute entries/tuples if the pages
 	 * become less than half full.
 	 *
 	 * @param t - the tuple to delete
@@ -1015,7 +1015,7 @@ public class BTreeFile implements DbFile {
 		// if the page is below minimum occupancy, get some tuples from its siblings
 		// or merge with one of the siblings
 		int maxEmptySlots = page.getMaxTuples() - page.getMaxTuples()/2; // ceiling
-		if(page.getNumEmptySlots() > maxEmptySlots) { 
+		if(page.getNumEmptySlots() > maxEmptySlots) {
 			handleMinOccupancyPage(dirtypages, page);
 		}
 
@@ -1023,6 +1023,57 @@ public class BTreeFile implements DbFile {
 		dirtyPagesArr.addAll(dirtypages.values());
 		return dirtyPagesArr;
 	}
+
+	/**
+	 * Delete a tuple from this BTreeFile.
+	 * May cause pages to merge or redistribute entries/tuples if the pages
+	 * become less than half full.
+	 *
+	 * @param t - the tuple to delete
+	 * @return a list of all pages that were dirtied by this operation. Could include
+	 * many pages since parent pointers will need to be updated when an internal node merges.
+	 * @see #handleMinOccupancyPage(HashMap, BTreePage)
+	 */
+	/*
+	public ArrayList<Page> deleteTuple(Tuple t)
+			throws DbException, IOException {
+		HashMap<PageId, Page> dirtypages = new HashMap<PageId, Page>();
+		BTreeRootPtrPage rootPtr = getRootPtrPage(new HashMap<>());
+		BTreePageId rootId = rootPtr.getRootId();
+		BTreeLeafPage leafPage = findLeafPage(new HashMap<>(), rootId, t.getField(keyField));
+		Iterator<Tuple> it = leafPage.iterator();
+		Tuple target = null;
+		int fieldLen = td.numFields();
+		while(it.hasNext()){
+			Tuple c = it.next();
+			boolean eq = true;
+			for(int i = 0; i < fieldLen; i++){
+				if(!t.getField(i).equals(c.getField(i))){
+					eq = false;
+					break;
+				}
+			}
+			if(eq) {
+				target = c;
+				break;
+			}
+		}
+		if(target == null){
+			throw new DbException("Couldn't find the tuple to be deleted!");
+		}
+		leafPage.deleteTuple(target);
+
+		// if the page is below minimum occupancy, get some tuples from its siblings
+		// or merge with one of the siblings
+		int maxEmptySlots = leafPage.getMaxTuples() - leafPage.getMaxTuples()/2; // ceiling
+		if(leafPage.getNumEmptySlots() > maxEmptySlots) {
+			handleMinOccupancyPage(dirtypages, leafPage);
+		}
+
+		ArrayList<Page> dirtyPagesArr = new ArrayList<Page>();
+		dirtyPagesArr.addAll(dirtypages.values());
+		return dirtyPagesArr;
+	}*/
 
 	/**
 	 * Get a read lock on the root pointer page. Create the root pointer page and root page
@@ -1194,7 +1245,7 @@ public class BTreeFile implements DbFile {
 		// at this point headerId should either be null or set with 
 		// the headerPage containing the slot corresponding to emptyPageNo.
 		// Add header pages until we have one with a slot corresponding to emptyPageNo
-		while(shouldCreateHeader || (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() < emptyPageNo) {
+		while(shouldCreateHeader || (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() <= emptyPageNo) {
 		    if(shouldCreateHeader){
 		        shouldCreateHeader = false;
 		        headerPageCount--;
