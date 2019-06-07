@@ -63,8 +63,9 @@ public class JDBCStatement implements Statement {
             DataOutputStream out = new DataOutputStream(conn.getOutputStream());
             final int BUF_SIZE = 0xffff;
             char[] itemBuf = new char[BUF_SIZE];
-            while (dataIn.read(itemBuf, 0, BUF_SIZE) != -1) {
-                out.writeUTF(new String(itemBuf));
+            int nRead;
+            while ((nRead = dataIn.read(itemBuf, 0, BUF_SIZE)) != -1) {
+                out.writeUTF(new String(itemBuf, 0, nRead));
             }
             char[] eos = {(char)-1};
             out.writeUTF(new String(eos));

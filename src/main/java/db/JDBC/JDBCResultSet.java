@@ -41,6 +41,9 @@ public class JDBCResultSet implements ResultSet {
         catch (IOException e) {
             throw new SQLException("Read socket error.");
         }
+        catch (Exception e) {
+            throw new SQLException("Server close");
+        }
         return true;
     }
 

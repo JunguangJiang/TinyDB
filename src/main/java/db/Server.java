@@ -302,21 +302,19 @@ public class Server {
                     StringBuilder total = new StringBuilder();
                     StringBuilder current = new StringBuilder();
                     long runTime = 0;
-                    int c = ' ';
-                    while (in.ready() || total.length() > 0) {
-                        if (in.ready()) {
-                            c = in.read();
-                            current.append((char) c);
-                        }
-                        if (!in.ready() || c == ';') {
-                            if (!in.ready() || total.length() + current.length() > 0xffff) {
+                    int c;
+                    while ((c = in.read()) != -1 || total.length() > 0) {
+                        if (c != -1)
+                            current.append((char)c);
+                        if (c == -1 || c == ';') {
+                            if (c == -1 || total.length() + current.length() > 0xffff) {
                                 Pair<String, Long> result = server.processAndSend(out, total.toString());
                                 runTime += result.getValue();
                                 if (result.getKey().length() > 0)
                                     writeBack(out, result.getKey());
                                 total.delete(0, total.length());
                             }
-                            if (!in.ready())
+                            if (c == -1)
                                 break;
                             total.append(current);
                             current.delete(0, current.length());
