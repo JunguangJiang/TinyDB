@@ -42,7 +42,7 @@ public class Join extends Operator{
             cmp = new VVCmpNode(true);
         }
         this.cmp = cmp;
-        String filename = "Join:"+this.lhs.getTupleDesc().getTableName() + ":" + rhs.getTupleDesc().getTableName() + ".db";
+        String filename = "Join:"+this.lhs.getTupleDesc().getTableName() + ":" + rhs.getTupleDesc().getTableName() + ".data";
         File file = new File(filename);
         this.tupleBuffer = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_JOIN_BUFFER,
                 file, mergedTupleDesc);

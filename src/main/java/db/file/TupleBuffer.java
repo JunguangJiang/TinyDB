@@ -17,7 +17,8 @@ import java.util.Iterator;
 public class TupleBuffer {
     private int max_buffer_num; // max number of tuples in the memory
     private long tuple_num; // total number of tuples(including memory and disk)
-    private int pos;
+    private int load_pos;
+    private long read_pos;
     private File file;
     private DataInputStream dis;
     private DataOutputStream dos;
@@ -26,7 +27,6 @@ public class TupleBuffer {
     private TupleDesc tupleDesc;
     private boolean flushed; // whether has flushed to the disk
     static public int DEFAULT_MAX_BYTES = 1024*1024*4;//max buffer bytes in the the momory 4MB
-
     public TupleBuffer(File file, TupleDesc tupleDesc) throws DbException{
         this(DEFAULT_MAX_BYTES, file, tupleDesc);
     }
@@ -50,7 +50,16 @@ public class TupleBuffer {
         }
         tuples = new ArrayList<>();
         tuple_num = 0;
-        pos = 0;
+        load_pos = 0;
+        read_pos = 0;
+    }
+
+    /**
+     *
+     * @return total number of tuples(including memory and disk)
+     */
+    public long getTupleNumber() {
+        return tuple_num;
     }
 
     /**
@@ -89,7 +98,8 @@ public class TupleBuffer {
      */
     public void rewind() throws DbException{
         try {
-            pos = 0;
+            load_pos = 0;
+            read_pos = 0;
             if (flushed) {
                 dis = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
                 load();
@@ -105,6 +115,10 @@ public class TupleBuffer {
      * @return null if there are no more tuples
      */
     public Tuple next() {
+        read_pos++;
+        if (read_pos >= tuple_num) {
+            read_pos = tuple_num;
+        }
         if (iterator.hasNext()) {
             return iterator.next();
         } else {
@@ -120,6 +134,10 @@ public class TupleBuffer {
                 return null;
             }
         }
+    }
+
+    public boolean hasNext() {
+        return this.read_pos < tuple_num;
     }
 
     /**
@@ -156,8 +174,8 @@ public class TupleBuffer {
      */
     private void load() {
         tuples.clear();
-        while (pos < tuple_num && tuples.size() <= max_buffer_num) {
-            pos++;
+        while (load_pos < tuple_num && tuples.size() <= max_buffer_num) {
+            load_pos++;
             Tuple tuple = Util.parseTuple(tupleDesc, dis);
             tuples.add(tuple);
         }

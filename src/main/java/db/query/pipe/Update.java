@@ -101,74 +101,38 @@ public class Update extends Operator{
         if (changePrimaryKey && hasMoreThanOneChild() ) {
             throw new PrimaryKeyViolation(child.getTupleDesc().getPrimaryKey(), primaryKeyValue);
         }
-        int count = 0;
-        TupleBuffer oldTupleBuf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_FILTER_BUFFER,
-                new File(getTupleDesc().getTableName()+":oldBuf.data"), getTupleDesc());
-        TupleBuffer newTupleBuf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_FILTER_BUFFER,
-                new File(getTupleDesc().getTableName()+":newBuf.data"), getTupleDesc());
+        TupleBuffer oldTupleBuf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_UPDATE,
+                new File(getTupleDesc().getTableName()+":update.data"), getTupleDesc());
         while (child.hasNext()) {
-            //todo Í³Ò»Ð´·¨
             Tuple oldTuple = child.next();
-            Tuple newTuple = oldTuple.clone();
-            if(Setting.isBTree){
-                oldTupleBuf.add(oldTuple);
-                for (int i=0; i<indexes.length; i++){
-                    newTuple.setField(indexes[i], fields[i]);
-                }
-                newTupleBuf.add(newTuple);
-            }
-            else{
-                //make a new tuple, delete the old tuple and insert the new tuple
-                int tableid = oldTuple.getRecordId().getPageId().getTableId();
-                GlobalManager.getBufferPool().deleteTuple(oldTuple);
-
-                for (int i=0; i<indexes.length; i++){
-                    newTuple.setField(indexes[i], fields[i]);
-                }
-                try {
-                    GlobalManager.getBufferPool().insertTuple(tableid, newTuple);
-                } catch (DbException | IOException e) {
-                    e.printStackTrace();
-                } catch (PrimaryKeyViolation e) {
-                    try {
-                        GlobalManager.getBufferPool().insertTuple(tableid, oldTuple);
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                    }
-                    oldTupleBuf.finisheAdding();
-                    newTupleBuf.finisheAdding();
-                    oldTupleBuf.close();
-                    newTupleBuf.close();
-                    throw e;
-                }
-                count++;
-            }
+            oldTupleBuf.add(oldTuple);
         }
         oldTupleBuf.finisheAdding();
-        newTupleBuf.finisheAdding();
-        Tuple c;
-        while((c = oldTupleBuf.next()) != null){
-            int tableid = c.getRecordId().getPageId().getTableId();
-            GlobalManager.getBufferPool().deleteTuple(c);
-            Tuple t = newTupleBuf.next();
+        long count = oldTupleBuf.getTupleNum();
+
+        while(oldTupleBuf.hasNext()){
+            Tuple oldTuple = oldTupleBuf.next();
+            int tableid = oldTuple.getRecordId().getPageId().getTableId();
+            GlobalManager.getBufferPool().deleteTuple(oldTuple);
+            Tuple newTuple = oldTuple.clone();
+            for (int i=0; i<indexes.length; i++){
+                newTuple.setField(indexes[i], fields[i]);
+            }
             try {
-                GlobalManager.getBufferPool().insertTuple(tableid, t);
+                GlobalManager.getBufferPool().insertTuple(tableid, newTuple);
             } catch (DbException | IOException e) {
                 e.printStackTrace();
             } catch (PrimaryKeyViolation e) {
                 try {
-                    GlobalManager.getBufferPool().insertTuple(tableid, t);
+                    GlobalManager.getBufferPool().insertTuple(tableid, oldTuple);
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
                 oldTupleBuf.close();
-                newTupleBuf.close();
                 throw e;
             }
-            count++;
         }
         oldTupleBuf.close();
-        newTupleBuf.close();
         return Util.getCountTuple(count, "update counts");
     }
 }
