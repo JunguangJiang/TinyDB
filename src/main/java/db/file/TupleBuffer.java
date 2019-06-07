@@ -2,12 +2,16 @@ package db.file;
 
 import db.DbException;
 import db.Main;
+import db.Setting;
+import db.file.BTree.BTreePageId;
+import db.file.heap.HeapPageId;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * TupleBuffer can store the middle result of pipe opIterator
@@ -158,7 +162,9 @@ public class TupleBuffer {
             flushed = true;
             for (Tuple tuple: tuples) {
                 tuple.serialize(dos);
+                dos.writeInt(tuple.getRecordId().getPageId().getTableId());
             }
+
             dos.flush();
             tuples.clear();
         } catch (IOException e){
@@ -174,7 +180,21 @@ public class TupleBuffer {
         while (load_pos < tuple_num && tuples.size() <= max_buffer_num) {
             load_pos++;
             Tuple tuple = Util.parseTuple(tupleDesc, dis);
-            tuples.add(tuple);
+            try {
+                int tableid = dis.readInt();
+                PageId tmpPageId;
+                if (Setting.isBTree) {
+                    tmpPageId = new BTreePageId(tableid, 0, 0);
+                } else {
+                    tmpPageId = new HeapPageId(tableid, 0);
+                }
+                tuple.setRecordId(new RecordId(tmpPageId, 0));
+                tuples.add(tuple);
+            }
+            catch (IOException e){
+                e.printStackTrace();
+                throw new NoSuchElementException("parsing error!");
+            }
         }
     }
 }
