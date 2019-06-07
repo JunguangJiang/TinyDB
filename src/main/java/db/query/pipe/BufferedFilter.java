@@ -32,7 +32,7 @@ public class BufferedFilter extends Operator{
         this.predicate = predicate;
         this.child = child;
         this.tupleBuffer = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_FILTER_BUFFER,
-                new File(getTupleDesc().getTableName()+":filter.db"), getTupleDesc());
+                new File(getTupleDesc().getTableName()+":filter.data"), getTupleDesc());
     }
 
     @Override

@@ -4,7 +4,7 @@ package db;
  * Basic setting for the database
  */
 public class Setting {
-    public final static boolean isBTree = false;
+    public final static boolean isBTree = true;
 
     public final static long MAX_MEMORY_BYTES_FOR_FILTER_BUFFER = 4 * 1024 * 1024; // TupleBuffer in BufferedFilter use at most 4MB memory
 

@@ -2,16 +2,19 @@ package db.query.pipe;
 
 import db.DbException;
 import db.GlobalManager;
+import db.Setting;
 import db.error.SQLError;
 import db.field.Field;
 
 import db.field.Util;
 import db.error.NotNullViolation;
 import db.error.PrimaryKeyViolation;
+import db.file.TupleBuffer;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -98,15 +101,20 @@ public class Update extends Operator{
         if (changePrimaryKey && hasMoreThanOneChild() ) {
             throw new PrimaryKeyViolation(child.getTupleDesc().getPrimaryKey(), primaryKeyValue);
         }
-        int count = 0;
+        TupleBuffer oldTupleBuf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_UPDATE,
+                new File(getTupleDesc().getTableName()+":update.data"), getTupleDesc());
         while (child.hasNext()) {
-            count++;
             Tuple oldTuple = child.next();
-            Tuple newTuple = oldTuple.clone();
-            //make a new tuple, delete the old tuple and insert the new tuple
+            oldTupleBuf.add(oldTuple);
+        }
+        oldTupleBuf.finisheAdding();
+        long count = oldTupleBuf.getTupleNum();
+
+        while(oldTupleBuf.hasNext()){
+            Tuple oldTuple = oldTupleBuf.next();
             int tableid = oldTuple.getRecordId().getPageId().getTableId();
             GlobalManager.getBufferPool().deleteTuple(oldTuple);
-
+            Tuple newTuple = oldTuple.clone();
             for (int i=0; i<indexes.length; i++){
                 newTuple.setField(indexes[i], fields[i]);
             }
@@ -120,9 +128,11 @@ public class Update extends Operator{
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
+                oldTupleBuf.close();
                 throw e;
             }
         }
+        oldTupleBuf.close();
         return Util.getCountTuple(count, "update counts");
     }
 }

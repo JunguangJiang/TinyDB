@@ -75,9 +75,10 @@ public class BTreeInternalPage extends BTreePage {
 
 		// Read the parent pointer
 		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			this.parent = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
+			//Field f = Type.INT_TYPE.parse(dis);
+			//this.parent = (Integer)((IntField) f).getValue();
+			this.parent = dis.readInt();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
@@ -118,7 +119,7 @@ public class BTreeInternalPage extends BTreePage {
 	 * Retrieve the maximum number of entries this page can hold. (The number of keys)
  	 */
 	public int getMaxEntries() {        
-		int keySize = td.getTDItem(keyField).fieldType.getBytes();
+		int keySize = td.getTDItem(keyField).getBytes();
 		int bitsPerEntryIncludingHeader = keySize * 8 + INDEX_SIZE * 8 + 1;
 		// extraBits are: one parent pointer, 1 byte for child page category, 
 		// one extra child pointer (node with m entries has m+1 pointers to children), 1 bit for extra header
@@ -171,7 +172,7 @@ public class BTreeInternalPage extends BTreePage {
 		// if associated bit is not set, read forward to the next key, and
 		// return null.
 		if (!isSlotUsed(slotId)) {
-			for (int i=0; i<td.getTDItem(keyField).fieldType.getBytes(); i++) {
+			for (int i=0; i<td.getTDItem(keyField).getBytes(); i++) {
 				try {
 					dis.readByte();
 				} catch (IOException e) {
@@ -184,7 +185,7 @@ public class BTreeInternalPage extends BTreePage {
 		// read the key field
 		Field f = null;
 		try {
-			f = td.getTDItem(keyField).fieldType.parse(dis);
+			f = td.getTDItem(keyField).parse(dis);
 		} catch (java.text.ParseException e) {
 			e.printStackTrace();
 			throw new NoSuchElementException("parsing error!");
@@ -213,9 +214,10 @@ public class BTreeInternalPage extends BTreePage {
 		// read child pointer
 		int child = -1;
 		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			child = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
+			//Field f = Type.INT_TYPE.parse(dis);
+			//child = (Integer)((IntField) f).getValue();
+			child = dis.readInt();
+		} catch (IOException e) {
 			e.printStackTrace();
 			throw new NoSuchElementException("parsing error!");
 		}
@@ -238,7 +240,6 @@ public class BTreeInternalPage extends BTreePage {
 		// write out the parent pointer
 		try {
 			dos.writeInt(parent);
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -268,7 +269,7 @@ public class BTreeInternalPage extends BTreePage {
 
 			// empty slot
 			if (!isSlotUsed(i)) {
-				for (int j=0; j<td.getTDItem(keyField).fieldType.getBytes(); j++) {
+				for (int j=0; j<td.getTDItem(keyField).getBytes(); j++) {
 					try {
 						dos.writeByte(0);
 					} catch (IOException e) {
@@ -315,7 +316,7 @@ public class BTreeInternalPage extends BTreePage {
 
 		// padding
 		int zerolen = BufferPool.getPageSize() - (INDEX_SIZE + 1 + header.length + 
-				td.getTDItem(keyField).fieldType.getBytes() * (keys.length - 1) + INDEX_SIZE * children.length);
+				td.getTDItem(keyField).getBytes() * (keys.length - 1) + INDEX_SIZE * children.length);
 		byte[] zeroes = new byte[zerolen];
 		try {
 			dos.write(zeroes, 0, zerolen);
@@ -353,6 +354,10 @@ public class BTreeInternalPage extends BTreePage {
 			throw new DbException("tried to delete null entry.");
 		if(deleteRightChild) {
 			markSlotUsed(rid.getTupleNumber(), false);
+			int maxEntries = getMaxEntries();
+			for(int i = rid.getTupleNumber(); i < maxEntries; i++){
+				moveEntry(i+1, i);
+			}
 		}
 		else {
 			for(int i = rid.getTupleNumber() - 1; i >= 0; i--) {

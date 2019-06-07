@@ -77,26 +77,17 @@ public class BTreeLeafPage extends BTreePage {
 		DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
 
 		// Read the parent and sibling pointers
-		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			this.parent = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
-			e.printStackTrace();
-		}
+			//Field f = Type.INT_TYPE.parse(dis);
+			//this.parent = (Integer)((IntField) f).getValue();
+		this.parent = dis.readInt();
 
-		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			this.leftSibling = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
-			e.printStackTrace();
-		}
+			//Field f = Type.INT_TYPE.parse(dis);
+			//this.leftSibling = (Integer)((IntField) f).getValue();
+		this.leftSibling = dis.readInt();
 
-		try {
-			Field f = Type.INT_TYPE.parse(dis);
-			this.rightSibling = (Integer)((IntField) f).getValue();
-		} catch (java.text.ParseException e) {
-			e.printStackTrace();
-		}
+			//Field f = Type.INT_TYPE.parse(dis);
+			//this.rightSibling = (Integer)((IntField) f).getValue();
+		this.rightSibling = dis.readInt();
 
 		// allocate and read the header slots of this page
 		header = new byte[getHeaderSize()];
@@ -186,7 +177,7 @@ public class BTreeLeafPage extends BTreePage {
 		t.setRecordId(rid);
 		try {
 			for (int j=0; j<td.numFields(); j++) {
-				Field f = td.getTDItem(j).fieldType.parse(dis);
+				Field f = td.getTDItem(j).parse(dis);
 				t.setField(j, f);
 			}
 		} catch (java.text.ParseException e) {
@@ -305,6 +296,10 @@ public class BTreeLeafPage extends BTreePage {
 		if (!isSlotUsed(rid.getTupleNumber()))
 			throw new DbException("tried to delete null tuple.");
 		markSlotUsed(rid.getTupleNumber(), false);
+		int maxTuples = getMaxTuples();
+		for(int i = rid.getTupleNumber(); i < maxTuples - 1; i++){
+			moveRecord(i+1, i);
+		}
 		t.setRecordId(null);
 	}
 

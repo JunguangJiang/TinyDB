@@ -26,3 +26,6 @@ data.txt
 data/*
 bin/*
 test_data/
+.classpath
+.project
+.settings/

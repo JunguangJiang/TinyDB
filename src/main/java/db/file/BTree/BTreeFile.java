@@ -81,9 +81,9 @@ public class BTreeFile implements DbFile {
 		BufferedInputStream bis = null;
 
 		try {
-            if(f.length() == 0) {
+            /*if(f.length() == 0) {
                 initEmptyFile(f);
-            }
+            }*/
             bis = new BufferedInputStream(new FileInputStream(f));
 			if(id.pgcateg() == BTreePageId.ROOT_PTR) {
 				byte pageBuf[] = new byte[BTreeRootPtrPage.getPageSize()];
@@ -216,7 +216,8 @@ public class BTreeFile implements DbFile {
 					entry = it.next();
 				}
 
-				if (f.compare(Op.LESS_THAN_OR_EQ, entry.getKey())) {
+				// if (f.compare(Op.LESS_THAN_OR_EQ, entry.getKey())) {
+				if (f.compare(Op.LESS_THAN, entry.getKey())) {
 					nextSearchId = entry.getLeftChild();
 				} else {
 					// greater than the last one
@@ -523,6 +524,11 @@ public class BTreeFile implements DbFile {
 		BTreePageId rootId = rootPtr.getRootId();
 
 		if(rootId == null) { // the root has just been created, so set the root pointer to point to it		
+			/*rootId = new BTreePageId(tableid, 1 + numPages(), BTreePageId.LEAF);
+			rootPtr = (BTreeRootPtrPage) getPage(dirtypages, BTreeRootPtrPage.getId(tableid));
+			rootPtr.setRootId(rootId);
+			BTreeLeafPage rootPage = new BTreeLeafPage(rootId, BTreePage.createEmptyPageData(), this.keyField);
+			dirtypages.put(rootId, rootPage);*/
 			rootId = new BTreePageId(tableid, numPages(), BTreePageId.LEAF);
 			rootPtr = (BTreeRootPtrPage) getPage(dirtypages, BTreeRootPtrPage.getId(tableid));
 			rootPtr.setRootId(rootId);
@@ -536,6 +542,7 @@ public class BTreeFile implements DbFile {
 		Iterator<Tuple> it = leafPage.iterator();
 		int primaryKeyIndex = td.getPrimaryKeyIndex();
 		while(it.hasNext()){
+			//todo 找到比它大的就停
 		    Tuple tuple = it.next();
 		    if(tuple.getField(primaryKeyIndex).equals(t.getField(primaryKeyIndex))){
 		        throw new PrimaryKeyViolation(td.getPrimaryKey(), tuple.getField(primaryKeyIndex));
@@ -843,7 +850,7 @@ public class BTreeFile implements DbFile {
             parent.updateEntry(entry);
 
             rightEntry.setRightChild(pid);
-            assert page.reverseIterator().hasNext();
+            // assert page.reverseIterator().hasNext();
             rightEntry.setLeftChild(page.reverseIterator().next().getRightChild());
 
             // entry.setLeftChild(entry.getRightChild());
@@ -1171,18 +1178,29 @@ public class BTreeFile implements DbFile {
 
 		// iterate through all the existing header pages to find the one containing the slot
 		// corresponding to emptyPageNo
-		while(headerId != null && (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() < emptyPageNo) {
+        boolean shouldCreateHeader = false;
+		while(headerId != null && (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() <= emptyPageNo) {
 			BTreeHeaderPage headerPage = (BTreeHeaderPage) getPage(dirtypages, headerId);
 			prevId = headerId;
 			headerId = headerPage.getNextPageId();
 			headerPageCount++;
+			if(headerId == null && (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() > emptyPageNo){
+			    shouldCreateHeader = true;
+			    break;
+            }
 		}
+
 
 		// at this point headerId should either be null or set with 
 		// the headerPage containing the slot corresponding to emptyPageNo.
 		// Add header pages until we have one with a slot corresponding to emptyPageNo
-		while((headerPageCount + 1) * BTreeHeaderPage.getNumSlots() < emptyPageNo) {
-			BTreeHeaderPage prevPage = (BTreeHeaderPage) getPage(dirtypages, prevId);
+		while(shouldCreateHeader || (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() < emptyPageNo) {
+		    if(shouldCreateHeader){
+		        shouldCreateHeader = false;
+		        headerPageCount--;
+            }
+
+            BTreeHeaderPage prevPage = (BTreeHeaderPage) getPage(dirtypages, prevId);
 			
 			BTreeHeaderPage headerPage = (BTreeHeaderPage) getEmptyPage(dirtypages, BTreePageId.HEADER);
 			headerId = headerPage.getId();
@@ -1263,8 +1281,15 @@ class BTreeFileIterator extends AbstractDbFileIterator {
 	public void open() throws DbException {
 		BTreeRootPtrPage rootPtr = (BTreeRootPtrPage) GlobalManager.getBufferPool().getPage(BTreeRootPtrPage.getId(f.getId()));
 		BTreePageId root = rootPtr.getRootId();
-		curp = f.findLeafPage(root, null);
-		it = curp.iterator();
+		if(root == null){
+			// Empty BTreeFile
+			curp = null;
+			it = null;
+		}
+		else {
+			curp = f.findLeafPage(root, null);
+			it = curp.iterator();
+		}
 	}
 
 	/**
@@ -1344,14 +1369,20 @@ class BTreeSearchIterator extends AbstractDbFileIterator {
 		BTreeRootPtrPage rootPtr = (BTreeRootPtrPage) GlobalManager.getBufferPool().getPage(
 		        BTreeRootPtrPage.getId(f.getId()));
 		BTreePageId root = rootPtr.getRootId();
-		if(ipred.getOp() == Op.EQUALS || ipred.getOp() == Op.GREATER_THAN
-				|| ipred.getOp() == Op.GREATER_THAN_OR_EQ) {
-			curp = f.findLeafPage(root, ipred.getField());
+		if(root == null){
+			curp = null;
+			it = null;
 		}
-		else {
-			curp = f.findLeafPage(root, null);
+		else{
+            if(ipred.getOp() == Op.EQUALS || ipred.getOp() == Op.GREATER_THAN
+                    || ipred.getOp() == Op.GREATER_THAN_OR_EQ) {
+                curp = f.findLeafPage(root, ipred.getField());
+            }
+            else {
+                curp = f.findLeafPage(root, null);
+            }
+            it = curp.iterator();
 		}
-		it = curp.iterator();
 	}
 
 	/**
