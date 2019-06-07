@@ -1,5 +1,6 @@
 package db;
 
+import db.error.SQLError;
 import db.query.QueryResult;
 import db.tuple.TupleDesc;
 import org.junit.Test;
@@ -103,22 +104,26 @@ public class CatalogTest {
 
     @Test
     public void getTableNames() {
-        // create two databases
-        GlobalManager.getCatalog().createDatabase("database1");
-        GlobalManager.getCatalog().createDatabase("database2");
-        GlobalManager.getCatalog().useDatabase("database1");
-        GlobalManager.getDatabase().createTable("table1", Utility.getTupleDesc(3, "tup"));
-        GlobalManager.getDatabase().createTable("table2", Utility.getTupleDesc(3, "tup"));
-        GlobalManager.getDatabase().createTable("table3", Utility.getTupleDesc(3, "tup"));
+        try {
+            // create two databases
+            GlobalManager.getCatalog().createDatabase("database1");
+            GlobalManager.getCatalog().createDatabase("database2");
+            GlobalManager.getCatalog().useDatabase("database1");
+            GlobalManager.getDatabase().createTable("table1", Utility.getTupleDesc(3, "tup"));
+            GlobalManager.getDatabase().createTable("table2", Utility.getTupleDesc(3, "tup"));
+            GlobalManager.getDatabase().createTable("table3", Utility.getTupleDesc(3, "tup"));
 
-        String[] names = GlobalManager.getCatalog().getTableNames("database1");
-        Arrays.sort(names);
-        String[] expected = new String[]{"table1", "table2", "table3"};
-        Arrays.sort(expected);
-        assertArrayEquals(expected, names);
+            String[] names = GlobalManager.getCatalog().getTableNames("database1");
+            Arrays.sort(names);
+            String[] expected = new String[]{"table1", "table2", "table3"};
+            Arrays.sort(expected);
+            assertArrayEquals(expected, names);
 
-        GlobalManager.getCatalog().dropDatabase("database1");
-        GlobalManager.getCatalog().dropDatabase("database2");
+            GlobalManager.getCatalog().dropDatabase("database1");
+            GlobalManager.getCatalog().dropDatabase("database2");
+        } catch (SQLError e){
+            fail();
+        }
     }
 
 }

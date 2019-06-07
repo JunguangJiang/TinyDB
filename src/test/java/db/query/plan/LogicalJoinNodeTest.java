@@ -20,26 +20,31 @@ public class LogicalJoinNodeTest {
 
     @Before
     public void setUp() {
-        GlobalManager.getCatalog().createDatabase("database");
-        GlobalManager.getCatalog().useDatabase("database");
+        try {
+            GlobalManager.getCatalog().createDatabase("database");
+            GlobalManager.getCatalog().useDatabase("database");
 
-        TDItem[] tdItems = new TDItem[2];
-        tdItems[0] = new TDItem(Type.LONG_TYPE, "attr1", true, 0);
-        tdItems[1] = new TDItem(Type.LONG_TYPE, "attr2", true, 0);
-        TupleDesc tupleDesc = new TupleDesc(tdItems, "attr2");
-        GlobalManager.getDatabase().createTable("table1", tupleDesc);
+            TDItem[] tdItems = new TDItem[2];
+            tdItems[0] = new TDItem(Type.LONG_TYPE, "attr1", true, 0);
+            tdItems[1] = new TDItem(Type.LONG_TYPE, "attr2", true, 0);
+            TupleDesc tupleDesc = new TupleDesc(tdItems, "attr2");
+            GlobalManager.getDatabase().createTable("table1", tupleDesc);
 
-        TDItem[] tdItems2 = new TDItem[]{
-                new TDItem(Type.INT_TYPE, "attr3", true)
-        };
-        TupleDesc tupleDesc2 = new TupleDesc(tdItems2, "attr3");
-        GlobalManager.getDatabase().createTable("table2", tupleDesc2);
+            TDItem[] tdItems2 = new TDItem[]{
+                    new TDItem(Type.INT_TYPE, "attr3", true)
+            };
+            TupleDesc tupleDesc2 = new TupleDesc(tdItems2, "attr3");
+            GlobalManager.getDatabase().createTable("table2", tupleDesc2);
 
-        TDItem[] tdItems3 = new TDItem[]{
-                new TDItem(Type.STRING_TYPE, "attr1", false)
-        };
-        TupleDesc tupleDesc3 = new TupleDesc(tdItems3, "attr1");
-        GlobalManager.getDatabase().createTable("table3", tupleDesc3);
+            TDItem[] tdItems3 = new TDItem[]{
+                    new TDItem(Type.STRING_TYPE, "attr1", false)
+            };
+            TupleDesc tupleDesc3 = new TupleDesc(tdItems3, "attr1");
+            GlobalManager.getDatabase().createTable("table3", tupleDesc3);
+        } catch (SQLError e){
+            fail();
+        }
+
     }
 
     @After

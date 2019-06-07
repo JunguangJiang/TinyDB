@@ -49,6 +49,7 @@ public class Table {
     public Table(Integer id, String name, TupleDesc tupleDesc, File file,
                  boolean isBTree, boolean hasPrimaryKeyConstraint) {
         this.id = id;
+        tupleDesc.setTableName(name);
         if (isBTree) {
             if(file.length() == 0){
                 try {

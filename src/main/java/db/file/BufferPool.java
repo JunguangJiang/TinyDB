@@ -27,7 +27,7 @@ public class BufferPool {
 
     private long numPages;
     private HashMap<PageId, Page> pageHashMap;
-    private HashMap<PageId, Integer> recentlyUsed;
+    Clock clock;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -37,7 +37,7 @@ public class BufferPool {
     public BufferPool(long numPages) {
         this.numPages = numPages;
         this.pageHashMap = new HashMap<>();
-        this.recentlyUsed = new HashMap<>();
+        this.clock = new Clock();
     }
 
     public static int getPageSize() {
@@ -68,8 +68,7 @@ public class BufferPool {
             }
             pageHashMap.put(pid, page);
         }
-        updateRecentlyUsed();
-        recentlyUsed.put(pid, 0);
+        clock.addPageId(pid);
         return page;
     }
 
@@ -141,7 +140,6 @@ public class BufferPool {
      */
     public synchronized void discardPage(PageId pid) {
         pageHashMap.remove(pid);
-        recentlyUsed.remove(pid);
     }
 
     /**
@@ -167,15 +165,8 @@ public class BufferPool {
      * Flushes the page to disk to ensure dirty pages are updated on disk.
      */
     private synchronized  void evictPage() throws DbException {
-        PageId evictedPageId = null;
-        int counter = -1;
-        for (PageId pageId : recentlyUsed.keySet()) {
-            int value = recentlyUsed.get(pageId);
-            if (value > counter) {
-                counter = value;
-                evictedPageId = pageId;
-            }
-        }
+        PageId evictedPageId = clock.evict();
+        assert evictedPageId != null;
         
         if(pageHashMap.get(evictedPageId).isDirty()){
             try {
@@ -184,20 +175,6 @@ public class BufferPool {
                 e.printStackTrace();
             }
         }
-
         discardPage(evictedPageId);
-    }
-
-    /**
-     * Update the time of all the pages staying in the buffer pool
-     */
-    public void updateRecentlyUsed() {
-        if (!recentlyUsed.isEmpty()) {
-            for (PageId key : recentlyUsed.keySet()) {
-                int value = recentlyUsed.get(key);
-                value++;
-                recentlyUsed.put(key, value);
-            }
-        }
     }
 }
