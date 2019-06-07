@@ -16,6 +16,7 @@ gradle-app.setting
 .idea/*
 out/*
 *.db
+*.in
 log
 .DS_Store
 data.dat
