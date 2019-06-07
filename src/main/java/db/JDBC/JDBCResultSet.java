@@ -14,6 +14,7 @@ public class JDBCResultSet implements ResultSet {
     private String result;
     private DataInputStream socketIn;
     private boolean hasNext;
+    final int max_size = 0xffffff;
 
 //    JDBCResultSet(String result) {
 //        this.result = result;
@@ -30,7 +31,9 @@ public class JDBCResultSet implements ResultSet {
         try {
             if (!this.hasNext)
                 return false;
-            this.result = this.socketIn.readUTF();
+            byte[] data = new byte[max_size];
+            int num = this.socketIn.read(data, 0, max_size);
+            this.result = new String(data, 0, num);
             this.hasNext = !this.result.endsWith(sep);
             if (!this.hasNext)
                 this.result = this.result.substring(0, this.result.length() - sep.length());

@@ -3,6 +3,7 @@ package db;
 import db.parser.TinyDBOutput;
 import db.parser.TinyDBParser;
 import db.parser.Visitor;
+import javafx.util.Pair;
 import jline.console.ConsoleReader;
 import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.*;
@@ -107,17 +108,12 @@ public class Server {
     }
 
     private String sendFile(DataOutputStream socketOut, String filename) {
-        try (FileReader reader = new FileReader(filename)
-        ) {
-            char[] buf = new char[0xffff];  // 1MB
+        try (DataInputStream reader = new DataInputStream(new FileInputStream(filename))) {
+            byte[] buf = new byte[0xffffff];  // 1MB
             int num;
             while((num = reader.read(buf)) != -1){
-                socketOut.writeUTF(new String(buf, 0, num));
+                socketOut.write(buf, 0, num);
             }
-//            while ((line = br.readLine()) != null) {
-//                socketOut.writeUTF(line  + System.lineSeparator());
-//            }
-            socketOut.writeUTF(System.lineSeparator() + System.lineSeparator());
             return "";
         } catch (IOException e) {
             System.out.println("Read data files failed!");
@@ -129,18 +125,20 @@ public class Server {
      * process sql command and return result
      * @param sql: sql command
      */
-    private String processAndSend(DataOutputStream socketOut, String sql) {
-        String output_filename = sqlPath + "Client.out";
+    private Pair<String, Long> processAndSend(DataOutputStream socketOut, String sql) {
+        String output_filename = utils.getFilePath(sqlPath, "Client.out");
         File output = new File(output_filename);
         try (BufferedWriter outputBufferedWriter = new BufferedWriter(new FileWriter(output))){
             TinyDBOutput out = new TinyDBOutput(outputBufferedWriter);
+            long startTime = System.currentTimeMillis();
             this.process(sql, out);
-            return sendFile(socketOut, output_filename);
+            long endTime = System.currentTimeMillis();
+            return new Pair<>(sendFile(socketOut, output_filename), endTime - startTime);
         } catch (RuntimeException e) {
-            return "500 Internal Error";
+            return new Pair<>("500 Internal Error", 0L);
         } catch (IOException e) {
             System.out.println("Read data files failed!");
-            return "500 Internal Error";
+            return new Pair<>("500 Internal Error", 0L);
         } finally {
             if (!output.delete()) {
                 System.out.println("Delete client.out failed! Please delete it manually.");
@@ -230,11 +228,9 @@ public class Server {
             this.server = server;
         }
 
-//        private static String handleImportSequence(Server server, String sql) throws NoSuchElementException {
-//            String msg = sql.split(" ", 2)[1];
+//        private static String processAndSend(Server server) {
 //            try {
-//                FileInputStream fip = new FileInputStream(new File(msg.substring(0, msg.length() - 1)));
-//                InputStreamReader reader = new InputStreamReader(fip, "UTF-8");
+//                String filename;
 //                StringBuilder sb = new StringBuilder();
 //                StringBuilder rs = new StringBuilder();
 //                int i = 0;
@@ -269,42 +265,14 @@ public class Server {
 //            }
 //            catch (Exception e) {
 //                e.printStackTrace();
-//                return String.format("Read file %s fail!", msg);
+//                return String.format("Read file %s fail!", filename);
 //            }
-//        }
-//
-//        /**
-//         * to check whether the SQL is the the import command
-//         * @param sql: the sql to check
-//         * @return  if is import sequence, then 1; if is import sequence but error filename, then -1;otherwise 0
-//         */
-//        private static Boolean checkImportSequence(String sql) {
-//            String upperCaseSQL = sql.toUpperCase();
-//            if (upperCaseSQL.startsWith("IMPORT")) {
-//                String[] msg = sql.split(" ", 2);
-//                if (msg.length != 2) {
-//                    System.out.println("Error input, please input the correct filename!");
-//                    return false; // import but error input
-//                }
-//                return true;
-//            }
-//            return false; // otherwise
 //        }
 
         private static void writeBack(DataOutputStream out, String result) throws IOException{
-            int bufferSize = 0xffff;
-            int i =0;
-            int sum = 0;
-
-            while(i < result.length()){
-                int endIdx = java.lang.Math.min(result.length(), i + bufferSize);
-                String jsosPart = result.substring(i,endIdx);
-                out.writeUTF(jsosPart);
-                sum += jsosPart.length();
-                i += bufferSize;
-            }
-            out.writeUTF(System.lineSeparator() + System.lineSeparator() + System.lineSeparator());
-            assert sum == result.length();
+            result += System.lineSeparator();
+            byte[] data = result.getBytes();
+            out.write(data, 0, data.length);
         }
 
         /**
@@ -315,13 +283,51 @@ public class Server {
             if (socket == null) return;
             while (true) {
                 try {
-                    DataInputStream in = new DataInputStream(socket.getInputStream());
+                    DataInputStream dataIn = new DataInputStream(socket.getInputStream());
+                    String inputFilename = utils.getFilePath(server.sqlPath, "client.in");
+                    FileWriter fileWriter = new FileWriter(inputFilename);
+                    while (true) {
+                        String temp = dataIn.readUTF();
+                        fileWriter.write(temp);
+                        if (temp.charAt(temp.length() - 1) == (char)-1)
+                            break;
+                    }
+                    fileWriter.close();
+                    System.out.println("Read successfully");
+
+                    FileReader fileReader = new FileReader(inputFilename);
+                    BufferedReader in = new BufferedReader(fileReader);
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-                    String sql = in.readUTF();
-                    String result;
-                    result = server.processAndSend(out, sql);
-                    if (result.length() > 0)
-                        writeBack(out, result);
+
+                    StringBuilder total = new StringBuilder();
+                    StringBuilder current = new StringBuilder();
+                    long runTime = 0;
+                    int c = ' ';
+                    while (in.ready() || total.length() > 0) {
+                        if (in.ready()) {
+                            c = in.read();
+                            current.append((char) c);
+                        }
+                        if (!in.ready() || c == ';') {
+                            if (!in.ready() || total.length() + current.length() > 0xffff) {
+                                Pair<String, Long> result = server.processAndSend(out, total.toString());
+                                runTime += result.getValue();
+                                if (result.getKey().length() > 0)
+                                    writeBack(out, result.getKey());
+                                total.delete(0, total.length());
+                            }
+                            if (!in.ready())
+                                break;
+                            total.append(current);
+                            current.delete(0, current.length());
+                        }
+                    }
+                    writeBack(out, String.format("Execute Time: %.3f", runTime / 1000.0)
+                            + System.lineSeparator() + System.lineSeparator());
+                    fileReader.close();
+                    in.close();
+                    if (!(new File(inputFilename)).delete())
+                        System.out.println("Delete " + inputFilename + " failed.");
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;

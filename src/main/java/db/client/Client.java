@@ -1,5 +1,6 @@
 package db.client;
 
+import db.JDBC.JDBCStatement;
 import jline.console.ConsoleReader;
 import jline.console.completer.*;
 import jline.console.history.FileHistory;
@@ -12,6 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
 import db.utils.utils;
+import java.util.regex.*;
 
 public class Client {
     /**
@@ -61,7 +63,7 @@ public class Client {
      * to handle the import command
      * @param sql: the "import file.txt" Sql
      */
-    private static void handleImportSequence(Statement st, String sql) throws NoSuchElementException {
+    private static void handleImportSequenceDepreciate(Statement st, String sql) throws NoSuchElementException {
         String msg = sql.split(" ", 2)[1];
         try {
             FileInputStream fip = new FileInputStream(new File(msg.substring(0, msg.length() - 1)));
@@ -98,6 +100,29 @@ public class Client {
     }
 
     /**
+     * to handle the import command
+     * @param sql: the "import file.txt" Sql
+     */
+    private static void handleImportSequence(Statement st, String sql) throws NoSuchElementException {
+        String msg = sql.split(" ", 2)[1];
+        String filename = msg.substring(0, msg.length() - 1);
+        try {
+            long startTime = System.currentTimeMillis();
+            ResultSet rs = ((JDBCStatement)st).executeFile(filename);
+            System.out.println("Send successfully, printing results");
+            while (rs.next())
+                System.out.print(rs.getString(0));
+            long endTime = System.currentTimeMillis();
+            System.out.println(String.format("Total execute time: %.3f sec.", (endTime - startTime) / 1000.0));
+        }
+        catch (Exception e) {
+//            e.printStackTrace();
+            System.out.println("Read file " + msg + " fail!");
+            throw new NoSuchElementException();
+        }
+    }
+
+    /**
      * send message to the Server and receive message
      * @param conn: the socket
      * @param reader: the ConsoleReader to read message from console
@@ -106,8 +131,8 @@ public class Client {
         while (true) {
             try {
                 Statement st = conn.createStatement();
-                String sql = readSql(reader).trim();
-                if (sql.toUpperCase().equals("EXIT;"))
+                String sql = readSql(reader).toUpperCase();
+                if (Pattern.matches("\\s*(EXIT|QUIT)\\s*;", sql))
                     break;
                 switch (checkImportSequence(sql)) {
                     case 0:
@@ -171,11 +196,12 @@ public class Client {
     private static void completeHelper(ConsoleReader reader) {
         reader.addCompleter(getCompleter(_S("create", "drop" ), _S("database", "table"), _S()));
         reader.addCompleter(getCompleter(_S("show", "shutdown;"), _S("database", "databases;", "table"), _S()));
-        reader.addCompleter(getCompleter(_S("import"), _S()));
+        reader.addCompleter(getCompleter(_S("import"), _S("data/"), _S()));
         reader.addCompleter(getCompleter(_S("insert into"), _S(), _S("values();"), _S()));
         reader.addCompleter(getCompleter(_S("select"), _S(), _S("from"), _S(), _S("where")));
         reader.addCompleter(getCompleter(_S("delete from"), _S()));
         reader.addCompleter(getCompleter(_S("use database"), _S()));
+        reader.addCompleter(getCompleter(_S("use"), _S("database"), _S()));
         reader.addCompleter(getCompleter(_S("update"), _S(), _S("set"), _S()));
         reader.addCompleter(getCompleter(_S("exit;"), _S()));
     }
