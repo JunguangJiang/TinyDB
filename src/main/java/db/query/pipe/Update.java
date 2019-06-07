@@ -7,10 +7,8 @@ import db.error.SQLError;
 import db.field.Field;
 
 import db.field.Util;
-import db.error.NotNullViolation;
 import db.error.PrimaryKeyViolation;
 import db.file.TupleBuffer;
-import db.file.TupleBufferBTree;
 import db.tuple.TDItem;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
@@ -165,8 +163,8 @@ public class Update extends Operator{
                 }
             }
         } else {
-            TupleBufferBTree oldTupleBuf = new TupleBufferBTree(Setting.MAX_MEMORY_BYTES_FOR_UPDATE,
-                    new File(getTupleDesc().getTableName()+":update.data"), getTupleDesc());
+            TupleBuffer oldTupleBuf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_UPDATE,
+                    new File(getTupleDesc().getTableName()+"_update.data"), getTupleDesc());
             while (child.hasNext()) {
                 Tuple oldTuple = child.next();
                 oldTupleBuf.add(oldTuple);
@@ -174,8 +172,8 @@ public class Update extends Operator{
             oldTupleBuf.finisheAdding();
             count = oldTupleBuf.getTupleNum();
 
-            TupleBufferBTree newTupleBuf = new TupleBufferBTree(Setting.MAX_MEMORY_BYTES_FOR_UPDATE,
-                    new File(getTupleDesc().getTableName()+":update2.data"),getTupleDesc());
+            TupleBuffer newTupleBuf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_UPDATE,
+                    new File(getTupleDesc().getTableName()+"_update2.data"),getTupleDesc());
             int tableid=0;
             while(oldTupleBuf.hasNext()){
                 Tuple oldTuple = oldTupleBuf.next();
