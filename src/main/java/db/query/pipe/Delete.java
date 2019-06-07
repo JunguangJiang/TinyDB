@@ -68,9 +68,8 @@ public class Delete extends Operator{
             TupleBuffer tuple_buf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_FILTER_BUFFER,
                     new File(getTupleDesc().getTableName()+":delete.data"), getTupleDesc());
             while (child.hasNext()) {
-                //todo 这样删不行，迭代器和Page内部的改变不同步
+                //todo 统一写法
                 if(Setting.isBTree){
-                    //child.deleteNext();
                     tuple_buf.add(child.next());
                 }
                 else{

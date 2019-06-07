@@ -42,12 +42,6 @@ public interface OpIterator extends Serializable{
     Tuple next() throws DbException, NoSuchElementException, SQLError;
 
     /**
-     * Delete the next tuple from the operator (Used by Delete).
-     *
-     */
-    void deleteNext() throws DbException;
-
-    /**
      * Resets the iterator to the start.
      * @throws DbException when rewind is unsupported.
      * @throws IllegalStateException If the iterator has not been opened

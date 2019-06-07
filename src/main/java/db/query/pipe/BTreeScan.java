@@ -76,12 +76,6 @@ public class BTreeScan implements OpIterator {
 		return iterator.next();
 	}
 
-	public void deleteNext() throws DbException{
-		if(!isOpen)
-			throw new IllegalStateException("iterator is closed");
-		iterator.deleteNext();
-	}
-
 	public void close() {
 		iterator.close();
 		isOpen = false;

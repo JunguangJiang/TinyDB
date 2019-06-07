@@ -92,8 +92,6 @@ public class BufferPool {
             page.markDirty(true);
             pageHashMap.put(page.getId(), page);
         }
-        //todo delete it
-        System.out.println(1);
     }
 
     /**

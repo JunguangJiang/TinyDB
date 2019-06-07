@@ -47,11 +47,6 @@ public class SeqScan implements OpIterator{
     }
 
     @Override
-    public void deleteNext() throws DbException{
-        // Unused
-    }
-
-    @Override
     public Tuple next() throws DbException, NoSuchElementException {
         if (iterator == null) {
             throw new NoSuchElementException("tuple is null");

@@ -1176,10 +1176,6 @@ public class BTreeFile implements DbFile {
 			rootPtr.setHeaderId(headerId);
 		}
 
-        if(emptyPageNo == 336){
-
-            System.out.println("STOPHERE");
-        }
 		// iterate through all the existing header pages to find the one containing the slot
 		// corresponding to emptyPageNo
         boolean shouldCreateHeader = false;
@@ -1204,14 +1200,7 @@ public class BTreeFile implements DbFile {
 		        headerPageCount--;
             }
 
-            BTreeHeaderPage prevPage = null;
-            try {
-                prevPage = (BTreeHeaderPage) getPage(dirtypages, prevId);
-            }
-            catch (NullPointerException e){
-                e.printStackTrace();
-                throw e;
-            }
+            BTreeHeaderPage prevPage = (BTreeHeaderPage) getPage(dirtypages, prevId);
 			
 			BTreeHeaderPage headerPage = (BTreeHeaderPage) getEmptyPage(dirtypages, BTreePageId.HEADER);
 			headerId = headerPage.getId();
@@ -1223,35 +1212,11 @@ public class BTreeFile implements DbFile {
 			prevId = headerId;
 		}
 
-		/*
-		if(headerId == null && (headerPageCount + 1) * BTreeHeaderPage.getNumSlots() == emptyPageNo){
-            BTreeHeaderPage prevPage = null;
-            try {
-                prevPage = (BTreeHeaderPage) getPage(dirtypages, prevId);
-            }
-            catch (NullPointerException e){
-                e.printStackTrace();
-                throw e;
-            }
-            BTreeHeaderPage headerPage = (BTreeHeaderPage) getEmptyPage(dirtypages, BTreePageId.HEADER);
-            headerId = headerPage.getId();
-            headerPage.init();
-            headerPage.setPrevPageId(prevId);
-            prevPage.setNextPageId(headerId);
-            headerPageCount++;
-            prevId = headerId;
-        }*/
-
 		// now headerId should be set with the headerPage containing the slot corresponding to 
 		// emptyPageNo
 		BTreeHeaderPage headerPage = (BTreeHeaderPage) getPage(dirtypages, headerId);
 		int emptySlot = emptyPageNo - headerPageCount * BTreeHeaderPage.getNumSlots();
-		try {
-            headerPage.markSlotUsed(emptySlot, false);
-        }
-        catch (ArrayIndexOutOfBoundsException e){
-		    e.printStackTrace();
-        }
+		headerPage.markSlotUsed(emptySlot, false);
 	}
 
 	/**
@@ -1354,35 +1319,6 @@ class BTreeFileIterator extends AbstractDbFileIterator {
 		if (it == null)
 			return null;
 		return it.next();
-	}
-
-	/**
-	 * Delete next tuple of the iterator.
-	 * @see db.query.pipe.Delete
-	 */
-	@Override
-	public void deleteNext() throws DbException{
-		// todo
-		if (it != null && !it.hasNext())
-			it = null;
-
-		while (it == null && curp != null) {
-			BTreePageId nextp = curp.getRightSiblingId();
-			if(nextp == null) {
-				curp = null;
-			}
-			else {
-				curp = (BTreeLeafPage) GlobalManager.getBufferPool().getPage(nextp);
-				it = curp.iterator();
-				if (!it.hasNext())
-					it = null;
-			}
-		}
-		if (it == null)
-			return;
-		else{
-
-		}
 	}
 
 	/**
@@ -1489,15 +1425,6 @@ class BTreeSearchIterator extends AbstractDbFileIterator {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Delete next tuple of the iterator.
-	 * @see db.query.pipe.Delete
-	 */
-	@Override
-	public void deleteNext()  throws DbException {
-		// todo
 	}
 
 	/**
