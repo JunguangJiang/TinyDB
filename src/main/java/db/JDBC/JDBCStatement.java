@@ -17,13 +17,14 @@ public class JDBCStatement implements Statement {
         try {
             OutputStream outToServer = conn.getOutputStream();
             DataOutputStream out = new DataOutputStream(outToServer);
-            out.writeUTF(sql);
-
-            InputStream inFromServer = conn.getInputStream();
-            DataInputStream in = new DataInputStream(inFromServer);
+//            byte[] data = (sql + System.lineSeparator()).getBytes();
+//            out.write(data, 0, data.length);
+            char[] eos = {(char)-1};
+            out.writeUTF(sql + new String(eos));
+//            InputStream inFromServer = conn.getInputStream();
+//            DataInputStream in = new DataInputStream(inFromServer);
 //            BufferedReader reader = new BufferedReader(new InputStreamReader(inFromServer));
-
-            StringBuilder sb = new StringBuilder();
+//            StringBuilder sb = new StringBuilder();
 //            String firstLine = reader.readLine();
 //            sb.append(firstLine);
 //            sb.append("\r\n");
@@ -31,29 +32,49 @@ public class JDBCStatement implements Statement {
 //                sb.append(reader.readLine());
 //                sb.append("\r\n");
 //            }
+//            String temp;
+//            String sep = System.lineSeparator() + System.lineSeparator();
+//            while (true){
+//                temp = in.readUTF();
 
-            String temp;
-            String sep = System.lineSeparator() + System.lineSeparator();
-            while (true){
-                temp = in.readUTF();
-
-                if (temp.endsWith(sep)) {
-                    temp = temp.substring(0, temp.length() - sep.length());
-                    sb.append(temp);
-                    break;
-                }
-                sb.append(temp);
-            }
-
-            String rs = sb.toString();
+//                if (temp.endsWith(sep)) {
+//                    temp = temp.substring(0, temp.length() - sep.length());
+//                    sb.append(temp);
+//                    break;
+//                }
+//                sb.append(temp);
+//            }
+//            String rs = sb.toString();
 //            if (rs.length() >= 2)
 //                rs = rs.substring(2);
 //            String rs = in.readUTF();
-            return new JDBCResultSet(rs);
+            return new JDBCResultSet(new DataInputStream(conn.getInputStream()));
         }
         catch (Exception e) {
 //            e.printStackTrace();
             throw new SQLException("Server closed!");
+        }
+    }
+
+    public ResultSet executeFile(String filename) throws SQLException {
+        try {
+            File file = new File(filename);
+            FileReader dataIn = new FileReader(file);
+            DataOutputStream out = new DataOutputStream(conn.getOutputStream());
+            final int BUF_SIZE = 0xffff;
+            char[] itemBuf = new char[BUF_SIZE];
+            int nRead;
+            while ((nRead = dataIn.read(itemBuf, 0, BUF_SIZE)) != -1) {
+                out.writeUTF(new String(itemBuf, 0, nRead));
+            }
+            char[] eos = {(char)-1};
+            out.writeUTF(new String(eos));
+            return new JDBCResultSet(new DataInputStream(conn.getInputStream()));
+        } catch (FileNotFoundException e) {
+            System.out.printf("\nThe current path is %s , please input a correct path.\n\n", System.getProperty("user.dir"));
+            throw new SQLException("File not found");
+        } catch (IOException e) {
+            throw new SQLException("Server closed");
         }
     }
 

@@ -3,15 +3,19 @@ package db;
 import db.parser.TinyDBOutput;
 import db.parser.TinyDBParser;
 import db.parser.Visitor;
+import javafx.util.Pair;
 import jline.console.ConsoleReader;
 import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import db.utils.utils;
 
@@ -24,9 +28,9 @@ public class Server {
      * @param sqlPath the sql path where catalog and all the databases are stored in
      */
     Server(String sqlPath) {
-        if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
-            sqlPath += '/';
-        }
+//        if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
+//            sqlPath += '/';
+//        }
         this.sqlPath = sqlPath;
         GlobalManager.getCatalog().load(sqlPath);
 
@@ -103,25 +107,38 @@ public class Server {
         }
     }
 
+    private String sendFile(DataOutputStream socketOut, String filename) {
+        try (DataInputStream reader = new DataInputStream(new FileInputStream(filename))) {
+            byte[] buf = new byte[0xffffff];  // 1MB
+            int num;
+            while((num = reader.read(buf)) != -1){
+                socketOut.write(buf, 0, num);
+            }
+            return "";
+        } catch (IOException e) {
+            System.out.println("Read data files failed!");
+            return "500 Internal Error";
+        }
+    }
+
     /**
      * process sql command and return result
      * @param sql: sql command
      */
-    private String process(String sql) {
-        String output_filename = sqlPath + "Client.out";
+    private Pair<String, Long> processAndSend(DataOutputStream socketOut, String sql) {
+        String output_filename = utils.getFilePath(sqlPath, "Client.out");
         File output = new File(output_filename);
         try (BufferedWriter outputBufferedWriter = new BufferedWriter(new FileWriter(output))){
             TinyDBOutput out = new TinyDBOutput(outputBufferedWriter);
+            long startTime = System.currentTimeMillis();
             this.process(sql, out);
-            return utils.readFile(output_filename);
+            long endTime = System.currentTimeMillis();
+            return new Pair<>(sendFile(socketOut, output_filename), endTime - startTime);
         } catch (RuntimeException e) {
-//            e.printStackTrace();
-//            if (e.getMessage() != null && e.getMessage().equals("shutdown!!!"))
-//                throw new SQLException(e.getMessage());
-            return "500 Internal Error";
-        } catch (Exception e) {
+            return new Pair<>("500 Internal Error", 0L);
+        } catch (IOException e) {
             System.out.println("Read data files failed!");
-            return "500 Internal Error";
+            return new Pair<>("500 Internal Error", 0L);
         } finally {
             if (!output.delete()) {
                 System.out.println("Delete client.out failed! Please delete it manually.");
@@ -155,7 +172,8 @@ public class Server {
         try {
             ConsoleReader reader = new ConsoleReader();
             if (path.equals("")) {
-                System.out.println("Please input the working path: ");
+                System.out.printf("\nThe current path is %s\n\n", System.getProperty("user.dir"));
+                System.out.println("Please input a folder name to save data: ");
                 path = reader.readLine();
             }
             while (true) {
@@ -164,6 +182,7 @@ public class Server {
                     return path;
                 } else {
                     System.out.println("Error directory, please input again:");
+                    System.out.printf("The current path is %s\n", System.getProperty("user.dir"));
                     path = reader.readLine();
                 }
             }
@@ -209,6 +228,53 @@ public class Server {
             this.server = server;
         }
 
+//        private static String processAndSend(Server server) {
+//            try {
+//                String filename;
+//                StringBuilder sb = new StringBuilder();
+//                StringBuilder rs = new StringBuilder();
+//                int i = 0;
+//                long runTime = 0;
+//                long startTime, endTime;
+//                while (reader.ready()) {
+//                    int c = reader.read();
+//                    sb.append((char) c);
+//                    if (c == ';')
+//                        i++;
+//                    if (i == 100) {
+//                        startTime = System.currentTimeMillis();
+//                        rs.append(server.process(sb.toString()));
+//                        endTime = System.currentTimeMillis();
+//                        runTime += (endTime - startTime);
+//                        sb.delete(0, sb.length());
+//                        i = 0;
+//                    }
+//                }
+//                if (sb.length() > 0) {
+//                    startTime = System.currentTimeMillis();
+//                    rs.append(server.process(sb.toString()));
+//                    endTime = System.currentTimeMillis();
+//                    runTime += (endTime - startTime);
+//                }
+//                rs.append(String.format("\n\nTotal execute time: %.3f sec.", runTime / 1000.0));
+//                reader.close();
+//                fip.close();
+//                return rs.toString();
+//            } catch (FileNotFoundException e) {
+//                return String.format("\nThe current path is %s , please input a correct path.\n\n", System.getProperty("user.dir"));
+//            }
+//            catch (Exception e) {
+//                e.printStackTrace();
+//                return String.format("Read file %s fail!", filename);
+//            }
+//        }
+
+        private static void writeBack(DataOutputStream out, String result) throws IOException{
+            result += System.lineSeparator();
+            byte[] data = result.getBytes();
+            out.write(data, 0, data.length);
+        }
+
         /**
          * run: override the thread function
          * get input from client and write back the SQL result
@@ -217,25 +283,49 @@ public class Server {
             if (socket == null) return;
             while (true) {
                 try {
-                    DataInputStream in = new DataInputStream(socket.getInputStream());
+                    DataInputStream dataIn = new DataInputStream(socket.getInputStream());
+                    String inputFilename = utils.getFilePath(server.sqlPath, "client.in");
+                    FileWriter fileWriter = new FileWriter(inputFilename);
+                    while (true) {
+                        String temp = dataIn.readUTF();
+                        fileWriter.write(temp);
+                        if (temp.charAt(temp.length() - 1) == (char)-1)
+                            break;
+                    }
+                    fileWriter.close();
+                    System.out.println("Read successfully");
+
+                    FileReader fileReader = new FileReader(inputFilename);
+                    BufferedReader in = new BufferedReader(fileReader);
                     DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
-                    String sql = in.readUTF();
-
-                    String result = server.process(sql);
-                    int bufferSize = 60000;
-                    int i =0;
-                    int sum = 0;
-
-                    while(i < result.length()){
-                        int endIdx = java.lang.Math.min(result.length(), i + bufferSize);
-                        String jsosPart = result.substring(i,endIdx);
-                        out.writeUTF(jsosPart);
-                        sum += jsosPart.length();
-                        i += bufferSize;
+                    StringBuilder total = new StringBuilder();
+                    StringBuilder current = new StringBuilder();
+                    long runTime = 0;
+                    int c;
+                    while ((c = in.read()) != -1 || total.length() > 0) {
+                        if (c != -1)
+                            current.append((char)c);
+                        if (c == -1 || c == ';') {
+                            if (c == -1 || total.length() + current.length() > 0xffff) {
+                                Pair<String, Long> result = server.processAndSend(out, total.toString());
+                                runTime += result.getValue();
+                                if (result.getKey().length() > 0)
+                                    writeBack(out, result.getKey());
+                                total.delete(0, total.length());
+                            }
+                            if (c == -1)
+                                break;
+                            total.append(current);
+                            current.delete(0, current.length());
+                        }
                     }
-                    out.writeUTF(System.lineSeparator() + System.lineSeparator());
-                    assert sum == result.length();
+                    writeBack(out, String.format("Execute Time: %.3f", runTime / 1000.0)
+                            + System.lineSeparator() + System.lineSeparator());
+                    fileReader.close();
+                    in.close();
+                    if (!(new File(inputFilename)).delete())
+                        System.out.println("Delete " + inputFilename + " failed.");
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;

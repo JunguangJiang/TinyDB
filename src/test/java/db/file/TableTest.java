@@ -1,6 +1,7 @@
 package db.file;
 
 import db.GlobalManager;
+import db.error.SQLError;
 import db.field.FloatField;
 import db.field.IntField;
 import db.field.StringField;
@@ -27,136 +28,160 @@ public class TableTest {
     // Test primary key constraint
     @Test
     public void insertTuple() {
-        TDItem[] tdItems = new TDItem[3];
-        tdItems[0] = new TDItem(Type.INT_TYPE, "id", true);
-        tdItems[1] = new TDItem(Type.STRING_TYPE,"name", true, 10);
-        tdItems[2] = new TDItem(Type.FLOAT_TYPE,"value", false);
-        String primaryKey = tdItems[1].fieldName;
-        TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
-        QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
-        assertTrue(queryResult.succeeded());
+        try {
+            TDItem[] tdItems = new TDItem[3];
+            tdItems[0] = new TDItem(Type.INT_TYPE, "id", true);
+            tdItems[1] = new TDItem(Type.STRING_TYPE,"name", true, 10);
+            tdItems[2] = new TDItem(Type.FLOAT_TYPE,"value", false);
+            String primaryKey = tdItems[1].fieldName;
+            TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
+            QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
+            assertTrue(queryResult.succeeded());
 
-        Tuple tuple = new Tuple(tupleDesc);
-        tuple.setField(0, new IntField(1));
-        tuple.setField(1, new StringField("1", 10));
-        tuple.setField(2, new FloatField(1.1f));
-        Table table = GlobalManager.getDatabase().getTable("table");
-        queryResult = table.insertTuple(tuple);
-        assertTrue(queryResult.succeeded());
-        // TODO satisfy the primary key constraint
+            Tuple tuple = new Tuple(tupleDesc);
+            tuple.setField(0, new IntField(1));
+            tuple.setField(1, new StringField("1", 10));
+            tuple.setField(2, new FloatField(1.1f));
+            Table table = GlobalManager.getDatabase().getTable("table");
+            queryResult = table.insertTuple(tuple);
+            assertTrue(queryResult.succeeded());
+            // TODO satisfy the primary key constraint
 //        queryResult = table.insertTuple(tuple);
 //        assertFalse(queryResult.succeeded());
-        GlobalManager.getDatabase().dropTable("table");
-    }
+            GlobalManager.getDatabase().dropTable("table");
+        }catch (SQLError e){
+            fail();
+        }
+
+}
 
     // Test the compatibility of attrNames and values
     @Test
     public void insertTuple1() {
-        TDItem[] tdItems = new TDItem[3];
-        tdItems[0] = new TDItem(Type.INT_TYPE, "id", true);
-        tdItems[1] = new TDItem(Type.STRING_TYPE,"name", true, 10);
-        tdItems[2] = new TDItem(Type.FLOAT_TYPE,"value", false);
-        String primaryKey = tdItems[1].fieldName;
-        TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
-        QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
-        assertTrue(queryResult.succeeded());
+        try {
+            TDItem[] tdItems = new TDItem[3];
+            tdItems[0] = new TDItem(Type.INT_TYPE, "id", true);
+            tdItems[1] = new TDItem(Type.STRING_TYPE,"name", true, 10);
+            tdItems[2] = new TDItem(Type.FLOAT_TYPE,"value", false);
+            String primaryKey = tdItems[1].fieldName;
+            TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
+            QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
+            assertTrue(queryResult.succeeded());
 
-        String[] attrNames = {
-                "id", "name"
-        };
-        String [] values = {
-                "33", "'myname'"
-        };
-        Table table = GlobalManager.getDatabase().getTable("table");
-        queryResult = table.insertTuple(attrNames, values);
-        System.out.println(queryResult.getInfo());
-        assertTrue(queryResult.succeeded());
+            String[] attrNames = {
+                    "id", "name"
+            };
+            String [] values = {
+                    "33", "'myname'"
+            };
+            Table table = GlobalManager.getDatabase().getTable("table");
+            queryResult = table.insertTuple(attrNames, values);
+            System.out.println(queryResult.getInfo());
+            assertTrue(queryResult.succeeded());
 
-        String[] full_values = {
-                "33", "'myname2'", "3.3"
-        };
-        queryResult = table.insertTuple(null, full_values);
-        assertTrue(queryResult.succeeded());
+            String[] full_values = {
+                    "33", "'myname2'", "3.3"
+            };
+            queryResult = table.insertTuple(null, full_values);
+            assertTrue(queryResult.succeeded());
 
-        queryResult = table.insertTuple(attrNames, full_values);
-        assertFalse(queryResult.succeeded());
-        GlobalManager.getDatabase().dropTable("table");
+            queryResult = table.insertTuple(attrNames, full_values);
+            assertFalse(queryResult.succeeded());
+            GlobalManager.getDatabase().dropTable("table");
+        } catch (SQLError e){
+            fail();
+        }
     }
 
     // Test the not null constraint
     @Test
     public void insertTuple2() {
-        TDItem[] tdItems = new TDItem[3];
-        tdItems[0] = new TDItem(Type.INT_TYPE, "id", true);
-        tdItems[1] = new TDItem(Type.STRING_TYPE,"name", true, 10);
-        tdItems[2] = new TDItem(Type.FLOAT_TYPE,"value", false);
-        String primaryKey = tdItems[0].fieldName;
-        TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
-        QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
-        assertTrue(queryResult.succeeded());
+        try {
+            TDItem[] tdItems = new TDItem[3];
+            tdItems[0] = new TDItem(Type.INT_TYPE, "id", true);
+            tdItems[1] = new TDItem(Type.STRING_TYPE,"name", true, 10);
+            tdItems[2] = new TDItem(Type.FLOAT_TYPE,"value", false);
+            String primaryKey = tdItems[0].fieldName;
+            TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
+            QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
+            assertTrue(queryResult.succeeded());
 
-        String[] attrNames = {
-                "id"
-        };
-        String[] values = {
-                "33"
-        };
-        Table table = GlobalManager.getDatabase().getTable("table");
-        queryResult = table.insertTuple(attrNames, values);
-        assertFalse(queryResult.succeeded());
-        GlobalManager.getDatabase().dropTable("table");
+            String[] attrNames = {
+                    "id"
+            };
+            String[] values = {
+                    "33"
+            };
+            Table table = GlobalManager.getDatabase().getTable("table");
+            queryResult = table.insertTuple(attrNames, values);
+            assertFalse(queryResult.succeeded());
+            GlobalManager.getDatabase().dropTable("table");
+        } catch (SQLError e){
+            fail();
+        }
+
     }
 
     // Test not find attrName
     @Test
     public void insertTuple3() {
-        TDItem[] tdItems = new TDItem[3];
-        tdItems[0] = new TDItem(Type.INT_TYPE, "id", true);
-        tdItems[1] = new TDItem(Type.STRING_TYPE,"name", true, 10);
-        tdItems[2] = new TDItem(Type.FLOAT_TYPE,"value", false);
-        String primaryKey = tdItems[1].fieldName;
-        TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
-        QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
-        assertTrue(queryResult.succeeded());
+        try {
+            TDItem[] tdItems = new TDItem[3];
+            tdItems[0] = new TDItem(Type.INT_TYPE, "id", true);
+            tdItems[1] = new TDItem(Type.STRING_TYPE,"name", true, 10);
+            tdItems[2] = new TDItem(Type.FLOAT_TYPE,"value", false);
+            String primaryKey = tdItems[1].fieldName;
+            TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
+            QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
+            assertTrue(queryResult.succeeded());
 
-        String[] attrNames = {
-                "id", "names"
-        };
-        String[] values = {
-                "33", "'myname'"
-        };
-        Table table = GlobalManager.getDatabase().getTable("table");
-        queryResult = table.insertTuple(attrNames, values);
-        assertFalse(queryResult.succeeded());
-        GlobalManager.getDatabase().dropTable("table");
+            String[] attrNames = {
+                    "id", "names"
+            };
+            String[] values = {
+                    "33", "'myname'"
+            };
+            Table table = GlobalManager.getDatabase().getTable("table");
+            queryResult = table.insertTuple(attrNames, values);
+            assertFalse(queryResult.succeeded());
+            GlobalManager.getDatabase().dropTable("table");
+        } catch (SQLError e){
+            fail();
+        }
+
     }
 
     // Test primary auto increase
     @Test
     public void insertTuple4() {
-        TDItem[] tdItems = new TDItem[3];
-        tdItems[0] = new TDItem(Type.LONG_TYPE, "PRIMARY", true);
-        tdItems[1] = new TDItem(Type.STRING_TYPE,"name", true, 10);
-        tdItems[2] = new TDItem(Type.FLOAT_TYPE,"value", false);
-        String primaryKey = tdItems[0].fieldName;
-        TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
-        QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
-        assertTrue(queryResult.succeeded());
+        try {
+            TDItem[] tdItems = new TDItem[3];
+            tdItems[0] = new TDItem(Type.LONG_TYPE, "PRIMARY", true);
+            tdItems[1] = new TDItem(Type.STRING_TYPE,"name", true, 10);
+            tdItems[2] = new TDItem(Type.FLOAT_TYPE,"value", false);
+            String primaryKey = tdItems[0].fieldName;
+            TupleDesc tupleDesc = new TupleDesc(tdItems, primaryKey);
+            QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
+            assertTrue(queryResult.succeeded());
 
-        String[] attrNames = {
-                "name"
-        };
-        String[] values = {
-                "'myname'"
-        };
-        Table table = GlobalManager.getDatabase().getTable("table");
-        queryResult = table.insertTuple(attrNames, values);
-        assertTrue(queryResult.succeeded());
-        assertEquals(table.autoIncrementNumber, 1);
-        queryResult = table.insertTuple(attrNames, values);
-        assertTrue(queryResult.succeeded());
-        assertEquals(table.autoIncrementNumber, 2);
-        GlobalManager.getDatabase().dropTable("table");
+            String[] attrNames = {
+                    "name"
+            };
+            String[] values = {
+                    "'myname'"
+            };
+            Table table = GlobalManager.getDatabase().getTable("table");
+            queryResult = table.insertTuple(attrNames, values);
+            assertTrue(queryResult.succeeded());
+            assertEquals(table.autoIncrementNumber, 1);
+            queryResult = table.insertTuple(attrNames, values);
+            assertTrue(queryResult.succeeded());
+            assertEquals(table.autoIncrementNumber, 2);
+            GlobalManager.getDatabase().dropTable("table");
+        } catch (SQLError e){
+            fail();
+        }
+
     }
 
 }

@@ -22,14 +22,14 @@ select * from T;
 
 -- long out of range --
 -- -9223372036854774808~9223372036854774807 --
-insert into T values (2, 9223372036854774808, 2.0, 2.0, "2");
+insert into T values (2, 9223372036854775808, 2.0, 2.0, "2");
 select * from T;
-insert into T values (22, -9223372036854774809, 22.0, 22.0, "22");
+insert into T values (22, -9223372036854775809, 22.0, 22.0, "22");
 select * from T;
--- insert into T(m_int, m_long, m_string) values (32, 9223372036854774808, "32");
--- select * from T;
--- insert into T(m_int, m_long, m_string) values (42, -9223372036854774809, "42");
--- select * from T;
+insert into T(m_int, m_long, m_string) values (32, 9223372036854775808, "32");
+select * from T;
+insert into T(m_int, m_long, m_string) values (42, -9223372036854775809, "42");
+select * from T;
 
 -- float out of range --
 -- 3.402823e+38 ~ 1.401298e-45 --

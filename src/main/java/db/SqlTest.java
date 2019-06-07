@@ -136,7 +136,10 @@ public class SqlTest {
             }
         }
         else {
+            long startTime = System.currentTimeMillis();
             (new SqlTest((new File(args[0])).toPath().toString(), "test")).run_();
+            long endTime = System.currentTimeMillis();
+           System.out.println(String.format("%.3f s", (endTime - startTime) / 1000.0));
         }
     }
 }

@@ -28,6 +28,7 @@ public class LogicalFilterNodeTest {
 
     @Test
     public void AndNodeExtractIndexPredicate() {
+
         GlobalManager.getCatalog().createDatabase("database");
         GlobalManager.getCatalog().useDatabase("database");
 
@@ -35,8 +36,13 @@ public class LogicalFilterNodeTest {
         tdItems[0] = new TDItem(Type.LONG_TYPE, "attr1", true, 0);
         tdItems[1] = new TDItem(Type.LONG_TYPE, "attr2", true, 0);
         TupleDesc tupleDesc = new TupleDesc(tdItems, "attr2");
-        QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
-        assertTrue(queryResult.succeeded());
+        try {
+            QueryResult queryResult = GlobalManager.getDatabase().createTable("table", tupleDesc);
+            assertTrue(queryResult.succeeded());
+        } catch (SQLError e){
+            fail();
+        }
+
         LogicalScanNode scanNode;
         try {
             scanNode = new LogicalScanNode("table","table");

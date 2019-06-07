@@ -31,10 +31,21 @@ insert into T(m_int, m_long, m_double, m_string) values (14, "14", 14.0, "14");
 select * from T;
 select * from T;
 
+-- float -> int --
+insert into T values (16, 16, 16, 16.0, "16");
+insert into T(m_int, m_long, m_float, m_string) values (26, 26, 26, "26");
+select * from T;
+select * from T;
+
 -- float -> string --
 insert into T values (6, 6, "6", 6.0, "6");
 insert into T(m_int, m_long, m_float, m_string) values (16, 16, "16", "16");
 select * from T;
+select * from T;
+
+-- double -> int --
+insert into T values (18, 18, 18.0, 18, "18");
+insert into T(m_int, m_long, m_double, m_string) values (28, 28, 28, "28");
 select * from T;
 
 -- double -> string --
