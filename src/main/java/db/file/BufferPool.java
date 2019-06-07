@@ -114,7 +114,7 @@ public class BufferPool {
             pages = dbFile.deleteTuple(t);
             for (Page page : pages) {
                 page.markDirty(true);
-                pageHashMap.put(page.getId(), page);
+                // pageHashMap.put(page.getId(), page);
             }
         }
         catch (DbException | IOException e){
