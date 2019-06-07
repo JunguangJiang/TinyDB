@@ -4,7 +4,7 @@ package db;
  * Basic setting for the database
  */
 public class Setting {
-    public final static boolean isBTree = false;
+    public final static boolean isBTree = true;
 
     public final static long MAX_MEMORY_BYTES_FOR_FILTER_BUFFER = 4 * 1024 * 1024; // TupleBuffer in BufferedFilter use at most 4MB memory
     public final static long MAX_MEMORY_BYTES_FOR_UPDATE = 4 * 1024 * 1024;
@@ -15,5 +15,5 @@ public class Setting {
     public final static long MAX_MEMORY_BYTES_FOR_JOIN_HASH_MAP = 4 * 1024 * 1024; // HashMaps in Hash-Join use at most 4MB memory
     public final static long MAX_MEMORY_BYTES_FOR_JOIN_BUFFER = 4 * 1024 * 1024; //TupleBuffer in Join use at most 4MB memory
 
-    public final static long BUFFER_POOL_PAGE_NUMBER = 4; // Buffer Pool max bytes is 4KB * 1024 * 16 = 64MB
+    public final static long BUFFER_POOL_PAGE_NUMBER = 40; // Buffer Pool max bytes is 4KB * 1024 * 16 = 64MB
 }

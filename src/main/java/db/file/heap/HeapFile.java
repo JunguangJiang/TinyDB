@@ -146,11 +146,10 @@ public class HeapFile implements DbFile {
             if (heapPage == null) {
                 HeapPageId heapPageId = new HeapPageId(this.getId(), this.numPages());
                 heapPage = new HeapPage(heapPageId, HeapPage.createEmptyPageData(), tupleDesc);
-                heapPage.insertTuple(t);
                 this.writePage(heapPage);
-            } else {
-                heapPage.insertTuple(t);
+                heapPage = (HeapPage) GlobalManager.getBufferPool().getPage(heapPageId);
             }
+            heapPage.insertTuple(t);
             affectedPages.add(heapPage);
         } catch (DbException e){
             e.printStackTrace();
