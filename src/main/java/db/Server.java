@@ -99,7 +99,7 @@ public class Server {
      * @see Main give an example using process
      */
     void process(File inFile, File outFile) {
-        try (BufferedReader in = new BufferedReader(new FileReader(inFile))) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(inFile), "UTF-8"))) {
             TinyDBOutput out = new TinyDBOutput(new BufferedWriter(new FileWriter(outFile)));
             this.process(in, out);
         } catch (IOException e) {
@@ -288,9 +288,11 @@ public class Server {
                     FileWriter fileWriter = new FileWriter(inputFilename);
                     while (true) {
                         String temp = dataIn.readUTF();
-                        fileWriter.write(temp);
-                        if (temp.charAt(temp.length() - 1) == (char)-1)
+                        if (temp.charAt(temp.length() - 1) == (char)-1) {
+                            fileWriter.write(temp.substring(0, temp.length() - 1));
                             break;
+                        }
+                        fileWriter.write(temp);
                     }
                     fileWriter.close();
 //                    System.out.println("Read successfully");

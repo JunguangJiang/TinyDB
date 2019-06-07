@@ -59,7 +59,7 @@ public class JDBCStatement implements Statement {
     public ResultSet executeFile(String filename) throws SQLException {
         try {
             File file = new File(filename);
-            FileReader dataIn = new FileReader(file);
+            BufferedReader dataIn = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
             DataOutputStream out = new DataOutputStream(conn.getOutputStream());
             final int BUF_SIZE = 0xff00;
             char[] itemBuf = new char[BUF_SIZE];
