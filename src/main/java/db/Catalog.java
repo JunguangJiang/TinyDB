@@ -80,7 +80,7 @@ public class Catalog {
             this.database.load(this.sqlPath, databaseName);
         }
         catch (NoSuchElementException e) {
-            return new QueryResult(false, "System collapse. Something error, todo.");
+            return new QueryResult(false, "The system may not be close correctly. Data file is broken! Fail to change database!");
         }
         return new QueryResult(true, "Database changed");
     }

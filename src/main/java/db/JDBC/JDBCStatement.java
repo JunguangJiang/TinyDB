@@ -59,12 +59,13 @@ public class JDBCStatement implements Statement {
     public ResultSet executeFile(String filename) throws SQLException {
         try {
             File file = new File(filename);
-            FileReader dataIn = new FileReader(file);
+            BufferedReader dataIn = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
             DataOutputStream out = new DataOutputStream(conn.getOutputStream());
-            final int BUF_SIZE = 0xffff;
+            final int BUF_SIZE = 0xff00;
             char[] itemBuf = new char[BUF_SIZE];
             int nRead;
             while ((nRead = dataIn.read(itemBuf, 0, BUF_SIZE)) != -1) {
+                System.out.println(nRead);
                 out.writeUTF(new String(itemBuf, 0, nRead));
             }
             char[] eos = {(char)-1};
@@ -74,6 +75,7 @@ public class JDBCStatement implements Statement {
             System.out.printf("\nThe current path is %s , please input a correct path.\n\n", System.getProperty("user.dir"));
             throw new SQLException("File not found");
         } catch (IOException e) {
+            e.printStackTrace();
             throw new SQLException("Server closed");
         }
     }
