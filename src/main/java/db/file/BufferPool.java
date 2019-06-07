@@ -105,7 +105,14 @@ public class BufferPool {
      * @param t the tuple to delete
      */
     public void deleteTuple(Tuple t) {
-        int tableId = t.getRecordId().getPageId().getTableId();
+        int tableId = 0;
+        //todo delete the try sentence
+        try {
+            tableId = t.getRecordId().getPageId().getTableId();
+        }
+        catch (NullPointerException e){
+            e.printStackTrace();
+        }
         DbFile dbFile = GlobalManager.getDatabase().getDbFile(tableId);
         ArrayList<Page> pages;
         try {
@@ -147,7 +154,7 @@ public class BufferPool {
      * If the Table of the page was deleted, then do nothing.
      * @param pid an ID indicating the page to flush
      */
-    private synchronized  void flushPage(PageId pid) throws IOException {
+    private synchronized void flushPage(PageId pid) throws IOException {
         Page page = this.pageHashMap.get(pid);
         int tableId = pid.getTableId();
         DbFile file;

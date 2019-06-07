@@ -15,5 +15,5 @@ public class Setting {
     public final static long MAX_MEMORY_BYTES_FOR_JOIN_HASH_MAP = 4 * 1024 * 1024; // HashMaps in Hash-Join use at most 4MB memory
     public final static long MAX_MEMORY_BYTES_FOR_JOIN_BUFFER = 4 * 1024 * 1024; //TupleBuffer in Join use at most 4MB memory
 
-    public final static long BUFFER_POOL_PAGE_NUMBER = 40; // Buffer Pool max bytes is 4KB * 1024 * 16 = 64MB
+    public final static long BUFFER_POOL_PAGE_NUMBER = 1024 * 16; // Buffer Pool max bytes is 4KB * 1024 * 16 = 64MB
 }
