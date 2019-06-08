@@ -145,6 +145,13 @@ public class TupleBuffer {
      * Remove the TupleBuffer from disk
      */
     public void close() {
+        try{
+            if(dis != null)
+                dis.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
         file.delete();
     }
 
@@ -158,7 +165,6 @@ public class TupleBuffer {
      */
     private void flush() throws DbException{
         try {
-            System.out.println("flush "+tuples.size());
             flushed = true;
             for (Tuple tuple: tuples) {
                 tuple.serialize(dos);
