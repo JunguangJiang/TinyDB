@@ -2,19 +2,23 @@ package db.file;
 
 import db.DbException;
 import db.Main;
+import db.Setting;
+import db.file.BTree.BTreePageId;
+import db.file.heap.HeapPageId;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * TupleBuffer can store the middle result of pipe opIterator
  * when the buffer is full, it will write tuples to disk automatically
  *
  */
-public class TupleBuffer {
+public class TupleBufferBTree {
     private int max_buffer_num; // max number of tuples in the memory
     private long tuple_num; // total number of tuples(including memory and disk)
     private int load_pos;
@@ -35,7 +39,7 @@ public class TupleBuffer {
      * @param tupleDesc
      * @throws DbException
      */
-    public TupleBuffer(long max_bytes, File file, TupleDesc tupleDesc) throws DbException{
+    public TupleBufferBTree(long max_bytes, File file, TupleDesc tupleDesc) throws DbException{
         this.flushed = false;
         this.max_buffer_num = (int)Math.ceil((double)max_bytes / tupleDesc.getSize());
         this.file = file;
@@ -141,7 +145,7 @@ public class TupleBuffer {
      * Remove the TupleBuffer from disk
      */
     public void close() {
-        try{
+		try{
             if(dis != null)
                 dis.close();
         }
@@ -161,10 +165,13 @@ public class TupleBuffer {
      */
     private void flush() throws DbException{
         try {
+            System.out.println("flush "+tuples.size());
             flushed = true;
             for (Tuple tuple: tuples) {
                 tuple.serialize(dos);
+                dos.writeInt(tuple.getRecordId().getPageId().getTableId());
             }
+
             dos.flush();
             tuples.clear();
         } catch (IOException e){
@@ -180,7 +187,21 @@ public class TupleBuffer {
         while (load_pos < tuple_num && tuples.size() <= max_buffer_num) {
             load_pos++;
             Tuple tuple = Util.parseTuple(tupleDesc, dis);
-            tuples.add(tuple);
+            try {
+                int tableid = dis.readInt();
+                PageId tmpPageId;
+                if (Setting.isBTree) {
+                    tmpPageId = new BTreePageId(tableid, 0, 0);
+                } else {
+                    tmpPageId = new HeapPageId(tableid, 0);
+                }
+                tuple.setRecordId(new RecordId(tmpPageId, 0));
+                tuples.add(tuple);
+            }
+            catch (IOException e){
+                e.printStackTrace();
+                throw new NoSuchElementException("parsing error!");
+            }
         }
     }
 }

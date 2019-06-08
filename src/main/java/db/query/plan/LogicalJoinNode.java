@@ -8,15 +8,22 @@ import java.util.HashMap;
 public class LogicalJoinNode {
     public LogicalFilterNode.BaseFilterNode cmp;
     public LogicalScanNode scanNode;
+    public Type type;
+    public enum Type{
+        JOIN,
+        NATURAL_JOIN,
+        START
+    }
 
     /**
      * `JOIN table ON clause`
      * @param cmp the node of clause
      * @param scanNode node of table
      */
-    public LogicalJoinNode(LogicalFilterNode.BaseFilterNode cmp, LogicalScanNode scanNode) {
+    public LogicalJoinNode(LogicalFilterNode.BaseFilterNode cmp, LogicalScanNode scanNode, Type type) {
         this.cmp = cmp;
         this.scanNode = scanNode;
+        this.type = type;
     }
 
     /**

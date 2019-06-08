@@ -87,6 +87,7 @@ joinPart
         (
           ON comparisonExpressionPredicate
         )                                                           #outerJoin
+    | NATURAL JOIN table                                            #naturalJoin
     ;
 
 updateStatement
