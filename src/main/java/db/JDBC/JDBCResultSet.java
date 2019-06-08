@@ -27,7 +27,7 @@ public class JDBCResultSet implements ResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        String sep = System.lineSeparator() + System.lineSeparator();
+        String sep = "\r\n\r\n";
         try {
             if (!this.hasNext)
                 return false;
