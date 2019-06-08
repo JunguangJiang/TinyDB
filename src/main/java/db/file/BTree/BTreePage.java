@@ -2,7 +2,6 @@ package db.file.BTree;
 
 import db.DbException;
 import db.GlobalManager;
-import db.field.Type;
 import db.file.BufferPool;
 import db.file.Page;
 import db.tuple.TupleDesc;

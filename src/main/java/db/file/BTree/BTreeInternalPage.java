@@ -4,9 +4,7 @@ import java.util.*;
 import java.io.*;
 
 import db.DbException;
-import db.field.IntField;
 import db.field.Op;
-import db.field.Type;
 import db.file.BufferPool;
 import db.field.Field;
 import db.file.Debug;

@@ -6,6 +6,7 @@ import db.Setting;
 import db.error.SQLError;
 import db.field.*;
 import db.file.TupleBuffer;
+import db.file.TupleBufferBTree;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
 

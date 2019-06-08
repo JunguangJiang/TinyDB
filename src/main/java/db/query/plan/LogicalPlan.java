@@ -90,11 +90,21 @@ public class LogicalPlan
             scans[i] = Util.getScan(scanNode, andNode, optimized);
         }
 
-        // Join (no optimization here)
+        // Join (no order optimization here)
         assert scans.length >= 1;
         OpIterator opIterator = scans[0];
         for (int i=1; i<scans.length; i++){
-            opIterator = new Join(opIterator, joinNodes.get(i).cmp, scans[i]);
+            LogicalJoinNode joinNode = joinNodes.get(i);
+            switch (joinNode.type) {
+                case JOIN:
+                    opIterator = new Join(opIterator, joinNodes.get(i).cmp, scans[i]);
+                    break;
+                case NATURAL_JOIN:
+                    opIterator = new NaturalJoin(opIterator,scans[i]);
+                    break;
+                default:
+                    throw new IllegalStateException();
+            }
         }
 
         // Filter the result

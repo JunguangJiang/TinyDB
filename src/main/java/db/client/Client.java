@@ -109,11 +109,15 @@ public class Client {
         try {
             long startTime = System.currentTimeMillis();
             ResultSet rs = ((JDBCStatement)st).executeFile(filename);
-            System.out.println("Send successfully, printing results");
+//            System.out.println("Send successfully, printing results");
             while (rs.next())
                 System.out.print(rs.getString(0));
             long endTime = System.currentTimeMillis();
             System.out.println(String.format("Total execute time: %.3f sec.", (endTime - startTime) / 1000.0));
+        } catch (SQLException e) {
+            if (e.getMessage().equals("Server closed")) {
+                System.out.println("Server closed!");
+            }
         }
         catch (Exception e) {
 //            e.printStackTrace();

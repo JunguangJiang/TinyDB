@@ -2,9 +2,7 @@ package db.file.BTree;
 
 import db.DbException;
 import db.field.Field;
-import db.field.IntField;
 import db.field.Op;
-import db.field.Type;
 import db.file.Debug;
 import db.file.RecordId;
 import db.tuple.Tuple;

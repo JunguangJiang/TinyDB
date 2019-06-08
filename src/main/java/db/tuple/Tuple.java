@@ -137,6 +137,7 @@ public class Tuple implements Serializable {
         for (Field field: fields) {
             field.serialize(dos);
         }
+        // dos.writeInt(recordId.getPageId().getTableId());
     }
 
     /**
