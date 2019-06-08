@@ -3,12 +3,12 @@ package db;
 import db.parser.TinyDBOutput;
 import db.parser.TinyDBParser;
 import db.parser.Visitor;
-import javafx.util.Pair;
 import jline.console.ConsoleReader;
 import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,6 +23,16 @@ public class Server {
     private String sqlPath;
     private ServerSocket serverSocket;
     private List<Socket> clientSocketList;
+
+    private class Pair{
+        long time;
+        String result;
+
+        Pair(String r, long t) {
+            result = r;
+            time = t;
+        }
+    }
     /**
      *
      * @param sqlPath the sql path where catalog and all the databases are stored in
@@ -125,7 +135,7 @@ public class Server {
      * process sql command and return result
      * @param sql: sql command
      */
-    private Pair<String, Long> processAndSend(DataOutputStream socketOut, String sql) {
+    private Pair processAndSend(DataOutputStream socketOut, String sql) {
         String output_filename = utils.getFilePath(sqlPath, "Client.out");
         File output = new File(output_filename);
         try (BufferedWriter outputBufferedWriter = new BufferedWriter(new FileWriter(output))){
@@ -133,12 +143,12 @@ public class Server {
             long startTime = System.currentTimeMillis();
             this.process(sql, out);
             long endTime = System.currentTimeMillis();
-            return new Pair<>(sendFile(socketOut, output_filename), endTime - startTime);
+            return new Pair(sendFile(socketOut, output_filename), endTime - startTime);
         } catch (RuntimeException e) {
-            return new Pair<>("500 Internal Error", 0L);
+            return new Pair("500 Internal Error", 0L);
         } catch (IOException e) {
             System.out.println("Read data files failed!");
-            return new Pair<>("500 Internal Error", 0L);
+            return new Pair("500 Internal Error", 0L);
         } finally {
             if (!output.delete()) {
                 System.out.println("Delete client.out failed! Please delete it manually.");
@@ -295,7 +305,6 @@ public class Server {
                         fileWriter.write(temp);
                     }
                     fileWriter.close();
-//                    System.out.println("Read successfully");
 
                     FileReader fileReader = new FileReader(inputFilename);
                     BufferedReader in = new BufferedReader(fileReader);
@@ -310,10 +319,10 @@ public class Server {
                             current.append((char)c);
                         if (c == -1 || c == ';') {
                             if (c == -1 || total.length() + current.length() > 0xffff) {
-                                Pair<String, Long> result = server.processAndSend(out, total.toString());
-                                runTime += result.getValue();
-                                if (result.getKey().length() > 0)
-                                    writeBack(out, result.getKey());
+                                Pair result = server.processAndSend(out, total.toString());
+                                runTime += result.time;
+                                if (result.result.length() > 0)
+                                    writeBack(out, result.result);
                                 total.delete(0, total.length());
                             }
                             if (c == -1)
@@ -329,7 +338,7 @@ public class Server {
                     if (!(new File(inputFilename)).delete())
                         System.out.println("Delete " + inputFilename + " failed.");
                 } catch (IOException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                     break;
                 }
             }
