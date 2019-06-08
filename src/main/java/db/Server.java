@@ -286,6 +286,7 @@ public class Server {
                     DataInputStream dataIn = new DataInputStream(socket.getInputStream());
                     String inputFilename = utils.getFilePath(server.sqlPath, "client.in");
                     FileWriter fileWriter = new FileWriter(inputFilename);
+
                     while (true) {
                         String temp = dataIn.readUTF();
                         if (temp.charAt(temp.length() - 1) == (char)-1) {
@@ -294,6 +295,8 @@ public class Server {
                         }
                         fileWriter.write(temp);
                     }
+
+
                     fileWriter.close();
 //                    System.out.println("Read successfully");
 
@@ -329,7 +332,7 @@ public class Server {
                     if (!(new File(inputFilename)).delete())
                         System.out.println("Delete " + inputFilename + " failed.");
                 } catch (IOException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                     break;
                 }
             }

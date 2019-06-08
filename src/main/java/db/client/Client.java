@@ -249,7 +249,7 @@ public class Client {
                 history.removeLast();
             }
         } catch (IndexOutOfBoundsException e) {
-            System.out.println(history.size());
+//            System.out.println(history.size());
             throw e;
         }
         history.add(sb.toString());
