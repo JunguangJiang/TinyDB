@@ -280,7 +280,7 @@ public class Server {
 //        }
 
         private static void writeBack(DataOutputStream out, String result) throws IOException{
-            result += System.lineSeparator();
+            result += "\r\n";
             byte[] data = result.getBytes();
             out.write(data, 0, data.length);
         }
@@ -332,7 +332,7 @@ public class Server {
                         }
                     }
                     writeBack(out, String.format("Execute Time: %.3f", runTime / 1000.0)
-                            + System.lineSeparator() + System.lineSeparator());
+                            + "\r\n\r\n");
                     fileReader.close();
                     in.close();
                     if (!(new File(inputFilename)).delete())
