@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -16,6 +17,8 @@ public class JDBCResultSet implements ResultSet {
     private boolean hasNext;
     final private int max_size = 0xffffff;
     private byte[] data = new byte[max_size];
+    private char[] char_data = new char[max_size];
+
 
 //    JDBCResultSet(String result) {
 //        this.result = result;
@@ -33,8 +36,10 @@ public class JDBCResultSet implements ResultSet {
             if (!this.hasNext)
                 return false;
             int num = this.socketIn.read(data, 0, max_size);
-            this.result = null;
-            System.gc();
+            for(int i=0; i<num; i++) {
+                char_data[i] = (char)data[i];
+            }
+            this.result = String.copyValueOf(char_data, 0, num);
             this.result = new String(data, 0, num);
             this.hasNext = !this.result.endsWith(sep);
             if (!this.hasNext)
