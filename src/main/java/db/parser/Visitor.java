@@ -77,7 +77,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         try {
             queryResult = (QueryResult) super.visitSqlStatement(ctx);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             queryResult = new QueryResult(false, e.getMessage());
         }
         long endTime = System.currentTimeMillis();
