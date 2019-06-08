@@ -32,3 +32,6 @@ jar {
 }
 
 apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'db.Main'
