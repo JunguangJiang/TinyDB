@@ -161,7 +161,6 @@ public class TupleBuffer {
      */
     private void flush() throws DbException{
         try {
-            System.out.println("flush "+tuples.size());
             flushed = true;
             for (Tuple tuple: tuples) {
                 tuple.serialize(dos);
