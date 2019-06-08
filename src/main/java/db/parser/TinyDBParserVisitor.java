@@ -137,6 +137,13 @@ public interface TinyDBParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitOuterJoin(TinyDBParser.OuterJoinContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code naturalJoin}
+	 * labeled alternative in {@link TinyDBParser#joinPart}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNaturalJoin(TinyDBParser.NaturalJoinContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TinyDBParser#updateStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

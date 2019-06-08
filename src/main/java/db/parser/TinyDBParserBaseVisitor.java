@@ -158,6 +158,13 @@ public class TinyDBParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitNaturalJoin(TinyDBParser.NaturalJoinContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitUpdateStatement(TinyDBParser.UpdateStatementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

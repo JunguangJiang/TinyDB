@@ -601,7 +601,7 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
     @Override
     public Object visitTableSourceBase(TinyDBParser.TableSourceBaseContext ctx) {
         ArrayList<LogicalJoinNode> joinNodes = new ArrayList<>();
-        joinNodes.add(new LogicalJoinNode(null, (LogicalScanNode)visit(ctx.table())));
+        joinNodes.add(new LogicalJoinNode(null, (LogicalScanNode)visit(ctx.table()), LogicalJoinNode.Type.START));
         for (TinyDBParser.JoinPartContext context: ctx.joinPart()){
             joinNodes.add((LogicalJoinNode)visit(context));
         }
@@ -623,7 +623,12 @@ public class Visitor extends TinyDBParserBaseVisitor<Object> {
         if (ctx.comparisonExpressionPredicate() != null) {
             cmp = (LogicalFilterNode.BaseFilterNode)visit(ctx.comparisonExpressionPredicate());
         }
-        return new LogicalJoinNode(cmp, (LogicalScanNode)visit(ctx.table()));
+        return new LogicalJoinNode(cmp, (LogicalScanNode)visit(ctx.table()), LogicalJoinNode.Type.JOIN);
+    }
+
+    @Override
+    public Object visitNaturalJoin(TinyDBParser.NaturalJoinContext ctx) {
+        return new LogicalJoinNode(null,(LogicalScanNode)visit(ctx.table()), LogicalJoinNode.Type.NATURAL_JOIN);
     }
 
     /**
