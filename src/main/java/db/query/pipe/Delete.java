@@ -65,8 +65,8 @@ public class Delete extends Operator{
            return null;
         } else {
             fetched = true;
-            TupleBuffer tuple_buf = new TupleBuffer(Setting.MAX_MEMORY_BYTES_FOR_DELETE,
-                    new File(getTupleDesc().getTableName()+":delete.data"), getTupleDesc());
+            TupleBufferBTree tuple_buf = new TupleBufferBTree(Setting.MAX_MEMORY_BYTES_FOR_DELETE,
+                    new File(getTupleDesc().getTableName()+"_delete.data"), getTupleDesc());
             while (child.hasNext()) {
                 tuple_buf.add(child.next());
             }
