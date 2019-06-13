@@ -16,6 +16,7 @@ import java.util.NoSuchElementException;
 /**
  * TupleBuffer can store the middle result of pipe opIterator
  * when the buffer is full, it will write tuples to disk automatically
+ * Different from TupleBuffer, TupleBufferBTree will also persist the tuple recordID
  *
  */
 public class TupleBufferBTree {

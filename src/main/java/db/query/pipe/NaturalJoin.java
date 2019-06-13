@@ -3,18 +3,13 @@ package db.query.pipe;
 import db.DbException;
 import db.Setting;
 import db.error.SQLError;
-import db.field.Field;
 import db.field.Op;
 import db.file.TupleBuffer;
 import db.query.FullColumnName;
-import db.query.plan.LogicalFilterNode;
 import db.query.predicate.Predicate;
 import db.tuple.Tuple;
 import db.tuple.TupleDesc;
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.NoSuchElementException;
 import db.query.plan.LogicalFilterNode.*;
 

@@ -38,9 +38,6 @@ public class Server {
      * @param sqlPath the sql path where catalog and all the databases are stored in
      */
     Server(String sqlPath) {
-//        if (sqlPath.charAt(sqlPath.length() - 1) != '/' &&  sqlPath.charAt(sqlPath.length() - 1) != '\\') {
-//            sqlPath += '/';
-//        }
         this.sqlPath = sqlPath;
         GlobalManager.getCatalog().load(sqlPath);
 
@@ -238,47 +235,6 @@ public class Server {
             this.server = server;
         }
 
-//        private static String processAndSend(Server server) {
-//            try {
-//                String filename;
-//                StringBuilder sb = new StringBuilder();
-//                StringBuilder rs = new StringBuilder();
-//                int i = 0;
-//                long runTime = 0;
-//                long startTime, endTime;
-//                while (reader.ready()) {
-//                    int c = reader.read();
-//                    sb.append((char) c);
-//                    if (c == ';')
-//                        i++;
-//                    if (i == 100) {
-//                        startTime = System.currentTimeMillis();
-//                        rs.append(server.process(sb.toString()));
-//                        endTime = System.currentTimeMillis();
-//                        runTime += (endTime - startTime);
-//                        sb.delete(0, sb.length());
-//                        i = 0;
-//                    }
-//                }
-//                if (sb.length() > 0) {
-//                    startTime = System.currentTimeMillis();
-//                    rs.append(server.process(sb.toString()));
-//                    endTime = System.currentTimeMillis();
-//                    runTime += (endTime - startTime);
-//                }
-//                rs.append(String.format("\n\nTotal execute time: %.3f sec.", runTime / 1000.0));
-//                reader.close();
-//                fip.close();
-//                return rs.toString();
-//            } catch (FileNotFoundException e) {
-//                return String.format("\nThe current path is %s , please input a correct path.\n\n", System.getProperty("user.dir"));
-//            }
-//            catch (Exception e) {
-//                e.printStackTrace();
-//                return String.format("Read file %s fail!", filename);
-//            }
-//        }
-
         private static void writeBack(DataOutputStream out, String result) throws IOException{
             result += "\r\n";
             byte[] data = result.getBytes();
@@ -348,5 +304,3 @@ public class Server {
         }
     }
 }
-
-// java -cp .\build\libs\TinyDB-1.0.jar db.Main Server data
